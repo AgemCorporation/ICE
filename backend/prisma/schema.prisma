@@ -1,0 +1,389 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tenant {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  domain       String?
+  adminEmail   String   @unique
+  password     String?
+  contactName  String?
+  phone        String?
+  address      String?
+  city         String?
+  commune      String?
+  zip          String?
+  country      String?
+  vatNumber    String?
+  plan         String   @default("ICE Light") // "ICE Light" | "ICE Full"
+  status       String   @default("Active") // "Active" | "Suspended" | "Cancelled"
+  userCount    Int      @default(0)
+  maxUsers     Int      @default(9999)
+  storageUsed  Float    @default(0)
+  storageLimit Float    @default(9999)
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  mrr          Float    @default(0)
+  lat          Float?
+  lng          Float?
+  lockedGps    Boolean  @default(false)
+  rating       Float    @default(0)
+  reviewCount  Int      @default(0)
+  features     String[] @default([]) // enabled feature/module IDs
+  settings     Json?    // Tenant-specific garage settings (customization)
+
+  // Relations
+  users    AppUser[]
+  clients  Client[]
+  vehicles Vehicle[]
+  invoices Invoice[]
+}
+
+model AppUser {
+  id              String   @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String?  @unique
+  role            String?
+  active          Boolean  @default(true)
+  tenantId        String?
+  pinCode         String?
+  password        String?
+  superAdminPerms String[] @default([])
+  createdBy       String?
+
+  // HR specific fields
+  phone           String?
+  jobTitle        String?
+  hourlyCost      Float?
+  hiredDate       DateTime?
+  address         String?
+  contractType    String?
+  contractEndDate DateTime?
+  documents       Json?    // HR documents (array of doc references)
+  emergencyContact Json?   // Emergency contact info
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+}
+
+model Client {
+  id          String  @id @default(uuid())
+  firstName   String
+  lastName    String
+  email       String  @unique
+  password    String?
+  phone       String
+  mobile      String?
+  type        String  @default("Particulier") // "Particulier" | "Entreprise"
+  companyName String?
+  rccm        String?
+  vatNumber   String?
+
+  // Addresses
+  street  String
+  city    String
+  commune String?
+  zip     String
+
+  // Financial
+  paymentMethod   String @default("Espèces")
+  paymentTerms    String @default("Comptant")
+  discountPercent Float  @default(0)
+  balance         Float  @default(0)
+
+  notes    String?
+  tenantId String?
+  vehicleIds String[]  @default([]) // Frontend-managed vehicle references
+  history    Json      @default("[]") // Client interaction history
+  pushToken  String?   // Device token for Capacitor Push Notifications
+
+  tenant   Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  invoices Invoice[]
+}
+
+model Vehicle {
+  id                    String    @id @default(uuid())
+  plate                 String
+  brand                 String
+  model                 String
+  trim                  String?
+  engine                String?
+  fuel                  String
+  gearbox               String
+  ownerId               String
+  vin                   String
+  firstRegistrationDate DateTime?
+  fiscalPower           Int       @default(0)
+  mileage               Int       @default(0)
+  tireSizeFront         String?
+  tireSizeRear          String?
+  oilType               String?
+  lastTechnicalControl  DateTime?
+  tenantId              String?
+  history               Json      @default("[]") // Vehicle service history
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+}
+
+model Invoice {
+  id                 String    @id @default(uuid())
+  number             String    @unique
+  type               String // "DEVIS" | "FACTURE" | "AVOIR"
+  status             String // "BROUILLON" | "ENVOYE" | "VALIDE" | "PAYE" | "PARTIEL" | "ANNULE" | "REFUSE" | "EN_REVISION" | "ACCEPTE" | "NON_VALIDE"
+  date               DateTime  @default(now())
+  dueDate            DateTime
+  repairId           String?
+  clientId           String
+  clientName         String
+  vehicleId          String?
+  vehicleDescription String?
+  totalHT            Float     @default(0)
+  totalVAT           Float     @default(0)
+  totalTTC           Float     @default(0)
+  paidAmount         Float     @default(0)
+  remainingAmount    Float     @default(0)
+  tenantId           String?
+  restitutionDate    DateTime?
+
+  tenant Tenant?       @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  items  InvoiceItem[]
+  client Client        @relation(fields: [clientId], references: [id])
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  description String
+  quantity    Float
+  unitPrice   Float
+  totalHT     Float
+  partId      String?
+  invoiceId   String
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model AdminAuditLog {
+  id        String   @id @default(uuid())
+  adminId   String
+  adminName String
+  action    String
+  targetId  String?
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+model QuoteRequest {
+  id                   String    @id @default(uuid())
+  date                 DateTime  @default(now())
+  status               String    @default("NEW")
+  motoristName         String
+  motoristPhone        String
+  motoristEmail        String?
+  vehicleBrand         String
+  vehicleModel         String
+  vehicleYear          Int?
+  vehicleVin           String?
+  vehiclePlate         String?
+  fuel                 String?
+  mileage              Int?
+  description          String
+  photos               String[]  @default([])
+  locationCity         String?
+  locationCommune      String?
+  locationCoords       Json?
+  interventionLocation String    @default("GARAGE")
+  interventionDate     DateTime?
+  interventionType     String?
+  preferredPeriod      String?
+  preferredDate        DateTime?
+  preferredSlot        String?
+  isDirectRequest      Boolean   @default(false)
+  directTenantId       String?
+  assignedTenantIds    String[]  @default([])
+  proposedQuotes       String[]  @default([]) // Invoice IDs
+  acceptedQuoteId      String?
+  garageQuoteId        String?
+  rejectionReason      String?
+  repairOrderId        String?
+  repairStatus         String?
+  assignedDate         DateTime?
+  clientRating         Int?
+  clientReview         String?
+
+  diagnosticHistory         Json?
+  messages                  Json?
+  unlockedForModifications  Json?
+  unlockedTenantIds         String[] @default([])
+  unreadMessageTenantIds    String[] @default([])
+  hasUnreadMessagesForAdmin Boolean  @default(false)
+}
+
+model SystemLog {
+  id       String   @id @default(uuid())
+  date     DateTime @default(now())
+  level    String // "INFO" | "WARNING" | "ERROR" | "SECURITY"
+  message  String
+  tenantId String?
+  user     String?
+}
+
+model MotoristVehicle {
+  id                String    @id @default(uuid())
+  ownerPhone        String
+  plate             String
+  brand             String
+  model             String
+  year              Int
+  vin               String
+  mileage           Int       @default(0)
+  fuel              String
+  photos            String[]  @default([])
+  color             String?
+  insuranceProvider String?
+  lastRevisionDate  DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([ownerPhone])
+}
+
+model QRScanLog {
+  id               String   @id @default(uuid())
+  timestamp        DateTime @default(now())
+  scannedUserPhone String
+  scannedUserName  String
+  scannerTenantId  String
+  scannerName      String
+}
+
+// ============================================================
+// NEW MODELS — Migrated from localStorage to PostgreSQL
+// ============================================================
+
+model RepairOrder {
+  id             String   @id @default(uuid())
+  vehicleId      String
+  clientId       String
+  status         String   @default("En attente") // RepairStatus
+  entryDate      String
+  description    String
+  mechanic       String?
+  items          Json     @default("[]") // RepairItem[]
+  checkIn        Json?    // RepairCheckIn
+  history        Json     @default("[]") // RepairHistoryEntry[]
+  downPayments   Json     @default("[]") // DownPayment[]
+  isLocked       Boolean  @default(false)
+  timeLogs       Json     @default("[]") // TimeLog[]
+  vatRate        Float?   @default(18)
+  discountValue  Float?   @default(0)
+  discountType   String?  // 'PERCENT' | 'FIXED'
+  financialNotes String?
+  tenantId       String?
+}
+
+model Part {
+  id           String  @id @default(uuid())
+  reference    String
+  oem          String?
+  name         String
+  brand        String
+  category     String
+  image        String?
+  buyPrice     Float   @default(0)
+  sellPrice    Float   @default(0)
+  vatRate      Float   @default(18)
+  marginPercent Float  @default(0)
+  stock        Int     @default(0)
+  minStock     Int     @default(0)
+  reorderQty   Int     @default(0)
+  location     String?
+  warehouseId  String?
+  supplierId   String?
+  priceHistory Json    @default("[]") // PriceHistoryEntry[]
+  tenantId     String?
+}
+
+model Supplier {
+  id               String  @id @default(uuid())
+  name             String
+  contactName      String?
+  email            String?
+  phone            String?
+  deliveryDelayDays Int    @default(0)
+  address          String?
+  isArchived       Boolean @default(false)
+  tenantId         String?
+}
+
+model Warehouse {
+  id       String  @id @default(uuid())
+  name     String
+  address  String?
+  tenantId String?
+}
+
+model LabourRate {
+  id         String  @id @default(uuid())
+  code       String
+  name       String
+  hourlyRate Float   @default(0)
+  tenantId   String?
+}
+
+model ServicePackage {
+  id          String  @id @default(uuid())
+  name        String
+  description String
+  price       Float   @default(0)
+  partIds     Json    @default("[]") // string[]
+  tenantId    String?
+}
+
+model StockMovement {
+  id        String   @id @default(uuid())
+  partId    String
+  date      String
+  type      String   // 'IN_PURCHASE' | 'OUT_REPAIR' | 'OUT_COUNTER_SALE' | 'ADJUSTMENT'
+  quantity  Int
+  reason    String
+  userId    String
+  recipient String?
+  tenantId  String?
+}
+
+model PlatformLead {
+  id           String  @id @default(uuid())
+  garageName   String
+  contactName  String
+  email        String
+  phone        String
+  planInterest String  @default("ICE Light") // 'ICE Light' | 'ICE Full'
+  status       String  @default("New") // 'New' | 'Contacted' | 'Qualified' | 'Converted' | 'Lost'
+  date         String
+  notes        String?
+}
+
+model GarageRole {
+  id          String   @id @default(uuid())
+  name        String
+  isSystem    Boolean  @default(false)
+  permissions String[] @default([])
+  tenantId    String?  // null = global/system role
+}
+
+model PlatformConfigEntry {
+  id    String @id @default("singleton") // Single row
+  data  Json   @default("{}") // Full PlatformConfig object
+}

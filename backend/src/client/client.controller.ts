@@ -1,0 +1,55 @@
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { ClientService } from './client.service';
+import { Prisma } from '@prisma/client';
+import { Public } from '../auth/public.decorator';
+
+@Controller('client')
+export class ClientController {
+  constructor(private readonly clientService: ClientService) { }
+
+  @Post()
+  create(@Body() createClientDto: Prisma.ClientCreateInput) {
+    return this.clientService.create(createClientDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.clientService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.clientService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateClientDto: Prisma.ClientUpdateInput) {
+    return this.clientService.update(id, updateClientDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.clientService.remove(id);
+  }
+
+  // ==== MOBILE AUTH ENDPOINTS ====
+
+  @Public()
+  @Post('mobile/register')
+  mobileRegister(@Body() data: any) {
+    return this.clientService.mobileRegister(data);
+  }
+
+  @Public()
+  @Post('mobile/login')
+  mobileLogin(@Body() credentials: any) {
+    return this.clientService.mobileLogin(credentials);
+  }
+
+  @Public() // Can be secured if needed, but since it's from the app, keeping public for now, or just expecting an ID.
+  @Patch('mobile/push-token')
+  updatePushToken(@Body() data: { phone: string; pushToken: string }) {
+    return this.clientService.updatePushToken(data.phone, data.pushToken);
+  }
+}
+

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "171996779017",
+    "project_id": "ice-mecatech",
+    "storage_bucket": "ice-mecatech.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:171996779017:android:d1cf13d93ddcd8826c9ed8",
+        "android_client_info": {
+          "package_name": "com.mecatech.iceapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_OUnDl-XdQBCZQSwEefD-K-Ed1FexQco"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

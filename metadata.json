@@ -1,0 +1,8 @@
+{
+  "name": "AutoFix Manager",
+  "description": "Système de gestion de garage automobile complet : clients, véhicules, ordres de réparation, stock et facturation.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
