@@ -6,7 +6,7 @@ import { io, Socket } from 'socket.io-client';
 })
 export class WebSocketService {
   private socket: Socket | null = null;
-  private backendUrl = 'http://192.168.1.75:36864'; // Fallback base URL
+  private backendUrl = 'https://ice-m7jm.onrender.com'; // Fallback base URL
 
   constructor() {}
 

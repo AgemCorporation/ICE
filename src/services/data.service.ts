@@ -767,7 +767,7 @@ export class DataService {
    private http = inject(HttpClient);
    private toastService = inject(ToastService);
    private webSocketService = inject(WebSocketService);
-   readonly apiUrl = 'http://192.168.1.75:36864/api';
+   readonly apiUrl = 'https://ice-m7jm.onrender.com/api';
 
    constructor() {
       // Load public data (tenants) immediately so garages are visible without auth
