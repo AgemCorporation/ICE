@@ -17,13 +17,7 @@ async function bootstrap() {
 
   // Enable CORS for Angular frontend (restricted origins)
   app.enableCors({
-    origin: [
-      'http://192.168.1.75:3000',
-      'http://localhost:3000',
-      'http://localhost:4200',
-      'capacitor://localhost',
-      'http://localhost',
-    ],
+    origin: true, // Allow all domains to connect dynamically
     credentials: true,
   });
 
