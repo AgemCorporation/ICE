@@ -100,8 +100,8 @@ export class LoginComponent {
 
    constructor() {
       this.loginForm = this.fb.group({
-         email: ['admin@icebymecatech.ci', [Validators.required, Validators.email]],
-         password: ['password', Validators.required]
+         email: ['', [Validators.required, Validators.email]],
+         password: ['', Validators.required]
       });
    }
 
