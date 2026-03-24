@@ -9,6 +9,7 @@ export class PaymentsService {
   async initFeePayment(quoteRequestId: string) {
     const apiKey = process.env.CINETPAY_API_KEY;
     const siteId = process.env.CINETPAY_SITE_ID;
+    const feeAmount = process.env.CINETPAY_FEE_AMOUNT ? parseInt(process.env.CINETPAY_FEE_AMOUNT) : 2000;
 
     if (!apiKey || !siteId) {
       throw new HttpException("Configuration CinetPay manquante dans l'environnement", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -32,7 +33,7 @@ export class PaymentsService {
     await this.prisma.paymentTransaction.create({
       data: {
         transactionId,
-        amount: 2000,
+        amount: feeAmount,
         quoteRequestId,
         status: 'PENDING'
       }
@@ -52,7 +53,7 @@ export class PaymentsService {
           apikey: apiKey,
           site_id: siteId,
           transaction_id: transactionId,
-          amount: 2000,
+          amount: feeAmount,
           currency: 'XOF',
           description: `Frais de gestion - Devis ${quoteRequestId.substring(0, 8)}`,
           notify_url: notifyUrl,
