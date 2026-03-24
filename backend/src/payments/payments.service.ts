@@ -57,7 +57,7 @@ export class PaymentsService {
           currency: 'XOF',
           description: `Frais de gestion - Devis ${quoteRequestId.substring(0, 8)}`,
           notify_url: notifyUrl,
-          return_url: 'https://ice-m7jm.onrender.com', // Url classique requise par CinetPay
+          return_url: 'https://ice-m7jm.onrender.com/api/payments/cinetpay-return', // Route interceptant le POST de retour
           channels: 'ALL',
           customer_name: quote.motoristName || 'Client',
           customer_surname: 'ICE',
@@ -90,6 +90,8 @@ export class PaymentsService {
   }
 
   async handleWebhook(payload: any) {
+    this.logger.log('--- WEBHOOK CINETPAY REÇU --- : ' + JSON.stringify(payload));
+    
     const transaction_id = payload.cpm_trans_id;
     if (!transaction_id) {
       this.logger.warn('Webhook vide ou sans cpm_trans_id reçu');
