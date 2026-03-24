@@ -1888,6 +1888,10 @@ export class DataService {
       this.syncQuoteRequestDB(requestId);
    }
 
+   initQuotePayment(requestId: string, quoteId: string) {
+      return this.http.post<{paymentUrl: string, transactionId: string}>(`${this.apiUrl}/payments/init-fee`, { quoteRequestId: requestId, quoteId: quoteId });
+   }
+
    clientAcceptQuote(requestId: string, quoteId: string): string | null {
       const req = this.quoteRequests().find(r => r.id === requestId);
       if (req && req.proposedQuotes) {

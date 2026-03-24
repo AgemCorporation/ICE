@@ -2061,14 +2061,33 @@ export class MobileAppComponent {
    closeQuoteDetails() { this.selectedQuoteDetails.set(null); }
    acceptQuote(req: any, quote: any) { this.quoteToConfirm.set({ req, quote }); this.showConfirmQuoteModal.set(true); }
    cancelQuoteChoice() { this.showConfirmQuoteModal.set(false); }
-   confirmQuoteChoice() {
+   async confirmQuoteChoice() {
       const d = this.quoteToConfirm();
       if (d) {
-         this.dataService.clientAcceptQuote(d.req.id, d.quote.id);
-         this.toastService.show('Devis accepté ! En attente du transfert à l\'atelier par le garage.', 'success');
+         this.showConfirmQuoteModal.set(false);
+         this.toastService.show('Initialisation du paiement des frais de gestion...', 'info');
+         
+         this.dataService.initQuotePayment(d.req.id, d.quote.id).subscribe({
+            next: async (res) => {
+               if (Capacitor.isNativePlatform()) {
+                  const { Browser } = await import('@capacitor/browser');
+                  await Browser.open({ url: res.paymentUrl });
+                  await Browser.addListener('browserFinished', () => {
+                     // When user closes the browser, check the backend for new status
+                     this.dataService.loadApiData();
+                     this.closeQuoteDetails();
+                  });
+               } else {
+                  window.open(res.paymentUrl, '_blank');
+                  this.closeQuoteDetails();
+               }
+            },
+            error: (e) => {
+               this.toastService.show(e?.error?.message || 'Erreur lors de l\'initialisation du paiement.', 'error');
+               this.closeQuoteDetails();
+            }
+         });
       }
-      this.showConfirmQuoteModal.set(false);
-      this.closeQuoteDetails(); // Close details too
    }
    openGarageProfile(g: any) { this.selectedGarageProfile.set(g); }
    closeGarageProfile() { this.selectedGarageProfile.set(null); }

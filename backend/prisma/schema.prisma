@@ -42,7 +42,7 @@ model Tenant {
   rating       Float    @default(0)
   reviewCount  Int      @default(0)
   features     String[] @default([]) // enabled feature/module IDs
-  settings     Json?    // Tenant-specific garage settings (customization)
+  settings     Json? // Tenant-specific garage settings (customization)
 
   // Relations
   users    AppUser[]
@@ -65,15 +65,15 @@ model AppUser {
   createdBy       String?
 
   // HR specific fields
-  phone           String?
-  jobTitle        String?
-  hourlyCost      Float?
-  hiredDate       DateTime?
-  address         String?
-  contractType    String?
-  contractEndDate DateTime?
-  documents       Json?    // HR documents (array of doc references)
-  emergencyContact Json?   // Emergency contact info
+  phone            String?
+  jobTitle         String?
+  hourlyCost       Float?
+  hiredDate        DateTime?
+  address          String?
+  contractType     String?
+  contractEndDate  DateTime?
+  documents        Json? // HR documents (array of doc references)
+  emergencyContact Json? // Emergency contact info
 
   tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
@@ -103,11 +103,11 @@ model Client {
   discountPercent Float  @default(0)
   balance         Float  @default(0)
 
-  notes    String?
-  tenantId String?
-  vehicleIds String[]  @default([]) // Frontend-managed vehicle references
-  history    Json      @default("[]") // Client interaction history
-  pushToken  String?   // Device token for Capacitor Push Notifications
+  notes      String?
+  tenantId   String?
+  vehicleIds String[] @default([]) // Frontend-managed vehicle references
+  history    Json     @default("[]") // Client interaction history
+  pushToken  String? // Device token for Capacitor Push Notifications
 
   tenant   Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   invoices Invoice[]
@@ -228,6 +228,9 @@ model QuoteRequest {
   unlockedTenantIds         String[] @default([])
   unreadMessageTenantIds    String[] @default([])
   hasUnreadMessagesForAdmin Boolean  @default(false)
+
+  // System
+  paymentTransactions PaymentTransaction[]
 }
 
 model SystemLog {
@@ -273,58 +276,58 @@ model QRScanLog {
 // ============================================================
 
 model RepairOrder {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   vehicleId      String
   clientId       String
-  status         String   @default("En attente") // RepairStatus
+  status         String  @default("En attente") // RepairStatus
   entryDate      String
   description    String
   mechanic       String?
-  items          Json     @default("[]") // RepairItem[]
-  checkIn        Json?    // RepairCheckIn
-  history        Json     @default("[]") // RepairHistoryEntry[]
-  downPayments   Json     @default("[]") // DownPayment[]
-  isLocked       Boolean  @default(false)
-  timeLogs       Json     @default("[]") // TimeLog[]
-  vatRate        Float?   @default(18)
-  discountValue  Float?   @default(0)
-  discountType   String?  // 'PERCENT' | 'FIXED'
+  items          Json    @default("[]") // RepairItem[]
+  checkIn        Json? // RepairCheckIn
+  history        Json    @default("[]") // RepairHistoryEntry[]
+  downPayments   Json    @default("[]") // DownPayment[]
+  isLocked       Boolean @default(false)
+  timeLogs       Json    @default("[]") // TimeLog[]
+  vatRate        Float?  @default(18)
+  discountValue  Float?  @default(0)
+  discountType   String? // 'PERCENT' | 'FIXED'
   financialNotes String?
   tenantId       String?
 }
 
 model Part {
-  id           String  @id @default(uuid())
-  reference    String
-  oem          String?
-  name         String
-  brand        String
-  category     String
-  image        String?
-  buyPrice     Float   @default(0)
-  sellPrice    Float   @default(0)
-  vatRate      Float   @default(18)
-  marginPercent Float  @default(0)
-  stock        Int     @default(0)
-  minStock     Int     @default(0)
-  reorderQty   Int     @default(0)
-  location     String?
-  warehouseId  String?
-  supplierId   String?
-  priceHistory Json    @default("[]") // PriceHistoryEntry[]
-  tenantId     String?
+  id            String  @id @default(uuid())
+  reference     String
+  oem           String?
+  name          String
+  brand         String
+  category      String
+  image         String?
+  buyPrice      Float   @default(0)
+  sellPrice     Float   @default(0)
+  vatRate       Float   @default(18)
+  marginPercent Float   @default(0)
+  stock         Int     @default(0)
+  minStock      Int     @default(0)
+  reorderQty    Int     @default(0)
+  location      String?
+  warehouseId   String?
+  supplierId    String?
+  priceHistory  Json    @default("[]") // PriceHistoryEntry[]
+  tenantId      String?
 }
 
 model Supplier {
-  id               String  @id @default(uuid())
-  name             String
-  contactName      String?
-  email            String?
-  phone            String?
-  deliveryDelayDays Int    @default(0)
-  address          String?
-  isArchived       Boolean @default(false)
-  tenantId         String?
+  id                String  @id @default(uuid())
+  name              String
+  contactName       String?
+  email             String?
+  phone             String?
+  deliveryDelayDays Int     @default(0)
+  address           String?
+  isArchived        Boolean @default(false)
+  tenantId          String?
 }
 
 model Warehouse {
@@ -352,10 +355,10 @@ model ServicePackage {
 }
 
 model StockMovement {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   partId    String
   date      String
-  type      String   // 'IN_PURCHASE' | 'OUT_REPAIR' | 'OUT_COUNTER_SALE' | 'ADJUSTMENT'
+  type      String // 'IN_PURCHASE' | 'OUT_REPAIR' | 'OUT_COUNTER_SALE' | 'ADJUSTMENT'
   quantity  Int
   reason    String
   userId    String
@@ -380,10 +383,26 @@ model GarageRole {
   name        String
   isSystem    Boolean  @default(false)
   permissions String[] @default([])
-  tenantId    String?  // null = global/system role
+  tenantId    String? // null = global/system role
 }
 
 model PlatformConfigEntry {
-  id    String @id @default("singleton") // Single row
-  data  Json   @default("{}") // Full PlatformConfig object
+  id   String @id @default("singleton") // Single row
+  data Json   @default("{}") // Full PlatformConfig object
+}
+
+model PaymentTransaction {
+  id             String   @id @default(uuid())
+  transactionId  String   @unique // Generated unique ID for CinetPay
+  cinetpayId     String? // ID returned by CinetPay
+  amount         Float    @default(2000)
+  currency       String   @default("XOF")
+  status         String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  paymentMethod  String? // OM, MOMO, FLOOZ, WAVE, etc.
+  customerPhone  String?
+  quoteRequestId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  quoteRequest QuoteRequest @relation(fields: [quoteRequestId], references: [id])
 }

@@ -27,9 +27,10 @@ import { GarageRoleModule } from './garage-role/garage-role.module';
 import { PlatformConfigModule } from './platform-config/platform-config.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { EventsModule } from './events/events.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
-  imports: [AuthModule, TenantModule, UserModule, ClientModule, VehicleModule, InvoiceModule, PrismaModule, SuperadminModule, QuoteRequestModule, SystemLogModule, MotoristVehicleModule, QrscanlogModule, RepairModule, PartModule, SupplierModule, WarehouseModule, LabourRateModule, ServicePackageModule, StockMovementModule, LeadModule, GarageRoleModule, PlatformConfigModule, NotificationsModule, EventsModule],
+  imports: [AuthModule, TenantModule, UserModule, ClientModule, VehicleModule, InvoiceModule, PrismaModule, SuperadminModule, QuoteRequestModule, SystemLogModule, MotoristVehicleModule, QrscanlogModule, RepairModule, PartModule, SupplierModule, WarehouseModule, LabourRateModule, ServicePackageModule, StockMovementModule, LeadModule, GarageRoleModule, PlatformConfigModule, NotificationsModule, EventsModule, PaymentsModule],
   controllers: [AppController],
   providers: [
     AppService,
