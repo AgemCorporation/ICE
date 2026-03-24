@@ -12,7 +12,7 @@ export class PaymentsService {
 
   async initFeePayment(quoteRequestId: string) {
     if (!this.apiKey || !this.siteId) {
-      throw new HttpException('Configuration CinetPay manquante dans l\\'environnement', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException("Configuration CinetPay manquante dans l'environnement", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     const quote = await this.prisma.quoteRequest.findUnique({
