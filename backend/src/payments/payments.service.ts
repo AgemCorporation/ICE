@@ -57,12 +57,13 @@ export class PaymentsService {
           currency: 'XOF',
           description: `Frais de gestion - Devis ${quoteRequestId.substring(0, 8)}`,
           notify_url: notifyUrl,
-          return_url: `iceapp://payment-success`, // Deep link
+          return_url: 'https://ice-m7jm.onrender.com', // Url classique requise par CinetPay
           channels: 'ALL',
-          customer_name: quote.motoristName || 'Client ICE',
-          customer_surname: '',
+          customer_name: quote.motoristName || 'Client',
+          customer_surname: 'ICE',
           customer_phone_number: quote.motoristPhone || '0022500000000',
           customer_email: quote.motoristEmail || 'no-reply@agemcorporation.com',
+          customer_address: 'Abidjan', // Obligatoire pour CinetPay V2
           customer_city: quote.locationCity || 'Abidjan',
           customer_country: 'CI',
           customer_state: 'CI',
