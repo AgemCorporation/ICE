@@ -4,14 +4,13 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
-  private readonly apiKey = process.env.CINETPAY_API_KEY || '';
-  private readonly siteId = process.env.CINETPAY_SITE_ID || '';
-  private readonly fixedAmount = 2000;
-  
   constructor(private readonly prisma: PrismaService) {}
 
   async initFeePayment(quoteRequestId: string) {
-    if (!this.apiKey || !this.siteId) {
+    const apiKey = process.env.CINETPAY_API_KEY;
+    const siteId = process.env.CINETPAY_SITE_ID;
+
+    if (!apiKey || !siteId) {
       throw new HttpException("Configuration CinetPay manquante dans l'environnement", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -33,7 +32,7 @@ export class PaymentsService {
     await this.prisma.paymentTransaction.create({
       data: {
         transactionId,
-        amount: this.fixedAmount,
+        amount: 2000,
         quoteRequestId,
         status: 'PENDING'
       }
@@ -50,10 +49,10 @@ export class PaymentsService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          apikey: this.apiKey,
-          site_id: this.siteId,
+          apikey: apiKey,
+          site_id: siteId,
           transaction_id: transactionId,
-          amount: this.fixedAmount,
+          amount: 2000,
           currency: 'XOF',
           description: `Frais de gestion - Devis ${quoteRequestId.substring(0, 8)}`,
           notify_url: notifyUrl,
@@ -101,14 +100,17 @@ export class PaymentsService {
 
     if (!tx || tx.status === 'SUCCESS') return { status: 'already_processed' };
 
+    const apiKey = process.env.CINETPAY_API_KEY;
+    const siteId = process.env.CINETPAY_SITE_ID;
+
     // Need to verify via CinetPay check API
     try {
       const response = await fetch('https://api-checkout.cinetpay.com/v2/payment/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apikey: this.apiKey,
-          site_id: this.siteId,
+          apikey: apiKey,
+          site_id: siteId,
           transaction_id
         })
       });
