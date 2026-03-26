@@ -388,6 +388,48 @@ interface WizardNode {
                           </div>
                        }
 
+                       <!-- ===== STEP 6: Confirmation & Contact Info ===== -->
+                       @if (requestWizardStep() === 6) {
+                          <div class="animate-zoom-in text-center py-6">
+                             <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                             </div>
+                             <h3 class="font-bold text-2xl text-slate-900 dark:text-white mb-2">Demande Envoyée !</h3>
+                             <p class="text-slate-500 dark:text-slate-400 mb-8">Votre demande d'intervention a été transmise avec succès aux garages partenaires ICE.</p>
+
+                             <div class="bg-indigo-50 dark:bg-indigo-900/20 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-800/40 text-left mb-8 shadow-sm">
+                                <h4 class="font-bold text-indigo-900 dark:text-indigo-300 mb-3 flex items-center gap-2">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                   Assistance Call Center ICE
+                               </h4>
+                                <div class="space-y-3">
+                                   <div class="flex items-start gap-3">
+                                      <div class="mt-0.5 w-6 flex justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                                      <div>
+                                         <p class="text-sm font-medium text-slate-800 dark:text-slate-200">Horaires d'ouverture</p>
+                                         <p class="text-xs text-slate-500 dark:text-slate-400">Lun-Ven : 08h00 - 18h00</p>
+                                         <p class="text-xs text-slate-500 dark:text-slate-400">Samedi : 08h00 - 13h00</p>
+                                      </div>
+                                   </div>
+                                   <div class="flex items-start gap-3">
+                                      <div class="mt-0.5 w-6 flex justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg></div>
+                                      <div>
+                                         <p class="text-sm font-medium text-slate-800 dark:text-slate-200">Nous contacter</p>
+                                         <a href="tel:+2250576666601" class="block text-sm text-indigo-600 dark:text-indigo-400 font-bold mt-1">+225 05 76 66 66 01</a>
+                                         <a href="tel:+2250748343440" class="block text-sm text-indigo-600 dark:text-indigo-400 font-bold mt-1">+225 07 48 34 34 40</a>
+                                      </div>
+                                   </div>
+                                </div>
+                             </div>
+
+                             <button type="button" (click)="closeSuccessWizard()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                Suivre mes demandes
+                             </button>
+                          </div>
+                       }
+
+
                     </form>
                  </div>
               }
@@ -2335,6 +2377,13 @@ export class MobileAppComponent {
       this.editingInterventionDate.set(false);
    }
 
+   closeSuccessWizard() {
+      this.resetRequestWizard();
+      this.resetWizard();
+      this.activeTab.set('requests');
+      this.cdr.detectChanges(); // Force UI update
+   }
+
    cancelRequest(req: QuoteRequest) {
       this.requestToCancel.set(req);
    }
@@ -3041,11 +3090,10 @@ export class MobileAppComponent {
       };
 
       this.dataService.createMobileRequest(newReq);
-      this.toastService.show('Demande de devis envoyée aux garages !', 'success');
-      this.resetRequestWizard();
-      this.resetWizard();
-      this.activeTab.set('requests');
+      this.toastService.show('Demande de devis traitée !', 'success');
+      this.requestWizardStep.set(6); // Show the success confirmation View
       this.cdr.detectChanges(); // Force UI update
+
    }
 
    // Helper for vehicle selection in form
