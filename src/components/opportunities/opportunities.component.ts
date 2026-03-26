@@ -164,16 +164,16 @@ import { Capacitor } from '@capacitor/core';
                            <!-- Preferences Badges -->
                            <div class="flex flex-wrap gap-2">
                               @if(opp.preferredPeriod === 'Urgent') {
-                                 <span class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 uppercase border border-red-200 flex items-center gap-1">⚡ Urgent</span>
+                                 <span class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 uppercase border border-red-200 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> Urgent</span>
                               }
                               @if(opp.interventionDate) {
                                  <span class="px-2 py-1 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/30 flex items-center gap-1" title="Date souhaitée">
-                                    📅 {{ opp.interventionDate | date:'dd/MM/yyyy' }}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> {{ opp.interventionDate | date:'dd/MM/yyyy' }}
                                  </span>
                               }
                               @if(opp.interventionLocation) {
                                  <span class="px-2 py-1 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/30 flex items-center gap-1" title="Lieu d'intervention">
-                                    🚗 {{ getLocationLabel(opp.interventionLocation) }}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1" /></svg> {{ getLocationLabel(opp.interventionLocation) }}
                                  </span>
                               }
                            </div>
