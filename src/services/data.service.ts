@@ -2039,6 +2039,9 @@ export class DataService {
    // Helper to sync quotes to DB after local mutation
    syncQuoteRequestDB(requestId: string, partialPayload?: Record<string, any>) {
       if (partialPayload) {
+         // Optimistic update of local state
+         this.quoteRequests.update(list => list.map(r => r.id === requestId ? { ...r, ...partialPayload } : r));
+         
          // Send only the changed fields — avoids Prisma 'Unknown field' errors
          this.http.patch(`${this.apiUrl}/quote-request/${requestId}`, partialPayload).subscribe({
             error: err => console.error(`Error syncing quote request ${requestId} to DB`, err)
