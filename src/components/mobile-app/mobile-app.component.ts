@@ -449,7 +449,11 @@ interface WizardNode {
                                @if (hasTag(req, 'technician')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg> Technicien</span> }
                                @if (hasTag(req, 'towing')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg> Remorquage</span> }
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">{{ getCleanDescription(req.description) }}</p>
+                            @if(getCleanDescription(req.adminDescription)) {
+                               <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2"><span class="font-bold text-indigo-600 dark:text-indigo-400 mr-1">Diag ICE:</span>{{ getCleanDescription(req.adminDescription) }}</p>
+                            } @else {
+                               <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">{{ getCleanDescription(req.description) }}</p>
+                            }
                             
                             <!-- Display Proposed Quotes (Only if Validated by Admin) -->
                             @if (req.status === 'COMPLETED' || req.status === 'CONVERTED') {
@@ -894,12 +898,29 @@ interface WizardNode {
                          </div>
                       </div>
 
-                      <!-- Description -->
+                      <!-- Description / Diagnostics -->
+                      @if (getCleanDescription(reqInfo.adminDescription)) {
+                         <div class="mb-5">
+                            <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                               Diagnostic validé (Équipe ICE)
+                            </h4>
+                            <div class="bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-xl border border-indigo-200 dark:border-indigo-800/30 overflow-hidden relative">
+                               <div class="absolute -right-6 -top-6 text-indigo-100 dark:text-indigo-900/20">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                               </div>
+                               <p class="text-slate-800 dark:text-slate-200 text-sm whitespace-pre-wrap font-medium relative z-10">{{ getCleanDescription(reqInfo.adminDescription) }}</p>
+                            </div>
+                         </div>
+                      }
+                      
                       @if (getCleanDescription(reqInfo.description)) {
                          <div class="mb-5">
-                            <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Description / Note</h4>
+                            <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                               {{ getCleanDescription(reqInfo.adminDescription) ? 'Votre signalement initial' : 'Description / Note' }}
+                            </h4>
                             <div class="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-800/30">
-                               <p class="text-slate-800 dark:text-slate-200 text-sm whitespace-pre-wrap italic">{{ getCleanDescription(reqInfo.description) }}</p>
+                               <p class="text-slate-700 dark:text-slate-300 text-sm whitespace-pre-wrap italic">{{ getCleanDescription(reqInfo.description) }}</p>
                             </div>
                          </div>
                       }
@@ -915,6 +936,33 @@ interface WizardNode {
                                   </div>
                                }
                             </div>
+                         </div>
+                      }
+
+                      <!-- Actions (Annuler / Modifier) -->
+                      @if (reqInfo.status === 'NEW' || reqInfo.status === 'DISPATCHED') {
+                         <div class="mt-8 mb-4 border-t border-slate-200 dark:border-slate-800 pt-6">
+                            @if (editingInterventionDate()) {
+                               <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-200 dark:border-indigo-800 mb-4 animate-fade-in">
+                                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Nouvelle date souhaitée</label>
+                                  <input type="date" [ngModel]="newInterventionDate()" (ngModelChange)="newInterventionDate.set($event)" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 mb-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500">
+                                  <div class="flex gap-2">
+                                     <button (click)="cancelEditingDate()" class="flex-1 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700">Annuler</button>
+                                     <button (click)="saveInterventionDate(reqInfo)" [disabled]="!newInterventionDate()" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm shadow-sm hover:bg-indigo-700 disabled:opacity-50">Enregistrer</button>
+                                  </div>
+                               </div>
+                            } @else {
+                               <div class="flex gap-3">
+                                  <button (click)="cancelRequest(reqInfo)" class="flex-1 px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/30 font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                     Annuler
+                                  </button>
+                                  <button (click)="startEditingDate(reqInfo)" class="flex-1 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/30 font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                     Modifier RDV
+                                  </button>
+                               </div>
+                            }
                          </div>
                       }
                    </div>
@@ -1394,6 +1442,8 @@ export class MobileAppComponent {
 
    selectedQuoteRequest = signal<QuoteRequest | null>(null);
    selectedRequestInfo = signal<QuoteRequest | null>(null);
+   editingInterventionDate = signal<boolean>(false);
+   newInterventionDate = signal<string>('');
    selectedQuoteDetails = signal<Invoice | null>(null);
 
    quoteToConfirm = signal<{ req: QuoteRequest, quote: Invoice } | null>(null);
@@ -2226,7 +2276,50 @@ export class MobileAppComponent {
    getRepairStatus(id?: string) { return id ? this.dataService.getPublicRepairById(id)?.status : ''; }
    getStatusLabel(s: string) { return s; }
    viewRequestInfo(req: QuoteRequest) { this.selectedRequestInfo.set(req); }
-   closeRequestInfo() { this.selectedRequestInfo.set(null); }
+   closeRequestInfo() { 
+      this.selectedRequestInfo.set(null); 
+      this.editingInterventionDate.set(false);
+   }
+
+   startEditingDate(req: QuoteRequest) {
+      this.editingInterventionDate.set(true);
+      if (req.interventionDate) {
+         try {
+            this.newInterventionDate.set(new Date(req.interventionDate).toISOString().substring(0, 10));
+         } catch {
+            this.newInterventionDate.set(req.interventionDate.substring(0, 10));
+         }
+      } else {
+         this.newInterventionDate.set('');
+      }
+   }
+
+   saveInterventionDate(req: QuoteRequest) {
+      if (this.newInterventionDate()) {
+         try {
+            const dateObj = new Date(this.newInterventionDate());
+            const isoDate = dateObj.toISOString();
+            this.dataService.syncQuoteRequestDB(req.id, { interventionDate: isoDate });
+            this.selectedRequestInfo.set({ ...req, interventionDate: isoDate });
+         } catch {
+            this.dataService.syncQuoteRequestDB(req.id, { interventionDate: this.newInterventionDate() });
+            this.selectedRequestInfo.set({ ...req, interventionDate: this.newInterventionDate() });
+         }
+      }
+      this.editingInterventionDate.set(false);
+   }
+
+   cancelEditingDate() {
+      this.editingInterventionDate.set(false);
+   }
+
+   cancelRequest(req: QuoteRequest) {
+      if (confirm('Êtes-vous sûr de vouloir annuler cette demande ? Cette action est irréversible.')) {
+         this.dataService.syncQuoteRequestDB(req.id, { status: 'CANCELED' });
+         this.selectedRequestInfo.set({ ...req, status: 'CANCELED' });
+         this.toastService.show('La demande a été annulée.', 'info');
+      }
+   }
 
    viewQuoteDetails(req: any, quote: any) { this.selectedQuoteRequest.set(req); this.selectedQuoteDetails.set(quote); }
    closeQuoteDetails() { this.selectedQuoteDetails.set(null); }

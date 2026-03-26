@@ -425,7 +425,7 @@ export interface QuoteMessage {
 export interface QuoteRequest {
    id: string;
    date: string;
-   status: 'NEW' | 'DISPATCHED' | 'QUOTE_SUBMITTED' | 'COMPLETED' | 'REJECTED' | 'CONVERTED';
+   status: 'NEW' | 'DISPATCHED' | 'QUOTE_SUBMITTED' | 'COMPLETED' | 'REJECTED' | 'CONVERTED' | 'CANCELED';
    motoristName: string;
    motoristPhone: string;
    motoristEmail?: string;
