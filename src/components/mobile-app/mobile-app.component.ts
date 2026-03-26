@@ -208,152 +208,189 @@ interface WizardNode {
                 </div>
              }
 
-             <!-- 3. CREATE REQUEST TAB -->
-             @if (currentUser() && activeTab() === 'create') {
-                <div class="p-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-                   <div class="flex items-center gap-2 mb-6">
-                      <button (click)="activeTab.set('home')" class="p-2 bg-slate-200 dark:bg-slate-800 rounded-full text-slate-600 dark:text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
-                      <h2 class="text-xl font-bold text-slate-900 dark:text-white">Nouvelle Demande</h2>
-                   </div>
+              <!-- 3. CREATE REQUEST TAB (STEP-BY-STEP WIZARD) -->
+              @if (currentUser() && activeTab() === 'create') {
+                 <div class="p-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
+                    <div class="flex items-center gap-2 mb-4">
+                       <button (click)="cancelRequestWizard()" class="p-2 bg-slate-200 dark:bg-slate-800 rounded-full text-slate-600 dark:text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+                       <h2 class="text-xl font-bold text-slate-900 dark:text-white">Nouvelle Demande</h2>
+                    </div>
 
-                   <form [formGroup]="requestForm" class="space-y-6">
-                      
-                      <!-- Vehicle Selection -->
-                      <div class="space-y-2">
-                         <label class="text-xs font-bold text-slate-400 uppercase">Véhicule concerné</label>
-                         <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                            @for (v of myVehicles(); track v.id) {
-                               <div (click)="selectVehicleForRequest(v)" class="min-w-[140px] p-3 rounded-xl border-2 cursor-pointer transition-all relative"
-                                    [class.border-indigo-500]="requestForm.get('selectedVehicleId')?.value === v.id" 
-                                    [class.bg-indigo-50]="requestForm.get('selectedVehicleId')?.value === v.id"
-                                    [class.dark:bg-indigo-900_20]="requestForm.get('selectedVehicleId')?.value === v.id"
-                                    [class.border-slate-200]="requestForm.get('selectedVehicleId')?.value !== v.id"
-                                    [class.bg-white]="requestForm.get('selectedVehicleId')?.value !== v.id"
-                                    [class.dark:bg-slate-800]="requestForm.get('selectedVehicleId')?.value !== v.id"
-                                    [class.dark:border-slate-700]="requestForm.get('selectedVehicleId')?.value !== v.id">
-                                  <div class="font-bold text-sm text-slate-900 dark:text-white truncate">{{ v.brand }} {{ v.model }}</div>
-                                  <div class="text-xs text-slate-500 dark:text-slate-400">{{ v.plate }}</div>
-                               </div>
-                            }
-                            <button type="button" (click)="openAddVehicleForm()" class="min-w-[50px] flex items-center justify-center rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors">+</button>
-                         </div>
-                      </div>
+                    <!-- Progress Bar -->
+                    <div class="flex items-center gap-1 mb-6">
+                       @for (s of [1,2,3,4,5]; track s) {
+                          <div class="flex-1 h-1.5 rounded-full transition-all duration-300"
+                               [class.bg-indigo-600]="s <= requestWizardStep()"
+                               [class.dark:bg-indigo-500]="s <= requestWizardStep()"
+                               [class.bg-slate-200]="s > requestWizardStep()"
+                               [class.dark:bg-slate-700]="s > requestWizardStep()"></div>
+                       }
+                    </div>
 
-                      <!-- STANDARD MODE (WIZARD) -->
-                      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                         <!-- Location -->
-                         <div class="mb-4">
-                            <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Localisation</label>
-                            <div class="flex gap-2">
-                                <select formControlName="locationCity" (change)="onRequestCityChange()" class="flex-1 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white"><option value="">Ville...</option>@for(c of cities; track c) { <option [value]="c">{{ c }}</option> }</select>
-                                <select formControlName="locationCommune" class="flex-1 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white"><option value="">Commune...</option>@for(c of requestCommunes(); track c) { <option [value]="c">{{ c }}</option> }</select>
-                            </div>
-                         </div>
+                    <form [formGroup]="requestForm" class="space-y-6">
 
-                         <!-- Intervention Preferences -->
-                         <div class="mb-4 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-                            <label class="text-xs font-bold text-slate-400 uppercase block mb-3">Préférences d'Intervention</label>
-                            <div class="space-y-3">
-                               <div>
-                                  <label class="text-xs text-slate-600 dark:text-slate-400 block mb-1">Date souhaitée (Optionnel)</label>
-                                  <input type="date" formControlName="interventionDate" [min]="minInterventionDate()" [max]="maxInterventionDate()" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
-                               </div>
-                               <div>
-                                  <label class="text-xs text-slate-600 dark:text-slate-400 block mb-1">Lieu de l'intervention</label>
-                                  <select formControlName="interventionLocation" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
-                                     <option value="">Sélectionner une option...</option>
-                                     <option value="GARAGE">Au garage</option>
-                                     <option value="TOWING">Besoin de remorquage</option>
-                                     <option value="WORK">Au travail</option>
-                                     <option value="HOME">A domicile</option>
-                                     <option value="OTHER">Autre</option>
-                                  </select>
-                               </div>
-                            </div>
-                         </div>
+                       <!-- ===== STEP 1: Vehicle Selection ===== -->
+                       @if (requestWizardStep() === 1) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 1</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Sélectionnez le véhicule concerné</p>
+                             <div class="space-y-2">
+                                <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                   @for (v of myVehicles(); track v.id) {
+                                      <div (click)="selectVehicleForRequest(v)" class="min-w-[140px] p-3 rounded-xl border-2 cursor-pointer transition-all"
+                                           [class.border-indigo-500]="requestForm.get('selectedVehicleId')?.value === v.id"
+                                           [class.bg-indigo-50]="requestForm.get('selectedVehicleId')?.value === v.id"
+                                           [class.dark:bg-indigo-900_20]="requestForm.get('selectedVehicleId')?.value === v.id"
+                                           [class.border-slate-200]="requestForm.get('selectedVehicleId')?.value !== v.id"
+                                           [class.bg-white]="requestForm.get('selectedVehicleId')?.value !== v.id"
+                                           [class.dark:bg-slate-800]="requestForm.get('selectedVehicleId')?.value !== v.id"
+                                           [class.dark:border-slate-700]="requestForm.get('selectedVehicleId')?.value !== v.id">
+                                         <div class="font-bold text-sm text-slate-900 dark:text-white truncate">{{ v.brand }} {{ v.model }}</div>
+                                         <div class="text-xs text-slate-500 dark:text-slate-400">{{ v.plate }}</div>
+                                      </div>
+                                   }
+                                   <button type="button" (click)="openAddVehicleForm()" class="min-w-[50px] flex items-center justify-center rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors">+</button>
+                                </div>
+                             </div>
+                             <button type="button" (click)="goToNextRequestStep()" [disabled]="!requestForm.get('selectedVehicleId')?.value" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                          </div>
+                       }
 
-                         @if (wizardDiagnosis()) {
-                            <div class="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3 animate-fade-in mb-4">
-                               <div class="flex justify-between items-center mb-1">
-                                  <div class="font-bold text-emerald-800 dark:text-emerald-400 text-sm">Diagnostic : {{ wizardDiagnosis() }}</div>
-                                  <button type="button" (click)="resetWizard()" class="text-xs text-emerald-600 dark:text-emerald-400 underline">Refaire</button>
-                               </div>
-                               <textarea formControlName="description" rows="3" class="w-full bg-white dark:bg-slate-950 border border-emerald-200 dark:border-emerald-800 rounded-lg p-2 text-sm text-slate-900 dark:text-white" placeholder="Précisions supplémentaires..."></textarea>
-                               
-                               <!-- Photo Toggle Section -->
-                               <div class="mt-3 border-t border-emerald-200 dark:border-emerald-800/50 pt-3">
-                                  <div class="flex items-center justify-between mb-2">
-                                     <span class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                        {{ isBodyworkDiagnosis() ? 'Photos du dommage (Obligatoire)' : 'Ajouter des photos ?' }}
-                                     </span>
-                                     <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" [checked]="wantToAddPhotos() || isBodyworkDiagnosis()" 
-                                               (change)="togglePhotoOption($event)" 
-                                               [disabled]="isBodyworkDiagnosis()" 
-                                               class="sr-only peer">
-                                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                                     </label>
-                                  </div>
+                       <!-- ===== STEP 2: Is vehicle drivable? ===== -->
+                       @if (requestWizardStep() === 2) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 2</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Votre véhicule est-il roulant ?</p>
+                             <div class="grid grid-cols-2 gap-4">
+                                <button type="button" (click)="setVehicleDrivable(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-emerald-500]="isVehicleDrivable() === true" [class.bg-emerald-50]="isVehicleDrivable() === true" [class.border-slate-200]="isVehicleDrivable() !== true" [class.bg-white]="isVehicleDrivable() !== true" [class.dark:bg-slate-800]="isVehicleDrivable() !== true" [class.dark:border-slate-700]="isVehicleDrivable() !== true">
+                                   <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3" [class.bg-emerald-100]="isVehicleDrivable() === true" [class.bg-slate-100]="isVehicleDrivable() !== true"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" [class.text-emerald-600]="isVehicleDrivable() === true" [class.text-slate-400]="isVehicleDrivable() !== true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
+                                   <span class="font-bold text-slate-900 dark:text-white">Oui</span>
+                                   <span class="text-[10px] text-slate-400 mt-1">Il roule normalement</span>
+                                </button>
+                                <button type="button" (click)="setVehicleDrivable(false)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-red-500]="isVehicleDrivable() === false" [class.bg-red-50]="isVehicleDrivable() === false" [class.border-slate-200]="isVehicleDrivable() !== false" [class.bg-white]="isVehicleDrivable() !== false" [class.dark:bg-slate-800]="isVehicleDrivable() !== false" [class.dark:border-slate-700]="isVehicleDrivable() !== false">
+                                   <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3" [class.bg-red-100]="isVehicleDrivable() === false" [class.bg-slate-100]="isVehicleDrivable() !== false"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" [class.text-red-600]="isVehicleDrivable() === false" [class.text-slate-400]="isVehicleDrivable() !== false" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
+                                   <span class="font-bold text-slate-900 dark:text-white">Non</span>
+                                   <span class="text-[10px] text-slate-400 mt-1">Il est en panne</span>
+                                </button>
+                             </div>
+                             <div class="flex gap-3 mt-6">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="goToNextRequestStep()" [disabled]="isVehicleDrivable() === null" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                             </div>
+                          </div>
+                       }
 
-                                  @if (wantToAddPhotos() || isBodyworkDiagnosis()) {
-                                     <div class="flex gap-2 overflow-x-auto pb-2">
-                                        <!-- Photo Add Button -->
-                                        <button type="button" (click)="takePhoto()" class="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-emerald-300 dark:border-emerald-700 rounded-lg cursor-pointer bg-white dark:bg-slate-900 hover:bg-emerald-50 transition-colors shrink-0">
-                                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                        </button>
-                                        <input type="file" id="mobilePhotoInput" accept="image/*" capture="environment" (change)="onRequestPhotoSelected($event)" class="hidden">
-                                        <!-- Photo Previews -->
-                                        @for (photo of requestPhotos(); track $index) {
-                                           <div class="relative w-16 h-16 shrink-0 group">
-                                              <img [src]="photo" class="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-700">
-                                              <button type="button" (click)="removeRequestPhoto($index)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-md w-5 h-5 flex items-center justify-center text-[10px]">✕</button>
-                                           </div>
-                                        }
-                                     </div>
-                                  }
-                               </div>
-                            </div>
-                         } @else {
-                            <div class="mb-4">
-                               <div class="flex justify-between items-center mb-3">
-                                  <h3 class="font-bold text-slate-800 dark:text-slate-200">{{ currentNode().question }}</h3>
-                                  @if (wizardHistory().length > 0) {
-                                     <button type="button" (click)="wizardBack()" class="text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                                        Retour
-                                     </button>
-                                  }
-                               </div>
-                               
-                               <div [class]="currentNode().type === 'ICON_GRID' ? 'grid grid-cols-3 gap-2' : 'space-y-2'">
-                                  @for (opt of currentNode().options; track opt.label) {
-                                     <button type="button" (click)="selectOption(opt)" [class]="currentNode().type === 'ICON_GRID' ? 'flex flex-col items-center justify-center p-2 border border-slate-200 dark:border-slate-700 rounded hover:bg-slate-50 dark:hover:bg-slate-800 h-24 transition-all active:scale-95' : 'w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded hover:bg-slate-50 dark:hover:bg-slate-800 flex justify-between transition-all active:scale-[0.98]'">
-                                        @if (currentNode().type === 'ICON_GRID') {
-                                           @if (opt.svgKey) {
-                                             <div class="w-10 h-10 mb-2 flex items-center justify-center" 
-                                                   [style.color]="opt.color || (themeService.isDark() ? '#94a3b8' : '#475569')"
-                                                   [innerHTML]="getDashIcon(opt.svgKey, opt.color)"></div>
-                                           } @else {
-                                              <span class="text-2xl mb-1">{{ opt.icon }}</span>
-                                           }
-                                           <div class="text-[10px] font-bold text-center leading-tight text-slate-700 dark:text-slate-300">{{ opt.label }}</div>
-                                        } @else {
-                                           <span class="text-slate-700 dark:text-slate-300">{{ opt.label }}</span>
-                                           @if(opt.color) { <span class="w-3 h-3 rounded-full" [style.backgroundColor]="opt.color"></span> }
-                                        }
-                                     </button>
-                                  }
-                               </div>
-                            </div>
-                         }
-                      </div>
+                       <!-- ===== STEP 3: Technician dispatch? ===== -->
+                       @if (requestWizardStep() === 3) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 3</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Souhaitez-vous le déplacement d'un technicien pour diagnostic ?</p>
+                             <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-6 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                <span class="text-xs text-amber-800 dark:text-amber-300 font-medium">Le déplacement coûtera <strong>15.000 FCFA</strong> payable après l'intervention du technicien.</span>
+                             </div>
+                             <div class="grid grid-cols-2 gap-4">
+                                <button type="button" (click)="setTechnicianDispatch(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-indigo-500]="wantsTechnicianDispatch() === true" [class.bg-indigo-50]="wantsTechnicianDispatch() === true" [class.border-slate-200]="wantsTechnicianDispatch() !== true" [class.bg-white]="wantsTechnicianDispatch() !== true" [class.dark:bg-slate-800]="wantsTechnicianDispatch() !== true" [class.dark:border-slate-700]="wantsTechnicianDispatch() !== true">
+                                   <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2 bg-indigo-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
+                                   <span class="font-bold text-sm text-slate-900 dark:text-white">Oui</span>
+                                </button>
+                                <button type="button" (click)="setTechnicianDispatch(false)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-slate-500]="wantsTechnicianDispatch() === false" [class.bg-slate-50]="wantsTechnicianDispatch() === false" [class.border-slate-200]="wantsTechnicianDispatch() !== false" [class.bg-white]="wantsTechnicianDispatch() !== false" [class.dark:bg-slate-800]="wantsTechnicianDispatch() !== false" [class.dark:border-slate-700]="wantsTechnicianDispatch() !== false">
+                                   <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2 bg-slate-200"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
+                                   <span class="font-bold text-sm text-slate-900 dark:text-white">Non</span>
+                                </button>
+                             </div>
+                             <div class="flex gap-3 mt-6">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="goToNextRequestStep()" [disabled]="wantsTechnicianDispatch() === null" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                             </div>
+                          </div>
+                       }
 
-                      <button type="button" (click)="submitRequest()" [disabled]="requestForm.invalid" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors">
-                         Envoyer Demande
-                      </button>
-                   </form>
-                </div>
-             }
+                       <!-- ===== STEP 4: Towing? (Only if non-drivable + no technician) ===== -->
+                       @if (requestWizardStep() === 4) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 4</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Avez-vous besoin de remorquage ?</p>
+                             <div class="grid grid-cols-2 gap-4">
+                                <button type="button" (click)="setNeedsTowing(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-indigo-500]="needsTowing() === true" [class.bg-indigo-50]="needsTowing() === true" [class.border-slate-200]="needsTowing() !== true" [class.bg-white]="needsTowing() !== true" [class.dark:bg-slate-800]="needsTowing() !== true" [class.dark:border-slate-700]="needsTowing() !== true">
+                                   <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2 bg-indigo-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
+                                   <span class="font-bold text-sm text-slate-900 dark:text-white">Oui</span>
+                                </button>
+                                <button type="button" (click)="setNeedsTowing(false)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-slate-500]="needsTowing() === false" [class.bg-slate-50]="needsTowing() === false" [class.border-slate-200]="needsTowing() !== false" [class.bg-white]="needsTowing() !== false" [class.dark:bg-slate-800]="needsTowing() !== false" [class.dark:border-slate-700]="needsTowing() !== false">
+                                   <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2 bg-slate-200"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
+                                   <span class="font-bold text-sm text-slate-900 dark:text-white">Non</span>
+                                </button>
+                             </div>
+                             <div class="flex gap-3 mt-6">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="goToNextRequestStep()" [disabled]="needsTowing() === null" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                             </div>
+                          </div>
+                       }
+
+                       <!-- ===== STEP 5: Final Form ===== -->
+                       @if (requestWizardStep() === 5) {
+                          <div class="animate-fade-in">
+                             @if (!requestWizardNeedsForm()) {
+                                <div class="text-center py-10">
+                                   <div class="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                   </div>
+                                   <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Aucune option disponible</h3>
+                                   <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Malheureusement, sans déplacement de technicien ni remorquage, nous ne pouvons pas traiter votre demande pour un véhicule non roulant.</p>
+                                   <button type="button" (click)="goToPrevRequestStep()" class="py-3 px-6 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Revenir en arrière</button>
+                                </div>
+                             } @else {
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                   <span class="text-[10px] font-bold px-2 py-1 rounded-full" [class.bg-emerald-100]="isVehicleDrivable()" [class.text-emerald-700]="isVehicleDrivable()" [class.bg-red-100]="!isVehicleDrivable()" [class.text-red-700]="!isVehicleDrivable()">{{ isVehicleDrivable() ? '🚗 Véhicule roulant' : '🔧 Véhicule en panne' }}</span>
+                                   @if (wantsTechnicianDispatch()) { <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">🔧 Technicien à domicile</span> }
+                                   @if (needsTowing()) { <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-100 text-amber-700">🚛 Remorquage</span> }
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Dernière étape</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Renseignez les détails de l'intervention</p>
+                                <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                                   <div>
+                                      <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Localisation</label>
+                                      <div class="flex gap-2">
+                                         <select formControlName="locationCity" (change)="onRequestCityChange()" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white"><option value="">Ville...</option>@for(c of requestWizardCities(); track c) { <option [value]="c">{{ c }}</option> }</select>
+                                         <select formControlName="locationCommune" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white"><option value="">Commune...</option>@for(c of requestCommunes(); track c) { <option [value]="c">{{ c }}</option> }</select>
+                                      </div>
+                                   </div>
+                                   <div>
+                                      <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Date souhaitée d'intervention</label>
+                                      <input type="date" formControlName="interventionDate" [min]="minInterventionDate()" [max]="maxInterventionDate()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
+                                   </div>
+                                   @if (requestWizardShowDescription()) {
+                                      <div>
+                                         <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Description du problème</label>
+                                         <textarea formControlName="description" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white" placeholder="Décrivez le problème de votre véhicule..."></textarea>
+                                      </div>
+                                      <div>
+                                         <label class="text-xs font-bold text-slate-400 uppercase block mb-2">Photos (Optionnel)</label>
+                                         <div class="flex gap-2 overflow-x-auto pb-2">
+                                            <button type="button" (click)="takePhoto()" class="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg cursor-pointer bg-white dark:bg-slate-900 hover:bg-indigo-50 transition-colors shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
+                                            <input type="file" id="mobilePhotoInput" accept="image/*" capture="environment" (change)="onRequestPhotoSelected($event)" class="hidden">
+                                            @for (photo of requestPhotos(); track $index) {
+                                               <div class="relative w-16 h-16 shrink-0">
+                                                  <img [src]="photo" class="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-700">
+                                                  <button type="button" (click)="removeRequestPhoto($index)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-md w-5 h-5 flex items-center justify-center text-[10px]">✕</button>
+                                               </div>
+                                            }
+                                         </div>
+                                      </div>
+                                   }
+                                </div>
+                                <div class="flex gap-3 mt-6">
+                                   <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                   <button type="button" (click)="submitRequest()" [disabled]="!requestForm.get('locationCity')?.value" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Envoyer Demande</button>
+                                </div>
+                             }
+                          </div>
+                       }
+
+                    </form>
+                 </div>
+              }
 
              <!-- 4. REQUESTS LIST TAB -->
              @if (currentUser() && activeTab() === 'requests') {
@@ -388,7 +425,7 @@ interface WizardNode {
 
                    <div class="space-y-4">
                       @for (req of filteredRequests(); track req.id) {
-                         <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4">
+                         <div (click)="viewRequestInfo(req)" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 cursor-pointer active:scale-[0.99] transition-transform">
                             <div class="flex justify-between items-start mb-2">
                                <div class="flex flex-col">
                                   <div class="font-bold text-slate-900 dark:text-white">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
@@ -405,7 +442,14 @@ interface WizardNode {
                                   {{ translateStatus(req.status) }}
                                </span>
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">{{ req.description }}</p>
+                            <!-- Tags -->
+                            <div class="flex flex-wrap gap-1.5 mb-2 mt-1">
+                               @if (hasTag(req, 'drivable')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">🚗 Roulant</span> }
+                               @if (hasTag(req, 'not_drivable')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">🔧 En panne</span> }
+                               @if (hasTag(req, 'technician')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400">🛠 Technicien</span> }
+                               @if (hasTag(req, 'towing')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">🚛 Remorquage</span> }
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">{{ getCleanDescription(req.description) }}</p>
                             
                             <!-- Display Proposed Quotes (Only if Validated by Admin) -->
                             @if (req.status === 'COMPLETED' || req.status === 'CONVERTED') {
@@ -456,7 +500,7 @@ interface WizardNode {
                                                           Travaux : {{ repairStatus }}
                                                       </div>
                                                       @if(repairStatus === 'Clôturé' && !req.clientRating) {
-                                                         <button (click)="openRateModal(req)" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 rounded transition-colors flex items-center justify-center gap-1 z-20 relative">
+                                                         <button (click)="$event.stopPropagation(); openRateModal(req)" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 rounded transition-colors flex items-center justify-center gap-1 z-20 relative">
                                                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                                                              Évaluer la prestation
                                                          </button>
@@ -472,7 +516,7 @@ interface WizardNode {
                                                       </div>
                                                   }
                                                } @else if (req.status !== 'CONVERTED') {
-                                                  <button (click)="viewQuoteDetails(req, quote)" class="w-full text-center text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2 rounded text-indigo-600 dark:text-indigo-400 font-bold hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors z-20 relative">Voir détails</button>
+                                                  <button (click)="$event.stopPropagation(); viewQuoteDetails(req, quote)" class="w-full text-center text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2 rounded text-indigo-600 dark:text-indigo-400 font-bold hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors z-20 relative">Voir détails</button>
                                                }
                                             </div>
                                          }
@@ -512,7 +556,7 @@ interface WizardNode {
                                                    Travaux : {{ repairStatus }}
                                                </div>
                                                @if(repairStatus === 'Clôturé' && !req.clientRating) {
-                                                  <button (click)="openRateModal(req)" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 rounded transition-colors flex items-center justify-center gap-1 z-20 relative">
+                                                  <button (click)="$event.stopPropagation(); openRateModal(req)" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 rounded transition-colors flex items-center justify-center gap-1 z-20 relative">
                                                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                                                       Évaluer la prestation
                                                   </button>
@@ -528,7 +572,7 @@ interface WizardNode {
                                                </div>
                                            }
                                         } @else if (req.status !== 'CONVERTED') {
-                                           <button (click)="viewQuoteDetails(req, quote)" class="w-full text-center text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline z-20 relative mt-2">Voir détails</button>
+                                           <button (click)="$event.stopPropagation(); viewQuoteDetails(req, quote)" class="w-full text-center text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline z-20 relative mt-2">Voir détails</button>
                                         }
                                      </div>
                                   }
@@ -781,6 +825,99 @@ interface WizardNode {
                    <span class="text-[9px] font-medium mt-1">Profil</span>
                 </button>
              </nav>
+          }
+
+          <!-- REQUEST INFO MODAL -->
+          @if (selectedRequestInfo()) {
+             @let reqInfo = selectedRequestInfo()!;
+             <div class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-6 animate-fade-in" (click)="closeRequestInfo()">
+                <div class="bg-slate-50 dark:bg-slate-900 w-full max-w-lg sm:rounded-2xl rounded-t-3xl h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col relative" (click)="$event.stopPropagation()">
+                   
+                   <!-- Header -->
+                   <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sm:rounded-t-2xl rounded-t-3xl sticky top-0 z-10 shrink-0">
+                      <div>
+                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">Détails de la demande</h3>
+                         <div class="text-xs text-slate-500 font-mono">{{ reqInfo.id.substring(0,8) }} • {{ reqInfo.date | date:'dd/MM/yyyy HH:mm' }}</div>
+                      </div>
+                      <button (click)="closeRequestInfo()" class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">✕</button>
+                   </div>
+
+                   <!-- Scrollable Content -->
+                   <div class="p-4 overflow-y-auto w-full">
+                      <!-- Status Banner -->
+                      <div class="mb-5 flex justify-between items-center bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                         <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Statut actuel</span>
+                         <span class="text-xs px-2.5 py-1 rounded-full font-bold uppercase" 
+                            [class.bg-blue-100]="reqInfo.status === 'NEW' || reqInfo.status === 'DISPATCHED'" [class.text-blue-700]="reqInfo.status === 'NEW' || reqInfo.status === 'DISPATCHED'"
+                            [class.bg-emerald-100]="reqInfo.status === 'CONVERTED' || reqInfo.status === 'COMPLETED'" [class.text-emerald-700]="reqInfo.status === 'CONVERTED' || reqInfo.status === 'COMPLETED'">
+                            {{ translateStatus(reqInfo.status) }}
+                         </span>
+                      </div>
+
+                      <!-- Vehicle Info -->
+                      <div class="mb-5">
+                         <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Véhicule</h4>
+                         <div class="bg-white dark:bg-slate-950/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <div class="font-bold text-slate-900 dark:text-white text-lg mb-1">{{ reqInfo.vehicleBrand }} {{ reqInfo.vehicleModel }}</div>
+                            <div class="text-xs text-slate-500 grid flex-col gap-1">
+                               <div>Année : <span class="text-slate-700 dark:text-slate-300 font-medium">{{ reqInfo.vehicleYear }}</span></div>
+                               <div>Immatriculation : <span class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono font-bold text-slate-700 dark:text-slate-300">{{ reqInfo.vehiclePlate }}</span></div>
+                               @if(reqInfo.vehicleVin) { <div>VIN : <span class="font-mono">{{ reqInfo.vehicleVin }}</span></div> }
+                            </div>
+                         </div>
+                      </div>
+
+                      <!-- Preferences & Diagnosis -->
+                      <div class="mb-5">
+                         <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Diagnostic & Préférences</h4>
+                         <div class="bg-white dark:bg-slate-950/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <!-- Tags Recap -->
+                            <div class="flex flex-wrap gap-1.5 mb-3">
+                               @if (hasTag(reqInfo, 'drivable')) { <span class="text-[10px] font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">🚗 Véhicule Roulant</span> }
+                               @if (hasTag(reqInfo, 'not_drivable')) { <span class="text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">🔧 Véhicule en panne</span> }
+                               @if (hasTag(reqInfo, 'technician')) { <span class="text-[10px] font-bold px-2 py-1 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400">🛠 Technicien à domicile</span> }
+                               @if (hasTag(reqInfo, 'towing')) { <span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">🚛 Remorquage requis</span> }
+                            </div>
+
+                            @if (reqInfo.diagnosticHistory && reqInfo.diagnosticHistory.length > 0) {
+                               <div class="divide-y divide-slate-100 dark:divide-slate-800 border-t border-slate-100 dark:border-slate-800 pt-2">
+                                  @for (step of reqInfo.diagnosticHistory; track $index) {
+                                     <div class="py-2 text-sm flex justify-between items-center gap-2">
+                                        <div class="text-slate-500 dark:text-slate-400 text-[11px] truncate flex-1">{{ step.question }}</div>
+                                        <div class="text-slate-900 dark:text-white font-medium text-xs whitespace-nowrap">{{ step.answer }}</div>
+                                     </div>
+                                  }
+                               </div>
+                            }
+                         </div>
+                      </div>
+
+                      <!-- Description -->
+                      @if (getCleanDescription(reqInfo.description)) {
+                         <div class="mb-5">
+                            <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Description / Note</h4>
+                            <div class="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-800/30">
+                               <p class="text-slate-800 dark:text-slate-200 text-sm whitespace-pre-wrap italic">{{ getCleanDescription(reqInfo.description) }}</p>
+                            </div>
+                         </div>
+                      }
+                      
+                      <!-- Photos -->
+                      @if (reqInfo.photos && reqInfo.photos.length > 0) {
+                         <div class="mb-5">
+                            <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Photos jointes</h4>
+                            <div class="grid grid-cols-3 gap-2">
+                               @for (photo of reqInfo.photos; track $index) {
+                                  <div class="aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+                                     <img [src]="photo" class="w-full h-full object-cover">
+                                  </div>
+                               }
+                            </div>
+                         </div>
+                      }
+                   </div>
+                </div>
+             </div>
           }
 
           <!-- RATING MODAL -->
@@ -1254,6 +1391,7 @@ export class MobileAppComponent {
    showInterventionChoiceModal = signal(false);
 
    selectedQuoteRequest = signal<QuoteRequest | null>(null);
+   selectedRequestInfo = signal<QuoteRequest | null>(null);
    selectedQuoteDetails = signal<Invoice | null>(null);
 
    quoteToConfirm = signal<{ req: QuoteRequest, quote: Invoice } | null>(null);
@@ -1292,6 +1430,29 @@ export class MobileAppComponent {
    wizardStepId = signal('ROOT');
    wizardDiagnosis = signal<string>('');
    wizardHistory = signal<string[]>([]); // Track path for BACK functionality
+
+   // NEW: Step-by-step request wizard signals
+   requestWizardStep = signal<number>(1);
+   isVehicleDrivable = signal<boolean | null>(null);
+   wantsTechnicianDispatch = signal<boolean | null>(null);
+   needsTowing = signal<boolean | null>(null);
+   requestWizardCities = computed(() => {
+      // Technician dispatch or towing => Abidjan only
+      if (this.wantsTechnicianDispatch() === true || this.needsTowing() === true) return ['Abidjan'];
+      return this.cities;
+   });
+   requestWizardNeedsForm = computed(() => {
+      const techDispatch = this.wantsTechnicianDispatch();
+      const towing = this.needsTowing();
+      const drivable = this.isVehicleDrivable();
+      // No form if non-drivable + no technician + no towing
+      if (drivable === false && techDispatch === false && towing === false) return false;
+      return true;
+   });
+   requestWizardShowDescription = computed(() => {
+      // Description + photos only when: drivable=yes AND technician=no, OR drivable=no AND technician=no (which goes to towing)
+      return this.wantsTechnicianDispatch() === false && this.needsTowing() !== true;
+   });
 
    // New Photo Logic
    wantToAddPhotos = signal(false);
@@ -1574,7 +1735,7 @@ export class MobileAppComponent {
          password: ['', Validators.required]
       });
       this.requestForm = this.fb.group({
-         locationCity: ['', Validators.required],
+         locationCity: [''],
          locationCommune: [''],
          locationPrecision: [''],
          gpsCoordinates: [''],
@@ -2051,12 +2212,20 @@ export class MobileAppComponent {
          this.leafletMap = undefined;
       }
    }
-   startRequest() { this.activeTab.set('create'); const v = this.myVehicles()[0]; if (v) this.selectVehicleForRequest(v); }
+   startRequest() {
+      this.resetRequestWizard();
+      this.activeTab.set('create');
+      const v = this.myVehicles()[0];
+      if (v) this.selectVehicleForRequest(v);
+   }
    getVisibleQuotes(req: any): string[] { return (req.proposedQuotes || []).filter((qid: string) => { const q = this.getQuote(qid); return q && (q.status === 'ENVOYE' || q.status === 'ACCEPTE'); }); }
    getQuote(id: string) { return this.dataService.getPublicInvoiceById(id); }
    getRepair(id: string) { return this.dataService.getPublicRepairById(id); }
    getRepairStatus(id?: string) { return id ? this.dataService.getPublicRepairById(id)?.status : ''; }
    getStatusLabel(s: string) { return s; }
+   viewRequestInfo(req: QuoteRequest) { this.selectedRequestInfo.set(req); }
+   closeRequestInfo() { this.selectedRequestInfo.set(null); }
+
    viewQuoteDetails(req: any, quote: any) { this.selectedQuoteRequest.set(req); this.selectedQuoteDetails.set(quote); }
    closeQuoteDetails() { this.selectedQuoteDetails.set(null); }
    acceptQuote(req: any, quote: any) { this.quoteToConfirm.set({ req, quote }); this.showConfirmQuoteModal.set(true); }
@@ -2196,6 +2365,82 @@ export class MobileAppComponent {
       this.wizardDiagnosis.set('');
       this.wizardAnswers.set([]);
       this.wizardHistory.set([]);
+   }
+
+   // NEW: Step-by-step request wizard methods
+   resetRequestWizard() {
+      this.requestWizardStep.set(1);
+      this.isVehicleDrivable.set(null);
+      this.wantsTechnicianDispatch.set(null);
+      this.needsTowing.set(null);
+      this.requestPhotos.set([]);
+      this.requestForm.reset();
+      this.requestForm.patchValue({ locationCity: '', locationCommune: '', description: '' });
+   }
+
+   cancelRequestWizard() {
+      this.resetRequestWizard();
+      this.activeTab.set('home');
+   }
+
+   setVehicleDrivable(val: boolean) { this.isVehicleDrivable.set(val); }
+   setTechnicianDispatch(val: boolean) { this.wantsTechnicianDispatch.set(val); }
+   setNeedsTowing(val: boolean) { this.needsTowing.set(val); }
+
+   goToNextRequestStep() {
+      const step = this.requestWizardStep();
+      if (step === 1) {
+         // Step 1 -> Step 2 (vehicle selected?)
+         if (!this.requestForm.get('selectedVehicleId')?.value) return;
+         this.requestWizardStep.set(2);
+      } else if (step === 2) {
+         // Step 2 -> Step 3 (drivable answered?)
+         if (this.isVehicleDrivable() === null) return;
+         this.requestWizardStep.set(3);
+      } else if (step === 3) {
+         // Step 3 -> depends on answers
+         if (this.wantsTechnicianDispatch() === null) return;
+         if (this.wantsTechnicianDispatch() === true) {
+            // Technician dispatch -> go to final form (step 5)
+            this.requestWizardStep.set(5);
+         } else {
+            // No technician
+            if (this.isVehicleDrivable() === true) {
+               // Drivable + no technician -> go to final form (step 5)
+               this.requestWizardStep.set(5);
+            } else {
+               // Non-drivable + no technician -> ask about towing (step 4)
+               this.requestWizardStep.set(4);
+            }
+         }
+      } else if (step === 4) {
+         // Step 4 -> final form (step 5)
+         if (this.needsTowing() === null) return;
+         this.requestWizardStep.set(5);
+      }
+   }
+
+   goToPrevRequestStep() {
+      const step = this.requestWizardStep();
+      if (step === 2) {
+         this.isVehicleDrivable.set(null);
+         this.requestWizardStep.set(1);
+      } else if (step === 3) {
+         this.wantsTechnicianDispatch.set(null);
+         this.requestWizardStep.set(2);
+      } else if (step === 4) {
+         this.needsTowing.set(null);
+         this.requestWizardStep.set(3);
+      } else if (step === 5) {
+         // Go back to appropriate step
+         if (this.needsTowing() !== null) {
+            // Came from towing question
+            this.requestWizardStep.set(4);
+         } else {
+            // Came from technician question
+            this.requestWizardStep.set(3);
+         }
+      }
    }
 
    currentNode(): WizardNode {
@@ -2618,14 +2863,8 @@ export class MobileAppComponent {
 
    // Updated submitRequest to handle standard flow without FM
    submitRequest() {
-      if (this.requestForm.get('locationCity')?.invalid || this.requestForm.get('selectedVehicleId')?.invalid) {
-         this.requestForm.markAllAsTouched();
+      if (!this.requestForm.get('locationCity')?.value || !this.requestForm.get('selectedVehicleId')?.value) {
          this.toastService.show('Veuillez remplir les informations obligatoires.', 'error');
-         return;
-      }
-
-      if (this.isBodyworkDiagnosis() && this.requestPhotos().length === 0) {
-         this.toastService.show('Une photo est obligatoire pour la carrosserie.', 'error');
          return;
       }
 
@@ -2633,11 +2872,13 @@ export class MobileAppComponent {
       const vehicle = this.myVehicles().find(v => v.id === val.selectedVehicleId);
       if (!vehicle) return;
 
-      let finalDescription = val.description || "Aucune description fournie.";
-
-      if (this.wizardDiagnosis()) {
-         finalDescription = `[Diagnostic: ${this.wizardDiagnosis()}]\n${finalDescription}`;
-      }
+      // Build description from wizard choices
+      let finalDescription = val.description || '';
+      
+      const combinedHistory = [...this.wizardAnswers()];
+      if (this.needsTowing() === true) combinedHistory.unshift({ question: 'Besoin de remorquage', answer: 'Oui' });
+      if (this.wantsTechnicianDispatch() === true) combinedHistory.unshift({ question: 'Déplacement technicien', answer: 'Oui (15.000 FCFA)' });
+      combinedHistory.unshift({ question: 'Véhicule roulant', answer: this.isVehicleDrivable() ? 'Oui' : 'Non' });
 
       const newReq: QuoteRequest = {
          id: this.generateUUID(),
@@ -2669,13 +2910,12 @@ export class MobileAppComponent {
 
          proposedQuotes: [],
          assignedTenantIds: [],
-         diagnosticHistory: this.wizardAnswers()
+         diagnosticHistory: combinedHistory
       };
 
       this.dataService.createMobileRequest(newReq);
       this.toastService.show('Demande de devis envoyée aux garages !', 'success');
-      this.requestForm.reset();
-      this.requestPhotos.set([]);
+      this.resetRequestWizard();
       this.resetWizard();
       this.activeTab.set('requests');
       this.cdr.detectChanges(); // Force UI update
@@ -2705,6 +2945,31 @@ export class MobileAppComponent {
       const invoice = this.dataService.getPublicInvoiceById(quoteId);
       if (!invoice || !invoice.tenantId) return null;
       return this.dataService.tenants().find(t => t.id === invoice.tenantId);
+   }
+
+   getCleanDescription(desc?: string): string {
+      if (!desc) return '';
+      if (desc.includes('Véhicule roulant') && desc.includes(' | ')) {
+         const parts = desc.split('\n');
+         if (parts.length > 1) return parts.slice(1).join('\n');
+         return 'Demande d\'intervention';
+      }
+      return desc;
+   }
+
+   hasTag(req: any, tagType: 'drivable'|'not_drivable'|'technician'|'towing'): boolean {
+      if (req.diagnosticHistory && req.diagnosticHistory.length > 0) {
+         if (tagType === 'drivable') return req.diagnosticHistory.some((h: any) => h.question === 'Véhicule roulant' && h.answer === 'Oui');
+         if (tagType === 'not_drivable') return req.diagnosticHistory.some((h: any) => h.question === 'Véhicule roulant' && h.answer === 'Non');
+         if (tagType === 'technician') return req.diagnosticHistory.some((h: any) => h.question === 'Déplacement technicien');
+         if (tagType === 'towing') return req.diagnosticHistory.some((h: any) => h.question === 'Besoin de remorquage');
+      }
+      const desc = req.description || '';
+      if (tagType === 'drivable') return desc.includes('Véhicule roulant: Oui');
+      if (tagType === 'not_drivable') return desc.includes('Véhicule roulant: Non');
+      if (tagType === 'technician') return desc.includes('Déplacement technicien demandé');
+      if (tagType === 'towing') return desc.includes('Remorquage demandé');
+      return false;
    }
 
    // Anonymize Name

@@ -158,7 +158,7 @@ import { Capacitor } from '@capacitor/core';
                            <div class="p-4 flex flex-col flex-1 gap-3 relative">
                               <!-- Description Snippet -->
                               <div class="text-sm text-slate-600 dark:text-slate-400 italic line-clamp-2 mt-1">
-                              "{{ opp.description }}"
+                              "{{ opp.adminDescription || opp.description }}"
                            </div>
 
                            <!-- Preferences Badges -->
@@ -271,7 +271,7 @@ import { Capacitor } from '@capacitor/core';
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                      Description du problème
                   </h4>
-                  <p class="text-sm text-slate-700 dark:text-slate-300 italic whitespace-pre-wrap">"{{ opp.description }}"</p>
+                  <p class="text-sm text-slate-700 dark:text-slate-300 italic whitespace-pre-wrap">"{{ opp.adminDescription || opp.description }}"</p>
                 </div>
                 
                 <!-- Diagnostic History -->

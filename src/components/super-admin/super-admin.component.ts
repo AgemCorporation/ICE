@@ -977,9 +977,22 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-800 mb-6">
                    <div class="font-bold text-slate-900 dark:text-white mb-1">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
                    <div class="text-sm text-slate-500 italic mb-2">"{{ req.description }}"</div>
-                   <div class="flex gap-2 text-xs">
+                   <div class="flex gap-2 text-xs mb-4">
                       <span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded">{{ req.locationCity }}</span>
                       @if(req.locationCommune) { <span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">{{ req.locationCommune }}</span> }
+                   </div>
+
+                   <!-- ADMIN DESCRIPTION OVERRIDE -->
+                   <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                      <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                         Description Superadmin officielle (Optionnel)
+                      </label>
+                      <textarea
+                         [ngModel]="dispatchAdminDescription()"
+                         (ngModelChange)="dispatchAdminDescription.set($event)"
+                         placeholder="Saisissez une description corrigée ou plus détaillée. C'est celle-ci qui sera envoyée aux garages au lieu de l'originale..."
+                         class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                         rows="3"></textarea>
                    </div>
                 </div>
                 
@@ -1077,8 +1090,27 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <!-- ... -->
                 <div class="mb-8">
                    <h3 class="text-xs font-bold text-brand-600 dark:text-brand-500 uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-1 mb-3">Panne / Demande</h3>
-                   <div class="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-lg border border-amber-100 dark:border-amber-800/30">
-                      <p class="text-slate-800 dark:text-slate-200 italic whitespace-pre-wrap">"{{ req.description }}"</p>
+                   <!-- Diagnosis Details -->
+                   <div class="mb-8">
+                      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Panne Enregistrée</h3>
+                      @if (req.adminDescription) {
+                         <div class="mb-3">
+                            <h4 class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">Description (Corrigée par Superadmin)</h4>
+                            <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 p-3 rounded-lg">
+                               <p class="text-slate-800 dark:text-slate-200 italic whitespace-pre-wrap text-sm">"{{ req.adminDescription }}"</p>
+                            </div>
+                         </div>
+                         <div>
+                            <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Description Initiale (Automobiliste)</h4>
+                            <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                               <p class="text-slate-500 dark:text-slate-400 italic text-sm whitespace-pre-wrap">"{{ getCleanDescription(req.description) }}"</p>
+                            </div>
+                         </div>
+                      } @else {
+                         <div class="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-800/30">
+                            <p class="text-slate-800 dark:text-slate-200 italic whitespace-pre-wrap">"{{ getCleanDescription(req.description) }}"</p>
+                         </div>
+                      }
                    </div>
                    
                    @if (req.diagnosticHistory && req.diagnosticHistory.length > 0) {
@@ -1111,13 +1143,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                          </span>
                       </div>
 
-                      <!-- Preferred Location -->
-                      <div class="bg-slate-50 dark:bg-slate-950/30 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-                         <span class="block text-xs text-slate-500 mb-1">Lieu souhaité</span>
-                         <span class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>🚗</span> {{ getLocationLabel(req.interventionLocation) }}
-                         </span>
-                      </div>
+                      <!-- Removed Preferred Location card as it is no longer relevant -->
                    </div>
                 </div>
 
@@ -1566,6 +1592,7 @@ export class SuperAdminComponent {
    dispatchSearchTerm = signal('');
    dispatchCityFilter = signal('');
    dispatchCommuneFilter = signal('');
+   dispatchAdminDescription = signal('');
    selectedDispatchTenants = signal<string[]>([]);
 
    // Tenant CRUD
@@ -1824,6 +1851,7 @@ export class SuperAdminComponent {
       // FIX: Set to empty by default to show ALL cities, not the request city
       this.dispatchCityFilter.set('');
       this.dispatchCommuneFilter.set('');
+      this.dispatchAdminDescription.set(req.adminDescription || '');
 
       this.showRequestModal.set(true);
    }
@@ -1859,7 +1887,7 @@ export class SuperAdminComponent {
       const selected = this.selectedDispatchTenants();
       if (selected.length === 0) return;
 
-      this.dataService.dispatchQuoteRequest(req.id, selected);
+      this.dataService.dispatchQuoteRequest(req.id, selected, this.dispatchAdminDescription());
       this.toastService.show(`Demande dispatchée à ${selected.length} garage(s).`, 'success');
       this.closeRequestModal();
    }
@@ -2051,10 +2079,19 @@ export class SuperAdminComponent {
       this.showAdminModal.set(true);
    }
 
-   closeAdminModal() {
-      this.showAdminModal.set(false);
+   closeAdminModal() { this.showAdminModal.set(false); }
+
+   getCleanDescription(desc?: string): string {
+      if (!desc) return '';
+      if (desc.includes('Véhicule roulant') && desc.includes(' | ')) {
+         const parts = desc.split('\n');
+         if (parts.length > 1) return parts.slice(1).join('\n');
+         return 'Détails de la demande';
+      }
+      return desc;
    }
 
+   // --- INITIALIZATION ---
    submitAdmin() {
       if (this.adminForm.invalid) return;
       const val = this.adminForm.value;

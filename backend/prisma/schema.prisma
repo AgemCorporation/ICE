@@ -199,6 +199,7 @@ model QuoteRequest {
   fuel                 String?
   mileage              Int?
   description          String
+  adminDescription     String?
   photos               String[]  @default([])
   locationCity         String?
   locationCommune      String?

@@ -442,6 +442,7 @@ export interface QuoteRequest {
    fuel?: string;
    mileage?: number;
    description: string;
+   adminDescription?: string; // Optional official description provided by Superadmin
    photos: string[];
    assignedTenantIds?: string[];
    assignedDate?: string;
@@ -1877,11 +1878,11 @@ export class DataService {
       this.syncQuoteRequestDB(requestId);
    }
 
-   dispatchQuoteRequest(requestId: string, tenantIds: string[]) {
+   dispatchQuoteRequest(requestId: string, tenantIds: string[], adminDesc?: string) {
       this.quoteRequests.update(list => list.map(r => {
          if (r.id === requestId) {
             this.addSystemLog('INFO', `Quote Request #${r.id} dispatched to ${tenantIds.length} Tenants`, 'Global');
-            return { ...r, status: 'DISPATCHED', assignedTenantIds: tenantIds, assignedDate: new Date().toISOString() };
+            return { ...r, status: 'DISPATCHED', assignedTenantIds: tenantIds, assignedDate: new Date().toISOString(), adminDescription: adminDesc };
          }
          return r;
       }));
