@@ -2018,6 +2018,8 @@ export class SuperAdminComponent {
       return t ? t.name : 'Inconnu';
    }
 
+   getRef(id?: string): string { return id ? id.substring(0,8).toUpperCase() : ''; }
+
    getTenantNames(ids?: string[]) {
       if (!ids || ids.length === 0) return '-';
       return ids.map(id => this.getTenantName(id)).join(', ');
