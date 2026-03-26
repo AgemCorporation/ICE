@@ -470,7 +470,10 @@ interface WizardNode {
                          <div (click)="viewRequestInfo(req)" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 cursor-pointer active:scale-[0.99] transition-transform">
                             <div class="flex justify-between items-start mb-2">
                                <div class="flex flex-col">
-                                  <div class="font-bold text-slate-900 dark:text-white">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
+                                  <div class="flex items-center gap-2 mb-1">
+                                     <div class="font-bold text-slate-900 dark:text-white leading-none">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
+                                     <span class="px-1.5 py-0.5 rounded text-[9px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(req.id) }}</span>
+                                  </div>
                                   @if (req.isDirectRequest) {
                                      <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -882,8 +885,11 @@ interface WizardNode {
                    <!-- Header -->
                    <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sm:rounded-t-2xl rounded-t-3xl sticky top-0 z-10 shrink-0">
                       <div>
-                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">Détails de la demande</h3>
-                         <div class="text-xs text-slate-500 font-mono">{{ reqInfo.id.substring(0,8) }} • {{ reqInfo.date | date:'dd/MM/yyyy HH:mm' }}</div>
+                         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Détails de la demande</h3>
+                         <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">Réf: {{ getRef(reqInfo.id) }}</span>
+                            <span class="text-xs text-slate-500 font-medium">• {{ reqInfo.date | date:'dd/MM/yyyy HH:mm' }}</span>
+                         </div>
                       </div>
                       <button (click)="closeRequestInfo()" class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">✕</button>
                    </div>
@@ -2339,6 +2345,7 @@ export class MobileAppComponent {
    getRepair(id: string) { return this.dataService.getPublicRepairById(id); }
    getRepairStatus(id?: string) { return id ? this.dataService.getPublicRepairById(id)?.status : ''; }
    getStatusLabel(s: string) { return s; }
+   getRef(id?: string): string { return id ? id.substring(0,8).toUpperCase() : ''; }
    viewRequestInfo(req: QuoteRequest) { this.selectedRequestInfo.set(req); }
    closeRequestInfo() { 
       this.selectedRequestInfo.set(null); 

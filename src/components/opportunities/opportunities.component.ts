@@ -139,11 +139,13 @@ import { Capacitor } from '@capacitor/core';
                            }
 
                            <div class="flex justify-between items-start w-full gap-2">
-                              <div>
-                                 <div class="font-bold text-base lg:text-lg text-slate-900 dark:text-white">{{ opp.vehicleBrand }} {{ opp.vehicleModel }}</div>
-                                 <div class="flex items-center gap-2">
-                                    <div class="text-slate-500 text-xs flex items-center gap-1">
-                                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                           <div class="flex items-center gap-2 mb-1">
+                                     <div class="font-bold text-base lg:text-lg text-slate-900 dark:text-white leading-none">{{ opp.vehicleBrand }} {{ opp.vehicleModel }}</div>
+                                     <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(opp.id) }}</span>
+                                  </div>
+                                  <div class="flex items-center gap-2">
+                                     <div class="text-slate-500 text-xs flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                        {{ opp.date | date:'dd MMM yyyy' }}
                                     </div>
                                  </div>
@@ -211,8 +213,8 @@ import { Capacitor } from '@capacitor/core';
              <!-- Header -->
              <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-start bg-slate-50 dark:bg-slate-900 shrink-0">
                 <div>
-                  <div class="flex items-center gap-2 mb-1">
-                     <span class="text-[10px] font-bold uppercase text-slate-500">Dossier N°{{ opp.id | slice:0:8 }}</span>
+                  <div class="flex gap-2 items-center mb-1">
+                     <span class="px-2 py-0.5 rounded text-[12px] font-bold font-mono bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 leading-none">Réf: {{ getRef(opp.id) }}</span>
                      @if (opp.localStatus === 'QUOTE_SUBMITTED') { <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">En Revue Admin</span> }
                      @if (opp.localStatus === 'COMPLETED') { <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">Envoyé Client</span> }
                      @if (opp.localStatus === 'CONVERTED') { <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Gagné</span> }
@@ -809,6 +811,21 @@ export class OpportunitiesComponent {
          return acc + (val.quantity * val.unitPrice);
       }, 0);
    }
+
+   translateStatus(status?: string): string {
+      if(!status) return 'Inconnu';
+      switch(status) {
+         case 'NEW': return 'En attente';
+         case 'QUOTE_SUBMITTED': return 'Devis émis';
+         case 'CONVERTED': return 'Converti / A Planifier';
+         case 'COMPLETED': return 'Devis Envoyé';
+         case 'REJECTED': return 'Non retenu';
+         case 'DISPATCHED': return 'Dispatcher';
+         default: return status;
+      }
+   }
+
+   getRef(id?: string): string { return id ? id.substring(0,8).toUpperCase() : ''; }
 
    getRepairStatus(id?: string): string {
       if (!id) return '';

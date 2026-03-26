@@ -334,16 +334,19 @@ import { ActivatedRoute, Router } from '@angular/router';
                       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                          @for (req of filteredRequests(); track req.id) {
                             <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
-                               <div class="flex justify-between items-start mb-3">
-                                  <div class="flex gap-2 flex-wrap">
-                                     <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded font-bold">{{ req.locationCity }}</span>
+                               <div class="flex justify-between items-center">
+                                  <div class="flex gap-2 items-center">
+                                     <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-[10px] px-2 py-1 rounded font-bold uppercase border border-indigo-200 dark:border-indigo-800">{{ req.locationCity }}</span>
                                      @if (req.isDirectRequest) {
                                         <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] px-2 py-1 rounded font-bold uppercase border border-amber-200 dark:border-amber-800">Demande Directe (Scan)</span>
                                      }
                                   </div>
                                   <span class="text-xs text-slate-500 shrink-0">{{ req.date | date:'dd/MM/yyyy' }}</span>
                                </div>
-                               <h3 class="font-bold text-slate-900 dark:text-white text-lg">{{ req.vehicleBrand }} {{ req.vehicleModel }}</h3>
+                               <div class="flex items-center gap-2 mb-1">
+                                  <h3 class="font-bold text-slate-900 dark:text-white text-lg leading-none">{{ req.vehicleBrand }} {{ req.vehicleModel }}</h3>
+                                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(req.id) }}</span>
+                               </div>
                                
                                <div class="mt-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" (click)="openRequestDetails(req)">
                                   <span class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Demande (Voir fiche) :</span>
@@ -401,8 +404,11 @@ import { ActivatedRoute, Router } from '@angular/router';
                                         <div class="font-medium text-slate-900 dark:text-white">{{ req.motoristName }}</div>
                                         <div class="text-xs text-slate-500">{{ req.locationCity }}</div>
                                      </td>
-                                     <td class="px-6 py-4">{{ req.vehicleBrand }} {{ req.vehicleModel }}</td>
                                      <td class="px-6 py-4">
+                                        <div class="font-bold text-slate-900 dark:text-white">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
+                                        <div class="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0 inline-block mt-1 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(req.id) }}</div>
+                                     </td>
+                                     <td class="px-6 py-4 text-center">
                                         @if ((req.status === 'CONVERTED' || req.status === 'COMPLETED' || req.acceptedQuoteId) && getWinnerTenantName(req)) {
                                            <div class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1 flex items-center gap-1">
                                               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
@@ -976,7 +982,10 @@ import { ActivatedRoute, Router } from '@angular/router';
              </div>
              <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50 dark:bg-slate-950/50">
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-800 mb-6">
-                   <div class="font-bold text-slate-900 dark:text-white mb-1">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
+                   <div class="flex items-center gap-2 mb-1">
+                       <div class="font-bold text-slate-900 dark:text-white">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
+                       <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">Réf: {{ getRef(req.id) }}</span>
+                    </div>
                    <div class="text-sm text-slate-500 italic mb-2">"{{ req.description }}"</div>
                    <div class="flex gap-2 text-xs mb-4">
                       <span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded">{{ req.locationCity }}</span>
@@ -1048,11 +1057,12 @@ import { ActivatedRoute, Router } from '@angular/router';
              <!-- Header -->
              <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0 flex justify-between items-start">
                 <div>
-                   <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                      Détail Demande #{{ req.id.substring(0,6) }}
-                      <span class="text-xs px-2 py-0.5 rounded-full border uppercase tracking-wide bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-                         {{ req.status }}
-                      </span>
+                   <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-3">
+                      Détail Demande
+                       <span class="px-2 py-0.5 rounded text-[14px] font-bold font-mono bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 leading-none">Réf: {{ getRef(req.id) }}</span>
+                       <span class="text-xs px-2 py-0.5 rounded-full border uppercase tracking-wide bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 mt-1 md:mt-0">
+                          {{ req.status }}
+                       </span>
                    </h2>
                    <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm">
                       Reçue le {{ req.date | date:'dd/MM/yyyy à HH:mm' }}
@@ -1869,11 +1879,11 @@ export class SuperAdminComponent {
       const commune = this.dispatchCommuneFilter();
 
       return this.dataService.tenants().filter(t => {
-         const matchesTerm = !term || t.name.toLowerCase().includes(term);
+         const matchesSearch = !term || t.name.toLowerCase().includes(term);
          const matchesCity = !city || t.city === city;
          const matchesCommune = !commune || t.commune === commune;
          const hasAccess = t.features?.includes('access_opportunities');
-         return matchesTerm && matchesCity && matchesCommune && t.status === 'Active' && hasAccess;
+         return matchesSearch && matchesCity && matchesCommune && t.status === 'Active' && hasAccess;
       });
    });
 
