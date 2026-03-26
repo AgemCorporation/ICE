@@ -423,6 +423,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                                      </td>
                                      <td class="px-6 py-4 text-center">
                                         @if(moderationFilter() === 'REJECTED' || req.status === 'REJECTED') { <span class="text-red-500 font-bold text-xs uppercase">Refusé</span> }
+                                        @else if(req.status === 'CANCELED') { <span class="text-slate-500 font-bold text-xs uppercase" title="Annulé par l'automobiliste">Annulé (Client)</span> }
                                         @else if(req.status === 'QUOTE_SUBMITTED') { <span class="text-amber-500 font-bold text-xs uppercase">Devis Reçu</span> }
                                         @else if(req.status === 'DISPATCHED') { <span class="text-blue-500 font-bold text-xs uppercase">En attente</span> }
                                         @else if(req.status === 'COMPLETED') { <span class="text-emerald-500 font-bold text-xs uppercase">Devis Envoyé</span> }
@@ -1790,8 +1791,8 @@ export class SuperAdminComponent {
          return all.filter(r => r.status === 'REJECTED' || (r.proposedQuotes && r.proposedQuotes.some(qid => this.dataService.getInvoiceById(qid)?.status === 'REFUSE'))).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       }
       if (filter === 'HISTORY') {
-         // Everything finished (Converted)
-         return all.filter(r => r.status === 'CONVERTED').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+         // Everything finished (Converted or Canceled)
+         return all.filter(r => r.status === 'CONVERTED' || r.status === 'CANCELED').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       }
       // TRACKING is handled separately in trackedWorks
       return [];
@@ -1832,12 +1833,13 @@ export class SuperAdminComponent {
       }).sort((a, b) => b.progress - a.progress); // Most active first? Or recently converted?
    });
 
-   countByFilter(filter: 'MODERATE' | 'VALIDATE' | 'REJECTED' | 'DIRECT') {
+   countByFilter(filter: 'MODERATE' | 'VALIDATE' | 'REJECTED' | 'DIRECT' | 'HISTORY') {
       const all = this.dataService.quoteRequests();
       if (filter === 'MODERATE') return all.filter(r => r.status === 'NEW' && !r.isDirectRequest).length;
       if (filter === 'DIRECT') return all.filter(r => r.isDirectRequest && r.status !== 'REJECTED' && r.status !== 'CONVERTED').length;
       if (filter === 'VALIDATE') return all.filter(r => (r.status === 'DISPATCHED' || r.status === 'QUOTE_SUBMITTED' || r.status === 'COMPLETED') && !r.isDirectRequest).length;
       if (filter === 'REJECTED') return all.filter(r => r.status === 'REJECTED').length;
+      if (filter === 'HISTORY') return all.filter(r => r.status === 'CONVERTED' || r.status === 'CANCELED').length;
       return 0;
    }
 

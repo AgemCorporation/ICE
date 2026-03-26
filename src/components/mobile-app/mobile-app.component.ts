@@ -970,6 +970,27 @@ interface WizardNode {
              </div>
           }
 
+          <!-- CANCEL CONFIRMATION MODAL -->
+          @if (requestToCancel()) {
+             <div class="fixed inset-0 z-[60] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in" (click)="abortCancel()">
+                <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 relative border border-slate-200 dark:border-slate-800 shadow-2xl animate-zoom-in text-center" (click)="$event.stopPropagation()">
+                   <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                   </div>
+                   <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Annuler la demande ?</h3>
+                   <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                      Êtes-vous sûr de vouloir annuler cette demande d'intervention ?<br>
+                      <strong class="text-slate-700 dark:text-slate-300">Cette action est irréversible.</strong>
+                   </p>
+                   
+                   <div class="flex gap-3">
+                      <button (click)="abortCancel()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">Non, garder</button>
+                      <button (click)="confirmCancel()" class="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-colors hover:bg-red-700">Oui, annuler</button>
+                   </div>
+                </div>
+             </div>
+          }
+
           <!-- RATING MODAL -->
           @if (showRatingModal() && ratingRequest()) {
              <div class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
@@ -1444,6 +1465,7 @@ export class MobileAppComponent {
    selectedRequestInfo = signal<QuoteRequest | null>(null);
    editingInterventionDate = signal<boolean>(false);
    newInterventionDate = signal<string>('');
+   requestToCancel = signal<QuoteRequest | null>(null);
    selectedQuoteDetails = signal<Invoice | null>(null);
 
    quoteToConfirm = signal<{ req: QuoteRequest, quote: Invoice } | null>(null);
@@ -2314,11 +2336,21 @@ export class MobileAppComponent {
    }
 
    cancelRequest(req: QuoteRequest) {
-      if (confirm('Êtes-vous sûr de vouloir annuler cette demande ? Cette action est irréversible.')) {
+      this.requestToCancel.set(req);
+   }
+
+   confirmCancel() {
+      const req = this.requestToCancel();
+      if (req) {
          this.dataService.syncQuoteRequestDB(req.id, { status: 'CANCELED' });
          this.selectedRequestInfo.set({ ...req, status: 'CANCELED' });
          this.toastService.show('La demande a été annulée.', 'info');
       }
+      this.requestToCancel.set(null);
+   }
+
+   abortCancel() {
+      this.requestToCancel.set(null);
    }
 
    viewQuoteDetails(req: any, quote: any) { this.selectedQuoteRequest.set(req); this.selectedQuoteDetails.set(quote); }
