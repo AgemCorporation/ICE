@@ -139,13 +139,14 @@ import { Capacitor } from '@capacitor/core';
                            }
 
                            <div class="flex justify-between items-start w-full gap-2">
-                                                           <div class="flex items-center gap-2 mb-1">
-                                     <div class="font-bold text-base lg:text-lg text-slate-900 dark:text-white leading-none">{{ opp.vehicleBrand }} {{ opp.vehicleModel }}</div>
-                                     <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(opp.id) }}</span>
-                                  </div>
-                                  <div class="flex items-center gap-2">
-                                     <div class="text-slate-500 text-xs flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                              <div>
+                                 <div class="flex items-center gap-2 mb-1">
+                                    <div class="font-bold text-base lg:text-lg text-slate-900 dark:text-white leading-none">{{ opp.vehicleBrand }} {{ opp.vehicleModel }}</div>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(opp.id) }}</span>
+                                 </div>
+                                 <div class="flex items-center gap-2">
+                                    <div class="text-slate-500 text-xs flex items-center gap-1">
+                                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                        {{ opp.date | date:'dd MMM yyyy' }}
                                     </div>
                                  </div>
