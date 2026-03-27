@@ -4,14 +4,14 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { DataService, QuoteRequest, Client, Vehicle, Invoice, InvoiceItem, RepairOrder, RepairItem } from '../../services/data.service';
 import { ToastService } from '../../services/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 @Component({
    selector: 'app-opportunities',
    standalone: true,
-   imports: [CommonModule, ReactiveFormsModule],
+   imports: [CommonModule, ReactiveFormsModule, FormsModule],
    providers: [DecimalPipe],
    template: `
     <div class="flex flex-col h-full">
