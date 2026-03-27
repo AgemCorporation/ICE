@@ -468,7 +468,9 @@ interface WizardNode {
                    <div class="space-y-4">
                       @for (req of filteredRequests(); track req.id) {
                          <div (click)="viewRequestInfo(req)" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 cursor-pointer active:scale-[0.99] transition-transform">
-                            <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                               <div class="flex-1 min-w-0">
+                                  <div class="flex justify-between items-start mb-2">
                                <div class="flex flex-col">
                                   <div class="flex items-center gap-2 mb-1">
                                      <div class="font-bold text-slate-900 dark:text-white leading-none">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
@@ -634,6 +636,11 @@ interface WizardNode {
                                   </span>
                                </div>
                             }
+                            </div>
+                               <div class="text-slate-300 dark:text-slate-600 shrink-0 ml-1">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                               </div>
+                            </div>
                          </div>
                       }
                       @if (filteredRequests().length === 0) { <div class="text-center py-12 text-slate-400 text-sm">Aucune demande trouvée.</div> }
