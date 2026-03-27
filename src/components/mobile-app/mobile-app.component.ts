@@ -218,7 +218,7 @@ interface WizardNode {
 
                     <!-- Progress Bar -->
                     <div class="flex items-center gap-1 mb-6">
-                       @for (s of [1,2,3,4,5]; track s) {
+                       @for (s of [1,2,3,4,5,6]; track s) {
                           <div class="flex-1 h-1.5 rounded-full transition-all duration-300"
                                [class.bg-indigo-600]="s <= requestWizardStep()"
                                [class.dark:bg-indigo-500]="s <= requestWizardStep()"
@@ -280,14 +280,45 @@ interface WizardNode {
                           </div>
                        }
 
-                       <!-- ===== STEP 3: Technician dispatch? ===== -->
+                       <!-- ===== STEP 3: Description & Photos (NEW) ===== -->
                        @if (requestWizardStep() === 3) {
                           <div class="animate-fade-in">
                              <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 3</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Pouvez-vous nous en dire plus ?</p>
+                             <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                                <div>
+                                   <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Description du problème</label>
+                                   <textarea formControlName="description" rows="4" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm text-slate-900 dark:text-white" placeholder="Décrivez le problème de votre véhicule... (bruits, voyants allumés, circonstances)"></textarea>
+                                </div>
+                                <div>
+                                   <label class="text-xs font-bold text-slate-400 uppercase block mb-2">Photos (Optionnel)</label>
+                                   <div class="flex gap-2 overflow-x-auto pb-2">
+                                      <button type="button" (click)="takePhoto()" class="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg cursor-pointer bg-white dark:bg-slate-900 hover:bg-indigo-50 transition-colors shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span class="text-[10px] text-indigo-600 font-bold">Ajouter</span></button>
+                                      <input type="file" id="mobilePhotoInput" accept="image/*" capture="environment" (change)="onRequestPhotoSelected($event)" class="hidden">
+                                      @for (photo of requestPhotos(); track $index) {
+                                         <div class="relative w-20 h-20 shrink-0">
+                                            <img [src]="photo" class="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-700">
+                                            <button type="button" (click)="removeRequestPhoto($index)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-md w-6 h-6 flex items-center justify-center text-xs">✕</button>
+                                         </div>
+                                      }
+                                   </div>
+                                </div>
+                             </div>
+                             <div class="flex gap-3 mt-6">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="goToNextRequestStep()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg transition-colors active:scale-[0.98]">Suivant</button>
+                             </div>
+                          </div>
+                       }
+
+                       <!-- ===== STEP 4: Technician dispatch? ===== -->
+                       @if (requestWizardStep() === 4) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 4</h3>
                              <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Souhaitez-vous le déplacement d'un technicien pour diagnostic ?</p>
                              <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-6 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                                <span class="text-xs text-amber-800 dark:text-amber-300 font-medium">Le déplacement coûtera <strong>15.000 FCFA</strong> payable après l'intervention du technicien.</span>
+                                <span class="text-xs text-amber-800 dark:text-amber-300 font-medium italic">Frais de déplacement : 5000F - Frais de diagnostic : 10.000F (Remboursé en cas de réparation effectuée dans le réseau Mécatech)</span>
                              </div>
                              <div class="grid grid-cols-2 gap-4">
                                 <button type="button" (click)="setTechnicianDispatch(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-indigo-500]="wantsTechnicianDispatch() === true" [class.bg-indigo-50]="wantsTechnicianDispatch() === true" [class.border-slate-200]="wantsTechnicianDispatch() !== true" [class.bg-white]="wantsTechnicianDispatch() !== true" [class.dark:bg-slate-800]="wantsTechnicianDispatch() !== true" [class.dark:border-slate-700]="wantsTechnicianDispatch() !== true">
@@ -306,10 +337,10 @@ interface WizardNode {
                           </div>
                        }
 
-                       <!-- ===== STEP 4: Towing? (Only if non-drivable + no technician) ===== -->
-                       @if (requestWizardStep() === 4) {
+                       <!-- ===== STEP 5: Towing? (Only if non-drivable + no technician) ===== -->
+                       @if (requestWizardStep() === 5) {
                           <div class="animate-fade-in">
-                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 4</h3>
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 5</h3>
                              <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Avez-vous besoin de remorquage ?</p>
                              <div class="grid grid-cols-2 gap-4">
                                 <button type="button" (click)="setNeedsTowing(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-indigo-500]="needsTowing() === true" [class.bg-indigo-50]="needsTowing() === true" [class.border-slate-200]="needsTowing() !== true" [class.bg-white]="needsTowing() !== true" [class.dark:bg-slate-800]="needsTowing() !== true" [class.dark:border-slate-700]="needsTowing() !== true">
@@ -328,8 +359,8 @@ interface WizardNode {
                           </div>
                        }
 
-                       <!-- ===== STEP 5: Final Form ===== -->
-                       @if (requestWizardStep() === 5) {
+                       <!-- ===== STEP 6: Final Form ===== -->
+                       @if (requestWizardStep() === 6) {
                           <div class="animate-fade-in">
                              @if (!requestWizardNeedsForm()) {
                                 <div class="text-center py-10">
@@ -347,7 +378,7 @@ interface WizardNode {
                                    @if (needsTowing()) { <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg> Remorquage</span> }
                                 </div>
                                 <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Dernière étape</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Renseignez les détails de l'intervention</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Où et quand voulez-vous être pris en charge ?</p>
                                 <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                                    <div>
                                       <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Localisation</label>
@@ -360,25 +391,6 @@ interface WizardNode {
                                       <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Date souhaitée d'intervention</label>
                                       <input type="date" formControlName="interventionDate" [min]="minInterventionDate()" [max]="maxInterventionDate()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
                                    </div>
-                                   @if (requestWizardShowDescription()) {
-                                      <div>
-                                         <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Description du problème</label>
-                                         <textarea formControlName="description" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white" placeholder="Décrivez le problème de votre véhicule..."></textarea>
-                                      </div>
-                                      <div>
-                                         <label class="text-xs font-bold text-slate-400 uppercase block mb-2">Photos (Optionnel)</label>
-                                         <div class="flex gap-2 overflow-x-auto pb-2">
-                                            <button type="button" (click)="takePhoto()" class="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg cursor-pointer bg-white dark:bg-slate-900 hover:bg-indigo-50 transition-colors shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
-                                            <input type="file" id="mobilePhotoInput" accept="image/*" capture="environment" (change)="onRequestPhotoSelected($event)" class="hidden">
-                                            @for (photo of requestPhotos(); track $index) {
-                                               <div class="relative w-16 h-16 shrink-0">
-                                                  <img [src]="photo" class="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-700">
-                                                  <button type="button" (click)="removeRequestPhoto($index)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-md w-5 h-5 flex items-center justify-center text-[10px]">✕</button>
-                                               </div>
-                                            }
-                                         </div>
-                                      </div>
-                                   }
                                 </div>
                                 <div class="flex gap-3 mt-6">
                                    <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
@@ -388,8 +400,8 @@ interface WizardNode {
                           </div>
                        }
 
-                       <!-- ===== STEP 6: Confirmation & Contact Info ===== -->
-                       @if (requestWizardStep() === 6) {
+                       <!-- ===== STEP 7: Confirmation & Contact Info ===== -->
+                       @if (requestWizardStep() === 7) {
                           <div class="animate-zoom-in text-center py-6">
                              <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/20">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -433,7 +445,6 @@ interface WizardNode {
                     </form>
                  </div>
               }
-
              <!-- 4. REQUESTS LIST TAB -->
              @if (currentUser() && activeTab() === 'requests') {
                 <div class="p-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
@@ -2580,33 +2591,34 @@ export class MobileAppComponent {
    goToNextRequestStep() {
       const step = this.requestWizardStep();
       if (step === 1) {
-         // Step 1 -> Step 2 (vehicle selected?)
          if (!this.requestForm.get('selectedVehicleId')?.value) return;
          this.requestWizardStep.set(2);
       } else if (step === 2) {
-         // Step 2 -> Step 3 (drivable answered?)
          if (this.isVehicleDrivable() === null) return;
-         this.requestWizardStep.set(3);
+         this.requestWizardStep.set(3); // Go to Description & Photos
       } else if (step === 3) {
-         // Step 3 -> depends on answers
+         // Step 3 -> Step 4 (Technician dispatch question)
+         this.requestWizardStep.set(4);
+      } else if (step === 4) {
+         // Step 4 -> depends on answers
          if (this.wantsTechnicianDispatch() === null) return;
          if (this.wantsTechnicianDispatch() === true) {
-            // Technician dispatch -> go to final form (step 5)
-            this.requestWizardStep.set(5);
+            // Technician dispatch -> go to final form (step 6)
+            this.requestWizardStep.set(6);
          } else {
             // No technician
             if (this.isVehicleDrivable() === true) {
-               // Drivable + no technician -> go to final form (step 5)
-               this.requestWizardStep.set(5);
+               // Drivable + no technician -> go to final form (step 6)
+               this.requestWizardStep.set(6);
             } else {
-               // Non-drivable + no technician -> ask about towing (step 4)
-               this.requestWizardStep.set(4);
+               // Non-drivable + no technician -> ask about towing (step 5)
+               this.requestWizardStep.set(5);
             }
          }
-      } else if (step === 4) {
-         // Step 4 -> final form (step 5)
+      } else if (step === 5) {
+         // Step 5 -> final form (step 6)
          if (this.needsTowing() === null) return;
-         this.requestWizardStep.set(5);
+         this.requestWizardStep.set(6);
       }
    }
 
@@ -2616,19 +2628,21 @@ export class MobileAppComponent {
          this.isVehicleDrivable.set(null);
          this.requestWizardStep.set(1);
       } else if (step === 3) {
-         this.wantsTechnicianDispatch.set(null);
-         this.requestWizardStep.set(2);
+         this.requestWizardStep.set(2); // Go back to Drivable?
       } else if (step === 4) {
-         this.needsTowing.set(null);
-         this.requestWizardStep.set(3);
+         this.wantsTechnicianDispatch.set(null);
+         this.requestWizardStep.set(3); // Go back to Description/Photos
       } else if (step === 5) {
-         // Go back to appropriate step
+         this.needsTowing.set(null);
+         this.requestWizardStep.set(4); // Go back to Technician?
+      } else if (step === 6) {
+         // Go back to appropriate step from Final Form
          if (this.needsTowing() !== null) {
             // Came from towing question
-            this.requestWizardStep.set(4);
+            this.requestWizardStep.set(5);
          } else {
             // Came from technician question
-            this.requestWizardStep.set(3);
+            this.requestWizardStep.set(4);
          }
       }
    }
@@ -3067,7 +3081,7 @@ export class MobileAppComponent {
       
       const combinedHistory = [...this.wizardAnswers()];
       if (this.needsTowing() === true) combinedHistory.unshift({ question: 'Besoin de remorquage', answer: 'Oui' });
-      if (this.wantsTechnicianDispatch() === true) combinedHistory.unshift({ question: 'Déplacement technicien', answer: 'Oui (15.000 FCFA)' });
+      if (this.wantsTechnicianDispatch() === true) combinedHistory.unshift({ question: 'Déplacement technicien', answer: 'Oui (5000F + 10.000F)' });
       combinedHistory.unshift({ question: 'Véhicule roulant', answer: this.isVehicleDrivable() ? 'Oui' : 'Non' });
 
       const newReq: QuoteRequest = {
