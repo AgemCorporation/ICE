@@ -61,8 +61,21 @@ import { Capacitor } from '@capacitor/core';
                </button>
             </div>
             
-            <div class="mt-2 flex gap-2">
-               <select [value]="sortOrder()" (change)="updateSort($event)" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-brand-500">
+            <div class="mt-2 flex flex-col gap-2">
+               <!-- Search Input -->
+               <div class="relative w-full">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  </div>
+                  <input type="text" [ngModel]="opportunitiesSearchTerm()" (ngModelChange)="opportunitiesSearchTerm.set($event)" placeholder="Rechercher par Réf, Nom..." class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  @if(opportunitiesSearchTerm()) {
+                     <button (click)="opportunitiesSearchTerm.set('')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                     </button>
+                  }
+               </div>
+
+               <select [value]="sortOrder()" (change)="updateSort($event)" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-indigo-500">
                   <option value="desc">Plus récent</option>
                   <option value="asc">Plus ancien</option>
                </select>
@@ -734,6 +747,7 @@ export class OpportunitiesComponent {
    // Filter logic
    filterStatus = signal<'ALL' | 'DISPATCHED' | 'QUOTE_SUBMITTED' | 'CONVERTED' | 'REJECTED'>('ALL');
    sortOrder = signal<'asc' | 'desc'>('desc');
+   opportunitiesSearchTerm = signal<string>('');
 
    updateSort(e: Event) {
       this.sortOrder.set((e.target as HTMLSelectElement).value as 'asc' | 'desc');
@@ -741,6 +755,16 @@ export class OpportunitiesComponent {
 
    filteredOpportunities = computed(() => {
       let result = this.opportunities();
+      
+      const search = this.opportunitiesSearchTerm().toLowerCase().trim();
+      if (search) {
+         result = result.filter(o => 
+            this.getRef(o.id).toLowerCase().includes(search) || 
+            o.motoristName?.toLowerCase().includes(search) ||
+            o.motoristPhone?.toLowerCase().includes(search)
+         );
+      }
+
       const status = this.filterStatus();
 
       if (status === 'QUOTE_SUBMITTED') {
