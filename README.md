@@ -28,7 +28,7 @@ Pilotage centralisé de la plateforme par l'équipe **MECATECH**.
 - **Hiérarchie de Sécurité :** Distinction entre profil `Root` (Propriétaire) et `Administrateur` (Délégué).
 - **Permissions Granulaires :** Gestion fine des accès par onglet (Garages, Devis, Scans, Logs, Utilisateurs Mobile).
 - **Journal d'Audit :** Traçabilité complète de toutes les actions critiques effectuées par les admins.
-- **ICE Mobile Database :** Suivi en temps réel de l'adoption mobile et de la flotte de véhicules enregistrée.
+- **MonAuto Database :** Suivi en temps réel de l'adoption mobile et de la flotte de véhicules enregistrée.
 
 ### 2. Portail Garage (ERP PARTNER)
 Outil métier destiné aux gérants de garages et mécaniciens.
@@ -81,7 +81,7 @@ Le système utilise un mécanisme de session persistante sans `localStorage` pou
 ## 📱 Roadmap Mobile (Prochaines Étapes)
 Projet de conversion en application native via **Capacitor** :
 - **Application Native** : Build Android (.apk) et iOS (.ipa) à partir du code source existant.
-- **Isolation** : Utilisation du routage Angular pour garantir que l'application installée n'affiche que le module `ICE Mobile`.
+- **Isolation** : Utilisation du routage Angular pour garantir que l'application installée n'affiche que le module `MonAuto`.
 - **Notifications** : Intégration des notifications push pour le suivi des dossiers en temps réel.
 
 ---

@@ -37,7 +37,7 @@ interface WizardNode {
                    <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                    </div>
-                   <h1 class="font-bold text-lg">ICE Mobile</h1>
+                   <h1 class="font-bold text-lg">MonAuto</h1>
                 </div>
                 <button (click)="logout()" class="text-white/80 hover:text-white text-xs font-medium">Déconnexion</button>
              </header>
@@ -53,7 +53,7 @@ interface WizardNode {
                       <div class="w-20 h-20 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20 flex items-center justify-center mb-6 shadow-2xl shadow-indigo-900/50 shrink-0">
                          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
                       </div>
-                      <h2 class="text-2xl font-bold mb-2">ICE Mobile</h2>
+                      <h2 class="text-2xl font-bold mb-2">MonAuto</h2>
                       <p class="text-indigo-200 text-xs mb-8 max-w-[200px]">Votre réparateur idéal, au meilleur prix, où que vous soyez.</p>
                       
                       <div class="flex bg-black/20 p-1 rounded-xl mb-6 w-full max-w-xs shrink-0">
@@ -315,10 +315,13 @@ interface WizardNode {
                        @if (requestWizardStep() === 4) {
                           <div class="animate-fade-in">
                              <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 4</h3>
-                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Souhaitez-vous le déplacement d'un technicien pour diagnostic ?</p>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Souhaitez-vous le déplacement d’un technicien pour un diagnostic approfondi ?</p>
                              <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-6 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                                <span class="text-xs text-amber-800 dark:text-amber-300 font-medium italic">Frais de déplacement : 5000F - Frais de diagnostic : 10.000F (Remboursé en cas de réparation effectuée dans le réseau Mécatech)</span>
+                                <div class="flex flex-col gap-0.5">
+                                   <span class="text-xs text-amber-800 dark:text-amber-300 font-bold">Frais de déplacement : 5000F</span>
+                                   <span class="text-xs text-amber-800 dark:text-amber-300 font-bold leading-tight">Frais de diagnostic : 10.000F <span class="font-medium italic">(Remboursé en cas de réparation effectuée dans le réseau Mécatech)</span></span>
+                                </div>
                              </div>
                              <div class="grid grid-cols-2 gap-4">
                                 <button type="button" (click)="setTechnicianDispatch(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-indigo-500]="wantsTechnicianDispatch() === true" [class.bg-indigo-50]="wantsTechnicianDispatch() === true" [class.border-slate-200]="wantsTechnicianDispatch() !== true" [class.bg-white]="wantsTechnicianDispatch() !== true" [class.dark:bg-slate-800]="wantsTechnicianDispatch() !== true" [class.dark:border-slate-700]="wantsTechnicianDispatch() !== true">
@@ -3119,7 +3122,7 @@ export class MobileAppComponent {
 
       this.dataService.createMobileRequest(newReq);
       this.toastService.show('Demande de devis traitée !', 'success');
-      this.requestWizardStep.set(6); // Show the success confirmation View
+      this.requestWizardStep.set(7); // Show the success confirmation View
       this.cdr.detectChanges(); // Force UI update
 
    }

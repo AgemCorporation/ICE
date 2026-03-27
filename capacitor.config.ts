@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.mecatech.icemobileapp',
-  appName: 'ICE Mobile',
+  appName: 'MonAuto',
   webDir: 'dist',
   android: {
     allowMixedContent: true

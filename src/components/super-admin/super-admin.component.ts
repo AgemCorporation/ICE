@@ -123,7 +123,7 @@ import { ActivatedRoute, Router } from '@angular/router';
             </div>
          }
 
-         <!-- 10. ICE MOBILE USERS TAB -->
+         <!-- 10. MonAuto USERS TAB -->
          @if (activeTab() === 'customers') {
             <div class="p-6 h-full flex flex-col">
                <div class="flex justify-between items-center mb-6">
@@ -1563,7 +1563,7 @@ export class SuperAdminComponent {
    // Dashboard logic
    errorLogsCount = computed(() => this.dataService.systemLogs().filter(l => l.level === 'ERROR').length);
 
-   // ICE Mobile Logic
+   // MonAuto Logic
    mobileUsersSearchTerm = signal('');
    mobileUsers = computed(() => {
       const term = this.mobileUsersSearchTerm().toLowerCase().trim();
@@ -1771,7 +1771,7 @@ export class SuperAdminComponent {
          case 'config': return 'Configuration Plateforme';
          case 'moderation': return 'Pro Devis Auto (Modération)';
          case 'scans': return 'Historique des Scans ICE';
-         case 'customers': return 'Utilisateurs ICE Mobile';
+         case 'customers': return 'Utilisateurs MonAuto';
          case 'admins': return 'Administration Complète';
          case 'audit': return 'Traçabilité et Sécurité';
          default: return 'Administration';
