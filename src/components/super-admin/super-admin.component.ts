@@ -149,17 +149,21 @@ import { ActivatedRoute, Router } from '@angular/router';
                               <th class="px-6 py-4">Contact</th>
                               <th class="px-6 py-4">Localisation</th>
                               <th class="px-6 py-4 text-center">Flotte (Véhicules)</th>
+                              <th class="px-6 py-4 text-center">Activité (Devis)</th>
                            </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-950 relative z-10">
                            @for (user of mobileUsers(); track user.id) {
                               <tr class="hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
-                                 <td class="px-6 py-4">
+                                 <td class="px-6 py-4 cursor-pointer" (click)="openMotoristVehicles(user)">
                                     <div class="flex items-center gap-3">
                                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold text-xs shrink-0">{{ (user.firstName.charAt(0) + (user.lastName ? user.lastName.charAt(0) : '')).toUpperCase() }}</span>
                                        <div>
-                                          <div class="font-bold text-slate-900 dark:text-white">{{ user.firstName }} {{ user.lastName }}</div>
-                                          <div class="text-[10px] text-slate-400 mt-0.5" title="ID d'inscription unique">ID: {{ user.id.substring(0,8) }}</div>
+                                          <div class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ user.firstName }} {{ user.lastName }}</div>
+                                          <div class="flex items-center gap-2 mt-0.5">
+                                             <span class="px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 rounded text-[9px] font-bold uppercase transition-colors" [ngClass]="user.type === 'Entreprise' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'">{{ user.type || 'Particulier' }}</span>
+                                             <div class="text-[10px] text-slate-400" title="ID d'inscription unique">ID: {{ user.id.substring(0,8) }}</div>
+                                          </div>
                                        </div>
                                     </div>
                                  </td>
@@ -179,10 +183,23 @@ import { ActivatedRoute, Router } from '@angular/router';
                                        {{ user.vehicleCount }}
                                     </span>
                                  </td>
+                                 <td class="px-6 py-4 text-center">
+                                    <div class="flex flex-col items-center gap-1">
+                                       <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs">
+                                          Total: {{ user.totalQuotes }}
+                                       </span>
+                                       @if (user.convertedQuotes > 0) {
+                                          <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/10 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-800 flex items-center gap-1">
+                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                             {{ user.convertedQuotes }} convertis
+                                          </div>
+                                       }
+                                    </div>
+                                 </td>
                               </tr>
                            }
                            @if(mobileUsers().length === 0) {
-                              <tr><td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                              <tr><td colspan="5" class="px-6 py-12 text-center text-slate-500">
                                  <div class="flex flex-col items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-300 dark:text-slate-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                                     <span class="font-medium text-slate-400">Aucun automobiliste trouvé.</span>
@@ -372,7 +389,10 @@ import { ActivatedRoute, Router } from '@angular/router';
                                   <div class="flex justify-between items-center">
                                      <div>
                                         <div class="text-xs font-bold text-slate-400 uppercase mb-1">Automobiliste</div>
-                                        <div class="text-sm text-slate-800 dark:text-slate-200 font-medium">{{ req.motoristName }}</div>
+                                        <div class="flex items-center gap-2">
+                                           <span class="px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 rounded text-[9px] font-bold uppercase transition-colors" [ngClass]="getClientType(req.motoristPhone) === 'ENTREPRISE' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'">{{ getClientType(req.motoristPhone) }}</span>
+                                           <div class="text-sm text-slate-800 dark:text-slate-200 font-medium">{{ req.motoristName }}</div>
+                                        </div>
                                      </div>
                                      <!-- Detail Eye Button -->
                                      <button (click)="openRequestDetails(req)" class="text-slate-400 hover:text-indigo-500 p-2 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Voir Fiche Complète">
@@ -416,7 +436,10 @@ import { ActivatedRoute, Router } from '@angular/router';
                                   <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30">
                                      <td class="px-6 py-4 text-slate-500">{{ req.date | date:'dd/MM/yy' }}</td>
                                      <td class="px-6 py-4">
-                                        <div class="font-medium text-slate-900 dark:text-white">{{ req.motoristName }}</div>
+                                        <div class="font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                                           <span class="px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 rounded text-[9px] font-bold uppercase transition-colors" [ngClass]="getClientType(req.motoristPhone) === 'ENTREPRISE' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'">{{ getClientType(req.motoristPhone) }}</span>
+                                           {{ req.motoristName }}
+                                        </div>
                                         <div class="text-xs text-slate-500">{{ req.locationCity }}</div>
                                      </td>
                                      <td class="px-6 py-4">
@@ -485,7 +508,10 @@ import { ActivatedRoute, Router } from '@angular/router';
                                   <div class="flex justify-between items-start mb-2">
                                      <div>
                                         <div class="font-bold text-lg text-slate-900 dark:text-white">{{ work.req.vehicleBrand }} {{ work.req.vehicleModel }}</div>
-                                        <div class="text-sm text-slate-500">{{ work.req.motoristName }} • {{ work.req.locationCity }}</div>
+                                        <div class="text-sm text-slate-500 flex items-center gap-2 mt-0.5">
+                                           <span class="px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 rounded text-[9px] font-bold uppercase transition-colors" [ngClass]="getClientType(work.req.motoristPhone) === 'ENTREPRISE' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'">{{ getClientType(work.req.motoristPhone) }}</span>
+                                           {{ work.req.motoristName }} • {{ work.req.locationCity }}
+                                        </div>
                                         <div class="relative inline-block mt-1">
                                            <button (click)="openQuotePreview(work.req)" class="text-xs text-indigo-600 hover:text-indigo-700 font-bold underline flex items-center gap-1">
                                               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -1534,7 +1560,89 @@ import { ActivatedRoute, Router } from '@angular/router';
            }
         </div>
      }
-   `
+     <!-- Motorist Vehicles Modal -->
+    @if (showMotoristVehiclesModal()) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+         <!-- Backdrop -->
+         <div class="absolute inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm animate-fade-in" (click)="closeMotoristVehiclesModal()"></div>
+         
+         <!-- Modal Content -->
+         <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden animate-scale-up border border-slate-200 dark:border-slate-800">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
+               <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                     {{ selectedMotorist()?.firstName?.charAt(0) }}
+                  </div>
+                  <div>
+                     <h2 class="text-xl font-bold text-slate-900 dark:text-white">{{ selectedMotorist()?.firstName }} {{ selectedMotorist()?.lastName }}</h2>
+                     <p class="text-sm text-slate-500">{{ selectedMotorist()?.phone }} • Flotte enregistrée</p>
+                  </div>
+               </div>
+               <button (click)="closeMotoristVehiclesModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+               </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-950">
+               @if (selectedMotoristVehicles().length === 0) {
+                  <div class="text-center py-12 flex flex-col items-center">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                     <p class="text-slate-500 dark:text-slate-400 font-medium">Aucun véhicule enregistré pour le moment.</p>
+                  </div>
+               } @else {
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     @for (vehicle of selectedMotoristVehicles(); track vehicle.id) {
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+                           <!-- Card Header -->
+                           <div class="flex justify-between items-start mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+                              <div>
+                                 <h3 class="font-bold text-slate-900 dark:text-white text-lg leading-tight">{{ vehicle.brand }} {{ vehicle.model }}</h3>
+                                 <div class="text-xs text-slate-500 mt-1">Immatriculation : <span class="font-bold font-mono text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{{ vehicle.plate || 'Non renseigné' }}</span></div>
+                              </div>
+                              <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs px-2 py-1 rounded font-bold">{{ vehicle.year }}</span>
+                           </div>
+
+                           <!-- Card Body: Details -->
+                           <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
+                              <div>
+                                 <div class="text-[10px] font-bold text-slate-400 uppercase">Énergie</div>
+                                 <div class="font-medium text-slate-700 dark:text-slate-300">{{ vehicle.fuel || 'N/D' }}</div>
+                              </div>
+                              <div>
+                                 <div class="text-[10px] font-bold text-slate-400 uppercase">Kilométrage</div>
+                                 <div class="font-medium text-slate-700 dark:text-slate-300">{{ vehicle.mileage ? vehicle.mileage + ' km' : 'N/D' }}</div>
+                              </div>
+                              <div class="col-span-2">
+                                 <div class="text-[10px] font-bold text-slate-400 uppercase">VIN (Châssis)</div>
+                                 <div class="font-mono font-medium text-slate-700 dark:text-slate-300 text-xs">{{ vehicle.vin || 'Non renseigné' }}</div>
+                              </div>
+                           </div>
+                           
+                           <!-- Optional: Pictures -->
+                           @if (vehicle.photos && vehicle.photos.length > 0) {
+                              <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex gap-2 overflow-x-auto pb-1">
+                                 @for (photo of vehicle.photos; track photo) {
+                                    <div class="w-12 h-12 shrink-0 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                       <img [src]="photo" class="w-full h-full object-cover">
+                                    </div>
+                                 }
+                              </div>
+                           }
+                        </div>
+                     }
+                  </div>
+               }
+            </div>
+            <!-- Footer -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-end shrink-0">
+               <button (click)="closeMotoristVehiclesModal()" class="px-6 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-lg transition-colors">Fermer</button>
+            </div>
+         </div>
+      </div>
+    }
+  `
 })
 export class SuperAdminComponent {
    // Services with explicit types to resolve 'unknown'
@@ -1567,7 +1675,7 @@ export class SuperAdminComponent {
    mobileUsersSearchTerm = signal('');
    mobileUsers = computed(() => {
       const term = this.mobileUsersSearchTerm().toLowerCase().trim();
-      const allMobileClients = this.dataService.clients().filter(c => c.type === 'Particulier');
+      const allMobileClients = this.dataService.clients().filter(c => c.type === 'Particulier' || c.type === 'Entreprise');
       
       let filtered = allMobileClients;
       if (term) {
@@ -1579,15 +1687,40 @@ export class SuperAdminComponent {
          );
       }
       
-      // Map to include vehicle count
+      // Map to include vehicle count and quote counts
       return filtered.map(c => {
          const vehicleCount = this.dataService.mobileVehicles().filter(v => v.ownerPhone === c.phone).length;
+         const userQuotes = this.dataService.quoteRequests().filter(q => q.motoristPhone === c.phone);
+         const totalQuotes = userQuotes.length;
+         const convertedQuotes = userQuotes.filter(q => q.status === 'CONVERTED' || q.status === 'COMPLETED').length;
+         
          return {
             ...c,
-            vehicleCount
+            vehicleCount,
+            totalQuotes,
+            convertedQuotes
          };
       });
    });
+
+   selectedMotorist = signal<any | null>(null);
+   showMotoristVehiclesModal = signal(false);
+
+   selectedMotoristVehicles = computed(() => {
+      const u = this.selectedMotorist();
+      if (!u) return [];
+      return this.dataService.mobileVehicles().filter(v => v.ownerPhone === u.phone);
+   });
+
+   openMotoristVehicles(user: any) {
+      this.selectedMotorist.set(user);
+      this.showMotoristVehiclesModal.set(true);
+   }
+
+   closeMotoristVehiclesModal() {
+      this.showMotoristVehiclesModal.set(false);
+      setTimeout(() => this.selectedMotorist.set(null), 300);
+   }
 
    // Moderation Logic
    moderationFilter = signal<'MODERATE' | 'VALIDATE' | 'TRACKING' | 'REJECTED' | 'HISTORY' | 'DIRECT'>('MODERATE');
@@ -2101,7 +2234,8 @@ export class SuperAdminComponent {
             perms_manage_leads: perms.includes('MANAGE_LEADS'),
             perms_manage_config: perms.includes('MANAGE_CONFIG'),
             perms_view_logs: perms.includes('VIEW_LOGS'),
-            perms_manage_scans: perms.includes('MANAGE_SCANS')
+            perms_manage_scans: perms.includes('MANAGE_SCANS'),
+            perms_view_mobile_users: perms.includes('VIEW_MOBILE_USERS')
          });
       } else {
          this.selectedAdminId.set(null);
@@ -2118,7 +2252,8 @@ export class SuperAdminComponent {
             perms_manage_leads: false,
             perms_manage_config: false,
             perms_view_logs: false,
-            perms_manage_scans: false
+            perms_manage_scans: false,
+            perms_view_mobile_users: false
          });
       }
       this.showAdminModal.set(true);
@@ -2151,6 +2286,7 @@ export class SuperAdminComponent {
       if (val.perms_manage_config) mappedPerms.push('MANAGE_CONFIG');
       if (val.perms_view_logs) mappedPerms.push('VIEW_LOGS');
       if (val.perms_manage_scans) mappedPerms.push('MANAGE_SCANS');
+      if (val.perms_view_mobile_users) mappedPerms.push('VIEW_MOBILE_USERS');
 
       const adminData: any = {
          firstName: val.firstName,
@@ -2408,6 +2544,12 @@ export class SuperAdminComponent {
    }
 
    // Helper methods for preference labels
+   getClientType(phone: string): string {
+      if (!phone) return 'PARTICULIER';
+      const user = this.dataService.clients().find(c => c.phone === phone);
+      return user?.type?.toUpperCase() || 'PARTICULIER';
+   }
+
    getPeriodLabel(val?: string): string {
       switch (val) {
          case 'Urgent': return 'Au plus vite';

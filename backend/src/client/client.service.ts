@@ -184,5 +184,27 @@ export class ClientService {
       data: { pushToken }
     });
   }
+
+  async forgotPassword(email: string) {
+    const client = await this.prisma.client.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } }
+    });
+    if (!client) {
+      throw new UnauthorizedException('CLIENT_NOT_FOUND');
+    }
+
+    // Generate a random 8-char temporary password
+    const tempPassword = Math.random().toString(36).slice(-8);
+
+    const bcrypt = await import('bcrypt');
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    await this.prisma.client.update({
+      where: { id: client.id },
+      data: { password: hashedPassword }
+    });
+
+    return { success: true, tempPassword, firstName: client.firstName };
+  }
 }
 

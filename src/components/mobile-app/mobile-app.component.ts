@@ -63,10 +63,24 @@ interface WizardNode {
 
                       <form [formGroup]="loginForm" class="w-full space-y-3">
                          @if (authMode() === 'signup') {
-                            <!-- Nom complet -->
+                            <!-- Type de compte -->
+                            <div class="flex p-1 bg-white/10 border border-indigo-400/30 rounded-xl mb-3 animate-slide-in">
+                               <button type="button" (click)="loginForm.patchValue({type: 'Particulier'})" 
+                                       class="flex-1 py-2 text-sm font-bold rounded-lg transition-colors"
+                                       [class.bg-white]="loginForm.value.type === 'Particulier'" [class.text-indigo-600]="loginForm.value.type === 'Particulier'" [class.text-white]="loginForm.value.type !== 'Particulier'">
+                                  Particulier
+                               </button>
+                               <button type="button" (click)="loginForm.patchValue({type: 'Entreprise'})" 
+                                       class="flex-1 py-2 text-sm font-bold rounded-lg transition-colors"
+                                       [class.bg-white]="loginForm.value.type === 'Entreprise'" [class.text-indigo-600]="loginForm.value.type === 'Entreprise'" [class.text-white]="loginForm.value.type !== 'Entreprise'">
+                                  Entreprise
+                               </button>
+                            </div>
+
+                            <!-- Nom complet / Raison sociale -->
                             <div class="relative group animate-slide-in">
                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></div>
-                               <input formControlName="name" placeholder="Nom Complet" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
+                               <input formControlName="name" [placeholder]="loginForm.value.type === 'Entreprise' ? 'Nom de l\\'entreprise' : 'Nom Complet'" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
                             </div>
                             <!-- Numéro de téléphone -->
                             <div class="relative group animate-slide-in">
@@ -99,7 +113,68 @@ interface WizardNode {
                          <button type="button" (click)="submitAuth()" class="w-full bg-white text-indigo-600 font-bold py-3.5 rounded-xl shadow-xl shadow-indigo-900/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed">
                             {{ authMode() === 'login' ? 'Se connecter' : 'Créer mon compte' }}
                          </button>
+                         @if (authMode() === 'login') {
+                            <button type="button" (click)="forgotPasswordMode.set(true)" class="w-full text-center text-indigo-200 hover:text-white text-xs mt-3 transition-colors underline underline-offset-4">
+                               Mot de passe oublié ?
+                            </button>
+                         }
                       </form>
+                   </div>
+                </div>
+             }
+
+             <!-- FORGOT PASSWORD MODAL -->
+             @if (forgotPasswordMode()) {
+                <div class="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-md">
+                   <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-in">
+                      <!-- Header -->
+                      <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-5 text-center relative">
+                         <button (click)="closeForgotPassword()" class="absolute top-3 right-3 text-white/60 hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                         </button>
+                         <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                         </div>
+                         <h3 class="text-white font-bold text-lg">Réinitialisation</h3>
+                         <p class="text-indigo-100 text-xs mt-1">Récupérez l'accès à votre compte</p>
+                      </div>
+                      <div class="p-6">
+                         @if (!forgotPasswordResult()) {
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-4 text-center">Saisissez votre adresse email pour recevoir un nouveau mot de passe temporaire.</p>
+                            <div class="relative group mb-4">
+                               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg></div>
+                               <input [ngModel]="forgotPasswordEmail()" (ngModelChange)="forgotPasswordEmail.set($event)" type="email" placeholder="Votre adresse email" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                            </div>
+                            <button (click)="submitForgotPassword()" [disabled]="forgotPasswordLoading()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                               @if (forgotPasswordLoading()) {
+                                  <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                  Réinitialisation...
+                               } @else {
+                                  Réinitialiser mon mot de passe
+                               }
+                            </button>
+                         } @else {
+                            <div class="text-center">
+                               <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                               </div>
+                               <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Mot de passe réinitialisé</h4>
+                               <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ forgotPasswordResult()!.firstName }}, voici votre nouveau mot de passe temporaire :</p>
+                               <div class="bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-xl p-4 mb-4">
+                                  <span class="text-2xl font-mono font-bold tracking-[0.3em] text-indigo-600 dark:text-indigo-400 select-all">{{ forgotPasswordResult()!.tempPassword }}</span>
+                               </div>
+                               <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
+                                  <p class="text-xs text-amber-700 dark:text-amber-400 flex items-start gap-2">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                     Notez ce mot de passe et utilisez-le pour vous connecter. Pensez à le changer dans votre profil.
+                                  </p>
+                               </div>
+                               <button (click)="closeForgotPassword()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg active:scale-[0.98] transition-all">
+                                  Retour à la connexion
+                               </button>
+                            </div>
+                         }
+                      </div>
                    </div>
                 </div>
              }
@@ -218,7 +293,7 @@ interface WizardNode {
 
                     <!-- Progress Bar -->
                     <div class="flex items-center gap-1 mb-6">
-                       @for (s of [1,2,3,4,5,6]; track s) {
+                       @for (s of [1,2,3,4,5,6,7,8]; track s) {
                           <div class="flex-1 h-1.5 rounded-full transition-all duration-300"
                                [class.bg-indigo-600]="s <= requestWizardStep()"
                                [class.dark:bg-indigo-500]="s <= requestWizardStep()"
@@ -256,11 +331,31 @@ interface WizardNode {
                           </div>
                        }
 
-                       <!-- ===== STEP 2: Is vehicle drivable? ===== -->
+                       <!-- ===== STEP 2: Type de besoin ===== -->
                        @if (requestWizardStep() === 2) {
                           <div class="animate-fade-in">
                              <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 2</h3>
-                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Votre véhicule est-il roulant ?</p>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Que se passe-t-il avec votre véhicule ?</p>
+                             <div class="grid grid-cols-2 gap-3">
+                                @for (need of ['Ne démarre pas', 'Bruit / anomalie', 'Voyant allumé', 'Entretien', 'Accident', 'Autre']; track need) {
+                                   <button type="button" (click)="setNeedType(need)" class="p-3 rounded-xl border-2 text-left transition-all active:scale-95 flex items-center gap-2" [class.border-indigo-500]="requestNeedType() === need" [class.bg-indigo-50]="requestNeedType() === need" [class.text-indigo-700]="requestNeedType() === need" [class.border-slate-200]="requestNeedType() !== need" [class.bg-white]="requestNeedType() !== need" [class.text-slate-700]="requestNeedType() !== need" [class.dark:bg-slate-800]="requestNeedType() !== need" [class.dark:text-slate-300]="requestNeedType() !== need" [class.dark:border-slate-700]="requestNeedType() !== need">
+                                      <div class="w-3 h-3 rounded-full shrink-0" [class.bg-indigo-500]="requestNeedType() === need" [class.bg-slate-200]="requestNeedType() !== need" [class.dark:bg-slate-700]="requestNeedType() !== need"></div>
+                                      <span class="font-bold text-[13px] leading-tight">{{ need }}</span>
+                                   </button>
+                                }
+                             </div>
+                             <div class="flex gap-3 mt-6">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="goToNextRequestStep()" [disabled]="!requestNeedType()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                             </div>
+                          </div>
+                       }
+
+                       <!-- ===== STEP 3: Is vehicle drivable? ===== -->
+                       @if (requestWizardStep() === 3) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 3</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Pouvez-vous encore rouler avec votre véhicule ?</p>
                              <div class="grid grid-cols-2 gap-4">
                                 <button type="button" (click)="setVehicleDrivable(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-emerald-500]="isVehicleDrivable() === true" [class.bg-emerald-50]="isVehicleDrivable() === true" [class.border-slate-200]="isVehicleDrivable() !== true" [class.bg-white]="isVehicleDrivable() !== true" [class.dark:bg-slate-800]="isVehicleDrivable() !== true" [class.dark:border-slate-700]="isVehicleDrivable() !== true">
                                    <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3" [class.bg-emerald-100]="isVehicleDrivable() === true" [class.bg-slate-100]="isVehicleDrivable() !== true"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" [class.text-emerald-600]="isVehicleDrivable() === true" [class.text-slate-400]="isVehicleDrivable() !== true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
@@ -280,11 +375,46 @@ interface WizardNode {
                           </div>
                        }
 
-                       <!-- ===== STEP 3: Description & Photos (NEW) ===== -->
-                       @if (requestWizardStep() === 3) {
+                       <!-- ===== STEP 4: Urgency ===== -->
+                       @if (requestWizardStep() === 4) {
                           <div class="animate-fade-in">
-                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 3</h3>
-                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Pouvez-vous nous en dire plus ?</p>
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 4</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Quel est le niveau d'urgence ?</p>
+                             <div class="space-y-3">
+                                <button type="button" (click)="setUrgency('urgency_immediate')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-red-500]="requestUrgency() === 'urgency_immediate'" [class.bg-red-50]="requestUrgency() === 'urgency_immediate'" [class.border-slate-200]="requestUrgency() !== 'urgency_immediate'" [class.bg-white]="requestUrgency() !== 'urgency_immediate'" [class.dark:bg-slate-800]="requestUrgency() !== 'urgency_immediate'" [class.dark:border-slate-700]="requestUrgency() !== 'urgency_immediate'">
+                                   <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">🔴</div>
+                                   <div class="flex flex-col">
+                                      <span class="font-bold text-slate-900 dark:text-white">Urgent (immédiat)</span>
+                                      <span class="text-xs text-slate-500 leading-tight">Je suis bloqué, interviendez maintenant !</span>
+                                   </div>
+                                </button>
+                                <button type="button" (click)="setUrgency('urgency_today')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-amber-500]="requestUrgency() === 'urgency_today'" [class.bg-amber-50]="requestUrgency() === 'urgency_today'" [class.border-slate-200]="requestUrgency() !== 'urgency_today'" [class.bg-white]="requestUrgency() !== 'urgency_today'" [class.dark:bg-slate-800]="requestUrgency() !== 'urgency_today'" [class.dark:border-slate-700]="requestUrgency() !== 'urgency_today'">
+                                   <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">🟡</div>
+                                   <div class="flex flex-col">
+                                      <span class="font-bold text-slate-900 dark:text-white">Aujourd'hui</span>
+                                      <span class="text-xs text-slate-500 leading-tight">J'aimerais régler ça dans la journée.</span>
+                                   </div>
+                                </button>
+                                <button type="button" (click)="setUrgency('urgency_flexible')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-emerald-500]="requestUrgency() === 'urgency_flexible'" [class.bg-emerald-50]="requestUrgency() === 'urgency_flexible'" [class.border-slate-200]="requestUrgency() !== 'urgency_flexible'" [class.bg-white]="requestUrgency() !== 'urgency_flexible'" [class.dark:bg-slate-800]="requestUrgency() !== 'urgency_flexible'" [class.dark:border-slate-700]="requestUrgency() !== 'urgency_flexible'">
+                                   <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">🟢</div>
+                                   <div class="flex flex-col">
+                                      <span class="font-bold text-slate-900 dark:text-white">Flexible</span>
+                                      <span class="text-xs text-slate-500 leading-tight">Pas d'urgence extrême.</span>
+                                   </div>
+                                </button>
+                             </div>
+                             <div class="flex gap-3 mt-6">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="goToNextRequestStep()" [disabled]="!requestUrgency()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                             </div>
+                          </div>
+                       }
+
+                       <!-- ===== STEP 5: Description & Photos ===== -->
+                       @if (requestWizardStep() === 5) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 5</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Plus vous êtes précis, plus vos devis seront fiables.</p>
                              <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                                 <div>
                                    <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Description du problème</label>
@@ -311,100 +441,132 @@ interface WizardNode {
                           </div>
                        }
 
-                       <!-- ===== STEP 4: Technician dispatch? ===== -->
-                       @if (requestWizardStep() === 4) {
-                          <div class="animate-fade-in">
-                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 4</h3>
-                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Souhaitez-vous le déplacement d’un technicien pour un diagnostic approfondi ?</p>
-                             <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-6 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                                <div class="flex flex-col gap-0.5">
-                                   <span class="text-xs text-amber-800 dark:text-amber-300 font-bold">Frais de déplacement : 5000F</span>
-                                   <span class="text-xs text-amber-800 dark:text-amber-300 font-bold leading-tight">Frais de diagnostic : 10.000F <span class="font-medium italic">(Remboursé en cas de réparation effectuée dans le réseau Mécatech)</span></span>
-                                </div>
-                             </div>
-                             <div class="grid grid-cols-2 gap-4">
-                                <button type="button" (click)="setTechnicianDispatch(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-indigo-500]="wantsTechnicianDispatch() === true" [class.bg-indigo-50]="wantsTechnicianDispatch() === true" [class.border-slate-200]="wantsTechnicianDispatch() !== true" [class.bg-white]="wantsTechnicianDispatch() !== true" [class.dark:bg-slate-800]="wantsTechnicianDispatch() !== true" [class.dark:border-slate-700]="wantsTechnicianDispatch() !== true">
-                                   <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2 bg-indigo-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
-                                   <span class="font-bold text-sm text-slate-900 dark:text-white">Oui</span>
-                                </button>
-                                <button type="button" (click)="setTechnicianDispatch(false)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-slate-500]="wantsTechnicianDispatch() === false" [class.bg-slate-50]="wantsTechnicianDispatch() === false" [class.border-slate-200]="wantsTechnicianDispatch() !== false" [class.bg-white]="wantsTechnicianDispatch() !== false" [class.dark:bg-slate-800]="wantsTechnicianDispatch() !== false" [class.dark:border-slate-700]="wantsTechnicianDispatch() !== false">
-                                   <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2 bg-slate-200"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
-                                   <span class="font-bold text-sm text-slate-900 dark:text-white">Non</span>
-                                </button>
-                             </div>
-                             <div class="flex gap-3 mt-6">
-                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
-                                <button type="button" (click)="goToNextRequestStep()" [disabled]="wantsTechnicianDispatch() === null" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
-                             </div>
-                          </div>
-                       }
-
-                       <!-- ===== STEP 5: Towing? (Only if non-drivable + no technician) ===== -->
-                       @if (requestWizardStep() === 5) {
-                          <div class="animate-fade-in">
-                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 5</h3>
-                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Avez-vous besoin de remorquage ?</p>
-                             <div class="grid grid-cols-2 gap-4">
-                                <button type="button" (click)="setNeedsTowing(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-indigo-500]="needsTowing() === true" [class.bg-indigo-50]="needsTowing() === true" [class.border-slate-200]="needsTowing() !== true" [class.bg-white]="needsTowing() !== true" [class.dark:bg-slate-800]="needsTowing() !== true" [class.dark:border-slate-700]="needsTowing() !== true">
-                                   <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2 bg-indigo-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
-                                   <span class="font-bold text-sm text-slate-900 dark:text-white">Oui</span>
-                                </button>
-                                <button type="button" (click)="setNeedsTowing(false)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-slate-500]="needsTowing() === false" [class.bg-slate-50]="needsTowing() === false" [class.border-slate-200]="needsTowing() !== false" [class.bg-white]="needsTowing() !== false" [class.dark:bg-slate-800]="needsTowing() !== false" [class.dark:border-slate-700]="needsTowing() !== false">
-                                   <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2 bg-slate-200"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
-                                   <span class="font-bold text-sm text-slate-900 dark:text-white">Non</span>
-                                </button>
-                             </div>
-                             <div class="flex gap-3 mt-6">
-                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
-                                <button type="button" (click)="goToNextRequestStep()" [disabled]="needsTowing() === null" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
-                             </div>
-                          </div>
-                       }
-
-                       <!-- ===== STEP 6: Final Form ===== -->
+                       <!-- ===== STEP 6: Service ===== -->
                        @if (requestWizardStep() === 6) {
                           <div class="animate-fade-in">
-                             @if (!requestWizardNeedsForm()) {
-                                <div class="text-center py-10">
-                                   <div class="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 6</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Comment souhaitez-vous être pris en charge ?</p>
+                             <div class="space-y-3">
+                                <button type="button" (click)="setServiceType('tech_home')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-indigo-500]="requestServiceType() === 'tech_home'" [class.bg-indigo-50]="requestServiceType() === 'tech_home'" [class.border-slate-200]="requestServiceType() !== 'tech_home'" [class.bg-white]="requestServiceType() !== 'tech_home'" [class.dark:bg-slate-800]="requestServiceType() !== 'tech_home'" [class.dark:border-slate-700]="requestServiceType() !== 'tech_home'">
+                                   <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></div>
+                                   <div class="flex flex-col flex-1">
+                                      <span class="font-bold text-slate-900 dark:text-white">Technicien à domicile</span>
+                                      <span class="text-[11px] text-slate-500 leading-tight">Intervention sur place + diagnostic complet</span>
                                    </div>
-                                   <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Aucune option disponible</h3>
-                                   <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Malheureusement, sans déplacement de technicien ni remorquage, nous ne pouvons pas traiter votre demande pour un véhicule non roulant.</p>
-                                   <button type="button" (click)="goToPrevRequestStep()" class="py-3 px-6 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Revenir en arrière</button>
-                                </div>
-                             } @else {
-                                <div class="flex flex-wrap gap-2 mb-4">
-                                   <span class="text-[10px] font-bold px-2 py-1 rounded-full" [class.bg-emerald-100]="isVehicleDrivable()" [class.text-emerald-700]="isVehicleDrivable()" [class.bg-red-100]="!isVehicleDrivable()" [class.text-red-700]="!isVehicleDrivable()">{{ isVehicleDrivable() ? '🚗 Véhicule roulant' : '🔧 Véhicule en panne' }}</span>
-                                   @if (wantsTechnicianDispatch()) { <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg> Technicien à domicile</span> }
-                                   @if (needsTowing()) { <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg> Remorquage</span> }
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Dernière étape</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Où et quand voulez-vous être pris en charge ?</p>
-                                <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                                   <div>
-                                      <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Localisation</label>
-                                      <div class="flex gap-2">
-                                         <select formControlName="locationCity" (change)="onRequestCityChange()" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white"><option value="">Ville...</option>@for(c of requestWizardCities(); track c) { <option [value]="c">{{ c }}</option> }</select>
-                                         <select formControlName="locationCommune" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white"><option value="">Commune...</option>@for(c of requestCommunes(); track c) { <option [value]="c">{{ c }}</option> }</select>
-                                      </div>
+                                </button>
+                                <button type="button" (click)="setServiceType('towing')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-amber-500]="requestServiceType() === 'towing'" [class.bg-amber-50]="requestServiceType() === 'towing'" [class.border-slate-200]="requestServiceType() !== 'towing'" [class.bg-white]="requestServiceType() !== 'towing'" [class.dark:bg-slate-800]="requestServiceType() !== 'towing'" [class.dark:border-slate-700]="requestServiceType() !== 'towing'">
+                                   <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg></div>
+                                   <div class="flex flex-col flex-1">
+                                      <span class="font-bold text-slate-900 dark:text-white">Remorquage</span>
+                                      <span class="text-[11px] text-slate-500 leading-tight">Vers notre garage le plus proche</span>
                                    </div>
-                                   <div>
-                                      <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Date souhaitée d'intervention</label>
-                                      <input type="date" formControlName="interventionDate" [min]="minInterventionDate()" [max]="maxInterventionDate()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
+                                </button>
+                                <button type="button" (click)="setServiceType('garage_drop')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-emerald-500]="requestServiceType() === 'garage_drop'" [class.bg-emerald-50]="requestServiceType() === 'garage_drop'" [class.border-slate-200]="requestServiceType() !== 'garage_drop'" [class.bg-white]="requestServiceType() !== 'garage_drop'" [class.dark:bg-slate-800]="requestServiceType() !== 'garage_drop'" [class.dark:border-slate-700]="requestServiceType() !== 'garage_drop'">
+                                   <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>
+                                   <div class="flex flex-col flex-1">
+                                      <span class="font-bold text-slate-900 dark:text-white">Dépôt garage</span>
+                                      <span class="text-[11px] text-slate-500 leading-tight">Je peux me rendre au garage par moi-même</span>
                                    </div>
-                                </div>
-                                <div class="flex gap-3 mt-6">
-                                   <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
-                                   <button type="button" (click)="submitRequest()" [disabled]="!requestForm.get('locationCity')?.value" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Envoyer Demande</button>
+                                </button>
+                             </div>
+                             @if (requestServiceType() === 'tech_home') {
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mt-4 flex items-center gap-2 animate-fade-in">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                   <div class="flex flex-col gap-0.5">
+                                      <span class="text-xs text-amber-800 dark:text-amber-300 font-bold">Frais de déplacement : 5000F</span>
+                                      <span class="text-xs text-amber-800 dark:text-amber-300 font-bold leading-tight">Frais de diagnostic : 10.000F <br><span class="font-medium italic">(Remboursé en cas de réparation dans le réseau)</span></span>
+                                   </div>
                                 </div>
                              }
+                             <div class="flex gap-3 mt-6">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="goToNextRequestStep()" [disabled]="!requestServiceType()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                             </div>
                           </div>
                        }
 
-                       <!-- ===== STEP 7: Confirmation & Contact Info ===== -->
+                       <!-- ===== STEP 7: Localisation + Date ===== -->
                        @if (requestWizardStep() === 7) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 7</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Où et quand voulez-vous être pris en charge ?</p>
+                             <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                                <div>
+                                   <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Localisation</label>
+                                   <div class="flex gap-2">
+                                      <select formControlName="locationCity" (change)="onRequestCityChange()" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white"><option value="">Ville...</option>@for(c of requestWizardCities(); track c) { <option [value]="c">{{ c }}</option> }</select>
+                                      <select formControlName="locationCommune" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white"><option value="">Commune...</option>@for(c of requestCommunes(); track c) { <option [value]="c">{{ c }}</option> }</select>
+                                   </div>
+                                   <div class="mt-2">
+                                      <input type="text" formControlName="locationQuarter" placeholder="Quartier (Ex: Zone 4, Riviera...)" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white">
+                                   </div>
+                                </div>
+                                <div>
+                                   <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Date souhaitée</label>
+                                   <input type="date" formControlName="interventionDate" [min]="minInterventionDate()" [max]="maxInterventionDate()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
+                                </div>
+                             </div>
+                             <div class="flex gap-3 mt-6">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="goToNextRequestStep()" [disabled]="!requestForm.get('locationCity')?.value" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                             </div>
+                          </div>
+                       }
+
+                       <!-- ===== STEP 8: Validation (Estimation) ===== -->
+                       @if (requestWizardStep() === 8) {
+                          <div class="animate-fade-in">
+                             <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Dernière vérification</h3>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Voici votre estimation théorique :</p>
+                             <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-5 border border-indigo-100 dark:border-indigo-800 mb-6 shadow-sm">
+                                <div class="space-y-4">
+                                   <!-- Estimation Cost -->
+                                   <div class="flex justify-between items-center border-b border-indigo-200 dark:border-indigo-800/50 pb-3">
+                                      <div class="flex items-center gap-2">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                         <span class="font-bold text-indigo-900 dark:text-indigo-300 text-sm">Prix estimé</span>
+                                      </div>
+                                      @if (requestServiceType() === 'tech_home') {
+                                         <span class="font-bold text-indigo-700 dark:text-indigo-400">15.000 FCFA</span>
+                                      } @else if (requestServiceType() === 'towing') {
+                                         <span class="font-bold text-indigo-700 dark:text-indigo-400">À partir de 15.000F</span>
+                                      } @else {
+                                         <span class="font-bold text-indigo-700 dark:text-indigo-400 text-xs italic">Sur devis</span>
+                                      }
+                                   </div>
+                                   <!-- Timing -->
+                                   <div class="flex justify-between items-center border-b border-indigo-200 dark:border-indigo-800/50 pb-3">
+                                      <div class="flex items-center gap-2">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                         <span class="font-bold text-indigo-900 dark:text-indigo-300 text-sm">Délai estimé</span>
+                                      </div>
+                                      @if (requestUrgency() === 'urgency_immediate') {
+                                         <span class="font-bold text-amber-600">- de 2 heures</span>
+                                      } @else if (requestUrgency() === 'urgency_today') {
+                                         <span class="font-bold text-amber-600">Dans la journée</span>
+                                      } @else {
+                                         <span class="font-bold text-slate-600 dark:text-slate-400">Sous 24/48h</span>
+                                      }
+                                   </div>
+                                   <!-- Network Coverage -->
+                                   <div class="flex justify-between items-center">
+                                      <div class="flex items-center gap-2">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                         <span class="font-bold text-indigo-900 dark:text-indigo-300 text-sm">Réseau Mécatech</span>
+                                      </div>
+                                      <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ nearbyGarages().length }} garage(s) dispo(s)</span>
+                                   </div>
+                                </div>
+                             </div>
+                             <div class="flex gap-3">
+                                <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
+                                <button type="button" (click)="submitRequest()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg transition-colors active:scale-[0.98]">Recevoir mes devis</button>
+                             </div>
+                          </div>
+                       }
+
+                       <!-- ===== STEP 9: Confirmation & Contact Info ===== -->
+                       @if (requestWizardStep() === 9) {
                           <div class="animate-zoom-in text-center py-6">
                              <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/20">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -1513,6 +1675,10 @@ export class MobileAppComponent {
    });
    activeTab = signal<'home' | 'create' | 'requests' | 'vehicles' | 'profile'>('home'); // Added 'vehicles'
    authMode = signal<'login' | 'signup'>('login');
+   forgotPasswordMode = signal(false);
+   forgotPasswordEmail = signal('');
+   forgotPasswordResult = signal<{ tempPassword: string; firstName: string } | null>(null);
+   forgotPasswordLoading = signal(false);
 
    userLocation = signal<{ lat: number, lng: number } | null>(null);
 
@@ -1575,27 +1741,20 @@ export class MobileAppComponent {
    wizardHistory = signal<string[]>([]); // Track path for BACK functionality
 
    // NEW: Step-by-step request wizard signals
+   // NEW: Step-by-step optimized request wizard signals
    requestWizardStep = signal<number>(1);
+   requestNeedType = signal<string | null>(null);
    isVehicleDrivable = signal<boolean | null>(null);
-   wantsTechnicianDispatch = signal<boolean | null>(null);
-   needsTowing = signal<boolean | null>(null);
+   requestUrgency = signal<string | null>(null);
+   requestServiceType = signal<string | null>(null);
+
    requestWizardCities = computed(() => {
       // Technician dispatch or towing => Abidjan only
-      if (this.wantsTechnicianDispatch() === true || this.needsTowing() === true) return ['Abidjan'];
+      if (this.requestServiceType() === 'tech_home' || this.requestServiceType() === 'towing') return ['Abidjan'];
       return this.cities;
    });
-   requestWizardNeedsForm = computed(() => {
-      const techDispatch = this.wantsTechnicianDispatch();
-      const towing = this.needsTowing();
-      const drivable = this.isVehicleDrivable();
-      // No form if non-drivable + no technician + no towing
-      if (drivable === false && techDispatch === false && towing === false) return false;
-      return true;
-   });
-   requestWizardShowDescription = computed(() => {
-      // Description + photos are now shown for ALL request types in the final step
-      return this.requestWizardNeedsForm();
-   });
+   requestWizardNeedsForm = computed(() => true);
+   requestWizardShowDescription = computed(() => true);
 
    // New Photo Logic
    wantToAddPhotos = signal(false);
@@ -1870,6 +2029,7 @@ export class MobileAppComponent {
       });
 
       this.loginForm = this.fb.group({
+         type: ['Particulier'],
          name: [''],
          email: ['', [Validators.required, Validators.email]],
          phone: [''],
@@ -1880,6 +2040,7 @@ export class MobileAppComponent {
       this.requestForm = this.fb.group({
          locationCity: [''],
          locationCommune: [''],
+         locationQuarter: [''],
          locationPrecision: [''],
          gpsCoordinates: [''],
          selectedVehicleId: ['', Validators.required],
@@ -2282,6 +2443,35 @@ export class MobileAppComponent {
        }, 6000);
      }
 
+    submitForgotPassword() {
+       const email = this.forgotPasswordEmail().trim().toLowerCase();
+       if (!email) {
+          this.toastService.show('Veuillez saisir votre adresse email.', 'error');
+          return;
+       }
+       this.forgotPasswordLoading.set(true);
+       this.dataService.forgotPasswordMobile(email).subscribe({
+          next: (res) => {
+             this.forgotPasswordResult.set({ tempPassword: res.tempPassword, firstName: res.firstName });
+             this.forgotPasswordLoading.set(false);
+          },
+          error: (err) => {
+             this.forgotPasswordLoading.set(false);
+             if (err?.error?.message === 'CLIENT_NOT_FOUND') {
+                this.toastService.show('Aucun compte trouvé avec cet email.', 'error');
+             } else {
+                this.toastService.show('Erreur lors de la réinitialisation.', 'error');
+             }
+          }
+       });
+    }
+
+    closeForgotPassword() {
+       this.forgotPasswordMode.set(false);
+       this.forgotPasswordEmail.set('');
+       this.forgotPasswordResult.set(null);
+    }
+
     submitAuth() {
        const val = this.loginForm.value;
        if (this.authMode() === 'login') {
@@ -2316,7 +2506,7 @@ export class MobileAppComponent {
              phone: val.phone,
              email: normalizedEmail,
              password: val.password,
-             type: 'Particulier',
+             type: val.type || 'Particulier',
              address: { street: val.address, city: val.city, zip: '' },
              vehicleIds: [],
              financial: { paymentMethod: 'Cash', paymentTerms: 'Comptant', discountPercent: 0, balance: 0 },
@@ -2574,12 +2764,13 @@ export class MobileAppComponent {
    // NEW: Step-by-step request wizard methods
    resetRequestWizard() {
       this.requestWizardStep.set(1);
+      this.requestNeedType.set(null);
       this.isVehicleDrivable.set(null);
-      this.wantsTechnicianDispatch.set(null);
-      this.needsTowing.set(null);
+      this.requestUrgency.set(null);
+      this.requestServiceType.set(null);
       this.requestPhotos.set([]);
       this.requestForm.reset();
-      this.requestForm.patchValue({ locationCity: '', locationCommune: '', description: '' });
+      this.requestForm.patchValue({ locationCity: '', locationCommune: '', locationQuarter: '', description: '' });
    }
 
    cancelRequestWizard() {
@@ -2588,8 +2779,16 @@ export class MobileAppComponent {
    }
 
    setVehicleDrivable(val: boolean) { this.isVehicleDrivable.set(val); }
-   setTechnicianDispatch(val: boolean) { this.wantsTechnicianDispatch.set(val); }
-   setNeedsTowing(val: boolean) { this.needsTowing.set(val); }
+   setNeedType(val: string) { this.requestNeedType.set(val); }
+   setUrgency(val: string) {
+      this.requestUrgency.set(val);
+      if (val === 'urgency_immediate' || val === 'urgency_today') {
+         const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+         const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
+         this.requestForm.patchValue({ interventionDate: localISOTime });
+      }
+   }
+   setServiceType(val: string) { this.requestServiceType.set(val); }
 
    goToNextRequestStep() {
       const step = this.requestWizardStep();
@@ -2597,56 +2796,32 @@ export class MobileAppComponent {
          if (!this.requestForm.get('selectedVehicleId')?.value) return;
          this.requestWizardStep.set(2);
       } else if (step === 2) {
-         if (this.isVehicleDrivable() === null) return;
-         this.requestWizardStep.set(3); // Go to Description & Photos
+         if (!this.requestNeedType()) return;
+         this.requestWizardStep.set(3);
       } else if (step === 3) {
-         // Step 3 -> Step 4 (Technician dispatch question)
+         if (this.isVehicleDrivable() === null) return;
          this.requestWizardStep.set(4);
       } else if (step === 4) {
-         // Step 4 -> depends on answers
-         if (this.wantsTechnicianDispatch() === null) return;
-         if (this.wantsTechnicianDispatch() === true) {
-            // Technician dispatch -> go to final form (step 6)
-            this.requestWizardStep.set(6);
-         } else {
-            // No technician
-            if (this.isVehicleDrivable() === true) {
-               // Drivable + no technician -> go to final form (step 6)
-               this.requestWizardStep.set(6);
-            } else {
-               // Non-drivable + no technician -> ask about towing (step 5)
-               this.requestWizardStep.set(5);
-            }
-         }
+         if (!this.requestUrgency()) return;
+         this.requestWizardStep.set(5);
       } else if (step === 5) {
-         // Step 5 -> final form (step 6)
-         if (this.needsTowing() === null) return;
          this.requestWizardStep.set(6);
+      } else if (step === 6) {
+         if (!this.requestServiceType()) return;
+         this.requestWizardStep.set(7);
+      } else if (step === 7) {
+         if (!this.requestForm.get('locationCity')?.value) {
+             this.toastService.show('Veuillez spécifier un lieu.', 'error');
+             return;
+         }
+         this.requestWizardStep.set(8);
       }
    }
 
    goToPrevRequestStep() {
       const step = this.requestWizardStep();
-      if (step === 2) {
-         this.isVehicleDrivable.set(null);
-         this.requestWizardStep.set(1);
-      } else if (step === 3) {
-         this.requestWizardStep.set(2); // Go back to Drivable?
-      } else if (step === 4) {
-         this.wantsTechnicianDispatch.set(null);
-         this.requestWizardStep.set(3); // Go back to Description/Photos
-      } else if (step === 5) {
-         this.needsTowing.set(null);
-         this.requestWizardStep.set(4); // Go back to Technician?
-      } else if (step === 6) {
-         // Go back to appropriate step from Final Form
-         if (this.needsTowing() !== null) {
-            // Came from towing question
-            this.requestWizardStep.set(5);
-         } else {
-            // Came from technician question
-            this.requestWizardStep.set(4);
-         }
+      if (step > 1 && step <= 8) {
+         this.requestWizardStep.set(step - 1);
       }
    }
 
@@ -3083,9 +3258,17 @@ export class MobileAppComponent {
       let finalDescription = val.description || '';
       
       const combinedHistory = [...this.wizardAnswers()];
-      if (this.needsTowing() === true) combinedHistory.unshift({ question: 'Besoin de remorquage', answer: 'Oui' });
-      if (this.wantsTechnicianDispatch() === true) combinedHistory.unshift({ question: 'Déplacement technicien', answer: 'Oui (5000F + 10.000F)' });
+      
+      if (this.requestServiceType() === 'towing') combinedHistory.unshift({ question: 'Service souhaité', answer: 'Remorquage' });
+      if (this.requestServiceType() === 'tech_home') combinedHistory.unshift({ question: 'Service souhaité', answer: 'Technicien à domicile' });
+      if (this.requestServiceType() === 'garage_drop') combinedHistory.unshift({ question: 'Service souhaité', answer: 'Dépôt garage' });
+      
+      const urgencyStr = this.requestUrgency() === 'urgency_immediate' ? 'Urgent (immédiat)' : 
+                         this.requestUrgency() === 'urgency_today' ? 'Aujourd’hui' : 'Flexible';
+      combinedHistory.unshift({ question: 'Urgence', answer: urgencyStr });
+      
       combinedHistory.unshift({ question: 'Véhicule roulant', answer: this.isVehicleDrivable() ? 'Oui' : 'Non' });
+      combinedHistory.unshift({ question: 'Type de besoin', answer: this.requestNeedType() || 'Autre' });
 
       const newReq: QuoteRequest = {
          id: this.generateUUID(),
@@ -3096,6 +3279,7 @@ export class MobileAppComponent {
          motoristEmail: this.currentClientData()?.email || this.profileForm.value?.email || '',
          locationCity: val.locationCity,
          locationCommune: val.locationCommune,
+         locationQuarter: val.locationQuarter,
          locationCoords: this.userLocation() || undefined,
          vehicleBrand: vehicle.brand,
          vehicleModel: vehicle.model,
@@ -3122,7 +3306,7 @@ export class MobileAppComponent {
 
       this.dataService.createMobileRequest(newReq);
       this.toastService.show('Demande de devis traitée !', 'success');
-      this.requestWizardStep.set(7); // Show the success confirmation View
+      this.requestWizardStep.set(9); // Show the success confirmation View
       this.cdr.detectChanges(); // Force UI update
 
    }
@@ -3167,8 +3351,8 @@ export class MobileAppComponent {
       if (req.diagnosticHistory && req.diagnosticHistory.length > 0) {
          if (tagType === 'drivable') return req.diagnosticHistory.some((h: any) => h.question === 'Véhicule roulant' && h.answer === 'Oui');
          if (tagType === 'not_drivable') return req.diagnosticHistory.some((h: any) => h.question === 'Véhicule roulant' && h.answer === 'Non');
-         if (tagType === 'technician') return req.diagnosticHistory.some((h: any) => h.question === 'Déplacement technicien');
-         if (tagType === 'towing') return req.diagnosticHistory.some((h: any) => h.question === 'Besoin de remorquage');
+         if (tagType === 'technician') return req.diagnosticHistory.some((h: any) => h.question === 'Déplacement technicien' || (h.question === 'Service souhaité' && h.answer === 'Technicien à domicile'));
+         if (tagType === 'towing') return req.diagnosticHistory.some((h: any) => h.question === 'Besoin de remorquage' || (h.question === 'Service souhaité' && h.answer === 'Remorquage'));
       }
       const desc = req.description || '';
       if (tagType === 'drivable') return desc.includes('Véhicule roulant: Oui');

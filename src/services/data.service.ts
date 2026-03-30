@@ -431,6 +431,7 @@ export interface QuoteRequest {
    motoristEmail?: string;
    locationCity: string;
    locationCommune?: string; // NEW
+   locationQuarter?: string; // NEW
    locationCoords?: { lat: number, lng: number }; // For geofencing
    interventionDate?: string; // NEW: Desired intervention date
    interventionLocation?: 'GARAGE' | 'TOWING' | 'WORK' | 'HOME' | 'OTHER'; // NEW: Location preference
@@ -1931,6 +1932,10 @@ export class DataService {
       return this.http.post<{ user: Client; token: string }>(`${this.apiUrl}/client/mobile/register`, clientData);
    }
 
+   forgotPasswordMobile(email: string) {
+      return this.http.post<{ success: boolean; tempPassword: string; firstName: string }>(`${this.apiUrl}/client/mobile/forgot-password`, { email });
+   }
+
    syncPushToken(phone: string, pushToken: string) {
       if (!phone || !pushToken) return;
       this.http.patch(`${this.apiUrl}/client/mobile/push-token`, { phone, pushToken }).subscribe({
@@ -1985,7 +1990,14 @@ export class DataService {
 
    createMobileRequest(request: QuoteRequest) {
       // Remove frontend-only properties before sending to API to prevent Prisma "Unknown field" errors
-      const { localStatus, myQuoteId, isUnlockedForModification, hasUnreadMessagesForGarage, ...apiPayload } = request;
+      const { localStatus, myQuoteId, isUnlockedForModification, hasUnreadMessagesForGarage, locationQuarter, ...apiPayload } = request;
+      
+      // Merge locationQuarter into locationCommune so we don't need a DB migration
+      if (locationQuarter && locationQuarter.trim() !== '') {
+         apiPayload.locationCommune = apiPayload.locationCommune 
+            ? `${apiPayload.locationCommune} - ${locationQuarter.trim()}` 
+            : locationQuarter.trim();
+      }
       
       this.http.post<QuoteRequest>(`${this.apiUrl}/quote-request`, apiPayload).subscribe({
          next: (data) => this.quoteRequests.update(list => [...list, data]),

@@ -46,10 +46,16 @@ export class ClientController {
     return this.clientService.mobileLogin(credentials);
   }
 
-  @Public() // Can be secured if needed, but since it's from the app, keeping public for now, or just expecting an ID.
+  @Public()
   @Patch('mobile/push-token')
   updatePushToken(@Body() data: { phone: string; pushToken: string }) {
     return this.clientService.updatePushToken(data.phone, data.pushToken);
+  }
+
+  @Public()
+  @Post('mobile/forgot-password')
+  forgotPassword(@Body() data: { email: string }) {
+    return this.clientService.forgotPassword(data.email);
   }
 }
 
