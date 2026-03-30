@@ -2540,7 +2540,12 @@ export class MobileAppComponent {
           return;
        }
 
-       const clientId = this.currentClientData()?.id;
+       let clientId = this.currentClientData()?.id;
+       if (!clientId) {
+          const phone = this.currentPhone();
+          const found = this.dataService.clients().find(c => c.phone === phone);
+          clientId = found?.id;
+       }
        if (!clientId) {
           this.toastService.show('Erreur: utilisateur non identifié.', 'error');
           return;
