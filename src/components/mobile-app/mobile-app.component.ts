@@ -385,7 +385,7 @@ interface WizardNode {
                                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">🔴</div>
                                    <div class="flex flex-col">
                                       <span class="font-bold text-slate-900 dark:text-white">Urgent (immédiat)</span>
-                                      <span class="text-xs text-slate-500 leading-tight">Je suis bloqué, interviendez maintenant !</span>
+                                      <span class="text-xs text-slate-500 leading-tight">Je suis bloqué, intervenez maintenant !</span>
                                    </div>
                                 </button>
                                 <button type="button" (click)="setUrgency('urgency_today')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-amber-500]="requestUrgency() === 'urgency_today'" [class.bg-amber-50]="requestUrgency() === 'urgency_today'" [class.border-slate-200]="requestUrgency() !== 'urgency_today'" [class.bg-white]="requestUrgency() !== 'urgency_today'" [class.dark:bg-slate-800]="requestUrgency() !== 'urgency_today'" [class.dark:border-slate-700]="requestUrgency() !== 'urgency_today'">
@@ -1903,7 +1903,7 @@ export class MobileAppComponent {
       if (typeof crypto !== 'undefined' && crypto.randomUUID) {
          return crypto.randomUUID();
       }
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
          return v.toString(16);
       });
@@ -1959,32 +1959,32 @@ export class MobileAppComponent {
 
          // 1. Inject Automobiliste script dynamically if user requires it (defer to profile tab to avoid blocking Location prompt at app startup)
          if (user && tab === 'profile' && !mobileTawkInjected && Capacitor.isNativePlatform()) {
-             mobileTawkInjected = true;
-             
-             w.Tawk_API = w.Tawk_API || {};
-             w.Tawk_API.visitor = { name: fullName, email: finalEmail };
-             w.Tawk_API.onLoad = () => {
-                w.Tawk_API.setAttributes({ name: fullName, email: finalEmail }, function(e: any){});
-             };
+            mobileTawkInjected = true;
 
-             const s1 = document.createElement("script");
-             const s0 = document.getElementsByTagName("script")[0];
-             s1.async = true;
-             s1.src = 'https://embed.tawk.to/69bfe4ba1f2eee1c3a8ffa1f/1jkapau46';
-             s1.charset = 'UTF-8';
-             s1.setAttribute('crossorigin','*');
-             if (s0 && s0.parentNode) s0.parentNode.insertBefore(s1, s0);
-             else document.head.appendChild(s1);
+            w.Tawk_API = w.Tawk_API || {};
+            w.Tawk_API.visitor = { name: fullName, email: finalEmail };
+            w.Tawk_API.onLoad = () => {
+               w.Tawk_API.setAttributes({ name: fullName, email: finalEmail }, function (e: any) { });
+            };
+
+            const s1 = document.createElement("script");
+            const s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/69bfe4ba1f2eee1c3a8ffa1f/1jkapau46';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            if (s0 && s0.parentNode) s0.parentNode.insertBefore(s1, s0);
+            else document.head.appendChild(s1);
          }
-         
+
          const syncAndToggleTawk = () => {
             if (!w.Tawk_API) return;
 
             // Manage Visibility & Size
             if (user && tab === 'profile') {
                if (typeof w.Tawk_API.showWidget === 'function') w.Tawk_API.showWidget();
-               if (typeof w.Tawk_API.setAttributes === 'function') w.Tawk_API.setAttributes({ name: fullName, email: finalEmail }, function(e: any){});
-               
+               if (typeof w.Tawk_API.setAttributes === 'function') w.Tawk_API.setAttributes({ name: fullName, email: finalEmail }, function (e: any) { });
+
                setTimeout(() => {
                   const tawkIframe = document.querySelector('iframe[title="chat widget"]') as HTMLElement;
                   if (tawkIframe) {
@@ -2328,14 +2328,14 @@ export class MobileAppComponent {
 
    private locationRetryCount = 0;
 
-   async requestLocation() { 
+   async requestLocation() {
       try {
          if (Capacitor.isNativePlatform()) {
             const { Geolocation } = await import('@capacitor/geolocation');
-            
+
             // Allow more time for Android to fully bind the Activity
             await new Promise(resolve => setTimeout(resolve, 1500));
-            
+
             let perms = await Geolocation.checkPermissions();
             if (perms.location !== 'granted') {
                perms = await Geolocation.requestPermissions();
@@ -2348,27 +2348,27 @@ export class MobileAppComponent {
                }
                return;
             }
-            
+
             const pos = await Geolocation.getCurrentPosition({
                enableHighAccuracy: true,
                timeout: 10000,
                maximumAge: 3000
             });
-            this.userLocation.set({ lat: pos.coords.latitude, lng: pos.coords.longitude }); 
+            this.userLocation.set({ lat: pos.coords.latitude, lng: pos.coords.longitude });
             this.requestForm.patchValue({ gpsCoordinates: `${pos.coords.latitude}, ${pos.coords.longitude}` });
          } else {
-            if (navigator.geolocation) { 
+            if (navigator.geolocation) {
                navigator.geolocation.getCurrentPosition(
-                  (pos) => { 
-                     this.userLocation.set({ lat: pos.coords.latitude, lng: pos.coords.longitude }); 
-                     this.requestForm.patchValue({ gpsCoordinates: `${pos.coords.latitude}, ${pos.coords.longitude}` }); 
-                  }, 
-                  (err) => { 
-                     this.toastService.show('Impossible de récupérer la position sur ce navigateur', 'error'); 
+                  (pos) => {
+                     this.userLocation.set({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                     this.requestForm.patchValue({ gpsCoordinates: `${pos.coords.latitude}, ${pos.coords.longitude}` });
+                  },
+                  (err) => {
+                     this.toastService.show('Impossible de récupérer la position sur ce navigateur', 'error');
                   }
-               ); 
-            } else { 
-               this.toastService.show('Géolocalisation non supportée', 'error'); 
+               );
+            } else {
+               this.toastService.show('Géolocalisation non supportée', 'error');
             }
          }
       } catch (e: any) {
@@ -2426,214 +2426,214 @@ export class MobileAppComponent {
    getMapUrl(lat: number, lng: number): SafeResourceUrl { return this.sanitizer.bypassSecurityTrustResourceUrl(`https://maps.google.com/maps?q=${lat},${lng}&z=13&output=embed`); }
    completedRequestsCount = computed(() => this.myRequests().filter(r => r.status === 'COMPLETED').length);
    setAuthMode(mode: any) { this.authMode.set(mode); }
-    quickLogin(client: any) {
-       const fullName = client.firstName + (client.lastName ? ' ' + client.lastName : '');
-       this.currentUser.set(fullName);
-       this.currentPhone.set(client.phone);
-       this.currentClientData.set(client);
-       this.activeTab.set('home');
-       
-       // Force update the profile form with actual server data
-       this.profileForm.patchValue({
-          name: fullName,
-          phone: client.phone,
-          email: client.email,
-          city: client.address?.city || '',
-          address: client.address?.street || ''
-       });
+   quickLogin(client: any) {
+      const fullName = client.firstName + (client.lastName ? ' ' + client.lastName : '');
+      this.currentUser.set(fullName);
+      this.currentPhone.set(client.phone);
+      this.currentClientData.set(client);
+      this.activeTab.set('home');
 
-       // Load all API data (quoteRequests, invoices, repairs, etc.)
-       this.dataService.loadApiData();
+      // Force update the profile form with actual server data
+      this.profileForm.patchValue({
+         name: fullName,
+         phone: client.phone,
+         email: client.email,
+         city: client.address?.city || '',
+         address: client.address?.street || ''
+      });
 
-       // Init Push Notifications for this logged-in user
-       this.initPushNotifications();
-    }
- 
-    private initPushNotifications() {
-       setTimeout(async () => {
-          if (!Capacitor.isNativePlatform()) return;
-    
-          const phone = this.currentPhone();
-          if (!phone) return;
- 
-       let permStatus = await PushNotifications.checkPermissions();
-       if (permStatus.receive === 'prompt') {
-          permStatus = await PushNotifications.requestPermissions();
-       }
- 
-       if (permStatus.receive !== 'granted') {
-          console.warn('Push permissions denied.');
-          return;
-       }
- 
-       await PushNotifications.register();
- 
-       PushNotifications.addListener('registration', (token) => {
-          this.dataService.syncPushToken(phone, token.value);
-       });
- 
-       PushNotifications.addListener('pushNotificationReceived', (notification) => {
-          this.toastService.show(notification.title || 'Vous avez reçu une notification', 'success');
-          // Refresh background data
-          this.dataService.loadApiData();
-       });
- 
-       PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-          const type = notification.notification.data?.type;
-          
-          if (type === 'DEVIS' || type === 'FACTURE') {
-              this.requestsView.set('factures');
-              this.activeTab.set('requests');
-          } else if (type === 'QUOTE_REQUEST' || type === 'REPAIR_ORDER') {
-              this.requestsView.set('demandes');
-              this.activeTab.set('requests');
-          }
-          this.dataService.loadApiData();
-       });
-       }, 6000);
-     }
+      // Load all API data (quoteRequests, invoices, repairs, etc.)
+      this.dataService.loadApiData();
 
-    submitForgotPassword() {
-       const email = this.forgotPasswordEmail().trim().toLowerCase();
-       if (!email) {
-          this.toastService.show('Veuillez saisir votre adresse email.', 'error');
-          return;
-       }
-       this.forgotPasswordLoading.set(true);
-       this.dataService.forgotPasswordMobile(email).subscribe({
-          next: (res) => {
-             this.forgotPasswordResult.set({ tempPassword: res.tempPassword, firstName: res.firstName });
-             this.forgotPasswordLoading.set(false);
-          },
-          error: (err) => {
-             this.forgotPasswordLoading.set(false);
-             if (err?.error?.message === 'CLIENT_NOT_FOUND') {
-                this.toastService.show('Aucun compte trouvé avec cet email.', 'error');
-             } else {
-                this.toastService.show('Erreur lors de la réinitialisation.', 'error');
-             }
-          }
-       });
-    }
+      // Init Push Notifications for this logged-in user
+      this.initPushNotifications();
+   }
 
-    closeForgotPassword() {
-       this.forgotPasswordMode.set(false);
-       this.forgotPasswordEmail.set('');
-       this.forgotPasswordResult.set(null);
-    }
+   private initPushNotifications() {
+      setTimeout(async () => {
+         if (!Capacitor.isNativePlatform()) return;
 
-    submitChangePassword() {
-       const oldPwd = this.changePasswordOld();
-       const newPwd = this.changePasswordNew();
-       const confirmPwd = this.changePasswordConfirm();
+         const phone = this.currentPhone();
+         if (!phone) return;
 
-       if (!oldPwd || !newPwd || !confirmPwd) {
-          this.toastService.show('Veuillez remplir tous les champs.', 'error');
-          return;
-       }
-       if (newPwd.length < 6) {
-          this.toastService.show('Le nouveau mot de passe doit contenir au moins 6 caractères.', 'error');
-          return;
-       }
-       if (newPwd !== confirmPwd) {
-          this.toastService.show('Les mots de passe ne correspondent pas.', 'error');
-          return;
-       }
+         let permStatus = await PushNotifications.checkPermissions();
+         if (permStatus.receive === 'prompt') {
+            permStatus = await PushNotifications.requestPermissions();
+         }
 
-       let clientId = this.currentClientData()?.id;
-       if (!clientId) {
-          const phone = this.currentPhone();
-          const found = this.dataService.clients().find(c => c.phone === phone);
-          clientId = found?.id;
-       }
-       if (!clientId) {
-          this.toastService.show('Erreur: utilisateur non identifié.', 'error');
-          return;
-       }
+         if (permStatus.receive !== 'granted') {
+            console.warn('Push permissions denied.');
+            return;
+         }
 
-       this.changePasswordLoading.set(true);
-       this.dataService.changePasswordMobile(clientId, oldPwd, newPwd).subscribe({
-          next: () => {
-             this.changePasswordLoading.set(false);
-             this.closeChangePassword();
-             this.toastService.show('Mot de passe modifié avec succès !', 'success');
-          },
-          error: (err) => {
-             this.changePasswordLoading.set(false);
-             if (err?.error?.message === 'WRONG_PASSWORD') {
-                this.toastService.show('L\'ancien mot de passe est incorrect.', 'error');
-             } else {
-                this.toastService.show('Erreur lors de la modification.', 'error');
-             }
-          }
-       });
-    }
+         await PushNotifications.register();
 
-    closeChangePassword() {
-       this.showChangePasswordModal.set(false);
-       this.changePasswordOld.set('');
-       this.changePasswordNew.set('');
-       this.changePasswordConfirm.set('');
-    }
+         PushNotifications.addListener('registration', (token) => {
+            this.dataService.syncPushToken(phone, token.value);
+         });
 
-    submitAuth() {
-       const val = this.loginForm.value;
-       if (this.authMode() === 'login') {
-          if (!val.email || !val.password) return;
-          
-          // Bugfix: Mobile keyboards often auto-capitalize the first letter of the email.
-          // Postgres findUnique is case sensitive, leading to "deleted account" bugs.
-          const normalizedEmail = val.email.trim().toLowerCase();
-          
-          this.dataService.loginMobileClient({ email: normalizedEmail, password: val.password }).subscribe({
-             next: (res: any) => {
-                const client = res.user || res; if (res.token) localStorage.setItem("auth_token", res.token); this.quickLogin(client);
-                this.toastService.show('Connexion réussie', 'success');
-             },
-             error: (err) => {
-                this.toastService.show('Identifiants incorrects ou introuvables.', 'error');
-             }
-          });
-       } else {
-          if (!val.name || !val.email || !val.phone || !val.city || !val.address || !val.password) return;
-          
-          const normalizedEmail = val.email.trim().toLowerCase();
-          
-          // Split name into firstName/lastName for better DB consistency
-          const nameParts = val.name.trim().split(' ');
-          const firstName = nameParts[0];
-          const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+         PushNotifications.addListener('pushNotificationReceived', (notification) => {
+            this.toastService.show(notification.title || 'Vous avez reçu une notification', 'success');
+            // Refresh background data
+            this.dataService.loadApiData();
+         });
 
-          const newClientData = {
-             firstName: firstName,
-             lastName: lastName,
-             phone: val.phone,
-             email: normalizedEmail,
-             password: val.password,
-             type: val.type || 'Particulier',
-             address: { street: val.address, city: val.city, zip: '' },
-             vehicleIds: [],
-             financial: { paymentMethod: 'Cash', paymentTerms: 'Comptant', discountPercent: 0, balance: 0 },
-             history: []
-          };
- 
-          this.dataService.registerMobileClient(newClientData).subscribe({
-             next: (res: any) => {
-                const client = res.user || res; if (res.token) localStorage.setItem("auth_token", res.token); this.quickLogin(client);
-                this.toastService.show('Compte créé avec succès', 'success');
-             },
-             error: (err) => {
-                if (err?.error?.message === 'DOCUMENT_EXISTS') {
-                   this.toastService.show('Cette adresse e-mail possède déjà un compte ICE.', 'error');
-                } else {
-                   this.toastService.show('Erreur lors de la création du compte.', 'error');
-                }
-             }
-          });
-       }
-    }
+         PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+            const type = notification.notification.data?.type;
 
-   logout() { 
+            if (type === 'DEVIS' || type === 'FACTURE') {
+               this.requestsView.set('factures');
+               this.activeTab.set('requests');
+            } else if (type === 'QUOTE_REQUEST' || type === 'REPAIR_ORDER') {
+               this.requestsView.set('demandes');
+               this.activeTab.set('requests');
+            }
+            this.dataService.loadApiData();
+         });
+      }, 6000);
+   }
+
+   submitForgotPassword() {
+      const email = this.forgotPasswordEmail().trim().toLowerCase();
+      if (!email) {
+         this.toastService.show('Veuillez saisir votre adresse email.', 'error');
+         return;
+      }
+      this.forgotPasswordLoading.set(true);
+      this.dataService.forgotPasswordMobile(email).subscribe({
+         next: (res) => {
+            this.forgotPasswordResult.set({ tempPassword: res.tempPassword, firstName: res.firstName });
+            this.forgotPasswordLoading.set(false);
+         },
+         error: (err) => {
+            this.forgotPasswordLoading.set(false);
+            if (err?.error?.message === 'CLIENT_NOT_FOUND') {
+               this.toastService.show('Aucun compte trouvé avec cet email.', 'error');
+            } else {
+               this.toastService.show('Erreur lors de la réinitialisation.', 'error');
+            }
+         }
+      });
+   }
+
+   closeForgotPassword() {
+      this.forgotPasswordMode.set(false);
+      this.forgotPasswordEmail.set('');
+      this.forgotPasswordResult.set(null);
+   }
+
+   submitChangePassword() {
+      const oldPwd = this.changePasswordOld();
+      const newPwd = this.changePasswordNew();
+      const confirmPwd = this.changePasswordConfirm();
+
+      if (!oldPwd || !newPwd || !confirmPwd) {
+         this.toastService.show('Veuillez remplir tous les champs.', 'error');
+         return;
+      }
+      if (newPwd.length < 6) {
+         this.toastService.show('Le nouveau mot de passe doit contenir au moins 6 caractères.', 'error');
+         return;
+      }
+      if (newPwd !== confirmPwd) {
+         this.toastService.show('Les mots de passe ne correspondent pas.', 'error');
+         return;
+      }
+
+      let clientId = this.currentClientData()?.id;
+      if (!clientId) {
+         const phone = this.currentPhone();
+         const found = this.dataService.clients().find(c => c.phone === phone);
+         clientId = found?.id;
+      }
+      if (!clientId) {
+         this.toastService.show('Erreur: utilisateur non identifié.', 'error');
+         return;
+      }
+
+      this.changePasswordLoading.set(true);
+      this.dataService.changePasswordMobile(clientId, oldPwd, newPwd).subscribe({
+         next: () => {
+            this.changePasswordLoading.set(false);
+            this.closeChangePassword();
+            this.toastService.show('Mot de passe modifié avec succès !', 'success');
+         },
+         error: (err) => {
+            this.changePasswordLoading.set(false);
+            if (err?.error?.message === 'WRONG_PASSWORD') {
+               this.toastService.show('L\'ancien mot de passe est incorrect.', 'error');
+            } else {
+               this.toastService.show('Erreur lors de la modification.', 'error');
+            }
+         }
+      });
+   }
+
+   closeChangePassword() {
+      this.showChangePasswordModal.set(false);
+      this.changePasswordOld.set('');
+      this.changePasswordNew.set('');
+      this.changePasswordConfirm.set('');
+   }
+
+   submitAuth() {
+      const val = this.loginForm.value;
+      if (this.authMode() === 'login') {
+         if (!val.email || !val.password) return;
+
+         // Bugfix: Mobile keyboards often auto-capitalize the first letter of the email.
+         // Postgres findUnique is case sensitive, leading to "deleted account" bugs.
+         const normalizedEmail = val.email.trim().toLowerCase();
+
+         this.dataService.loginMobileClient({ email: normalizedEmail, password: val.password }).subscribe({
+            next: (res: any) => {
+               const client = res.user || res; if (res.token) localStorage.setItem("auth_token", res.token); this.quickLogin(client);
+               this.toastService.show('Connexion réussie', 'success');
+            },
+            error: (err) => {
+               this.toastService.show('Identifiants incorrects ou introuvables.', 'error');
+            }
+         });
+      } else {
+         if (!val.name || !val.email || !val.phone || !val.city || !val.address || !val.password) return;
+
+         const normalizedEmail = val.email.trim().toLowerCase();
+
+         // Split name into firstName/lastName for better DB consistency
+         const nameParts = val.name.trim().split(' ');
+         const firstName = nameParts[0];
+         const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+         const newClientData = {
+            firstName: firstName,
+            lastName: lastName,
+            phone: val.phone,
+            email: normalizedEmail,
+            password: val.password,
+            type: val.type || 'Particulier',
+            address: { street: val.address, city: val.city, zip: '' },
+            vehicleIds: [],
+            financial: { paymentMethod: 'Cash', paymentTerms: 'Comptant', discountPercent: 0, balance: 0 },
+            history: []
+         };
+
+         this.dataService.registerMobileClient(newClientData).subscribe({
+            next: (res: any) => {
+               const client = res.user || res; if (res.token) localStorage.setItem("auth_token", res.token); this.quickLogin(client);
+               this.toastService.show('Compte créé avec succès', 'success');
+            },
+            error: (err) => {
+               if (err?.error?.message === 'DOCUMENT_EXISTS') {
+                  this.toastService.show('Cette adresse e-mail possède déjà un compte ICE.', 'error');
+               } else {
+                  this.toastService.show('Erreur lors de la création du compte.', 'error');
+               }
+            }
+         });
+      }
+   }
+
+   logout() {
       this.currentUser.set(null);
       this.currentPhone.set(null);
       this.currentClientData.set(null);
@@ -2660,10 +2660,10 @@ export class MobileAppComponent {
    getRepair(id: string) { return this.dataService.getPublicRepairById(id); }
    getRepairStatus(id?: string) { return id ? this.dataService.getPublicRepairById(id)?.status : ''; }
    getStatusLabel(s: string) { return s; }
-   getRef(id?: string): string { return id ? id.substring(0,8).toUpperCase() : ''; }
+   getRef(id?: string): string { return id ? id.substring(0, 8).toUpperCase() : ''; }
    viewRequestInfo(req: QuoteRequest) { this.selectedRequestInfo.set(req); }
-   closeRequestInfo() { 
-      this.selectedRequestInfo.set(null); 
+   closeRequestInfo() {
+      this.selectedRequestInfo.set(null);
       this.editingInterventionDate.set(false);
    }
 
@@ -2733,7 +2733,7 @@ export class MobileAppComponent {
       if (d) {
          this.showConfirmQuoteModal.set(false);
          this.toastService.show('Initialisation du paiement des frais de gestion...', 'info');
-         
+
          this.dataService.initQuotePayment(d.req.id, d.quote.id).subscribe({
             next: async (res) => {
                if (Capacitor.isNativePlatform()) {
@@ -2802,7 +2802,7 @@ export class MobileAppComponent {
          return;
       }
       if (!this.currentUser()) return;
-      
+
       const v = this.vehicleForm.value;
       const existingId = this.editingVehicleId();
 
@@ -2915,8 +2915,8 @@ export class MobileAppComponent {
          this.requestWizardStep.set(7);
       } else if (step === 7) {
          if (!this.requestForm.get('locationCity')?.value) {
-             this.toastService.show('Veuillez spécifier un lieu.', 'error');
-             return;
+            this.toastService.show('Veuillez spécifier un lieu.', 'error');
+            return;
          }
          this.requestWizardStep.set(8);
       }
@@ -3008,14 +3008,14 @@ export class MobileAppComponent {
          const tenant = this.dataService.tenants().find(t => t.id === docData.tenantId);
          // Fall back to platform-level settings if tenant not found
          const globalSettings = this.dataService.currentSettings();
-         const garageName    = tenant?.name     || globalSettings.name     || 'Garage';
-         const garageAddress = tenant?.address  || globalSettings.address  || '';
-         const garageCity    = tenant?.city     || globalSettings.city     || '';
-         const garagePhone   = tenant?.phone    || globalSettings.phone    || '';
-         const garageLogoUrl = tenant?.settings?.logoUrl || globalSettings.logoUrl  || '';
-         const primaryColor  = globalSettings.docColor || '#2563eb';
-         const currency      = globalSettings.currency || 'XOF';
-         const footerText    = globalSettings.invoiceFooter || '';
+         const garageName = tenant?.name || globalSettings.name || 'Garage';
+         const garageAddress = tenant?.address || globalSettings.address || '';
+         const garageCity = tenant?.city || globalSettings.city || '';
+         const garagePhone = tenant?.phone || globalSettings.phone || '';
+         const garageLogoUrl = tenant?.settings?.logoUrl || globalSettings.logoUrl || '';
+         const primaryColor = globalSettings.docColor || '#2563eb';
+         const currency = globalSettings.currency || 'XOF';
+         const footerText = globalSettings.invoiceFooter || '';
 
          // --- Build client data from invoice fields ---
          const clientInvoice = this.dataService.clients().find(c => c.id === docData.clientId);
@@ -3032,10 +3032,10 @@ export class MobileAppComponent {
 
          // --- Totals breakdown ---
          const items = docData.items || [];
-         const positiveItems  = items.filter((i: any) => i.totalHT >= 0);
-         const discountItems  = items.filter((i: any) => i.totalHT < 0);
-         const grossHT        = positiveItems.reduce((acc: number, i: any) => acc + i.totalHT, 0);
-         const discountTotal  = discountItems.reduce((acc: number, i: any) => acc + Math.abs(i.totalHT), 0);
+         const positiveItems = items.filter((i: any) => i.totalHT >= 0);
+         const discountItems = items.filter((i: any) => i.totalHT < 0);
+         const grossHT = positiveItems.reduce((acc: number, i: any) => acc + i.totalHT, 0);
+         const discountTotal = discountItems.reduce((acc: number, i: any) => acc + Math.abs(i.totalHT), 0);
          const computedVatRate = docData.totalHT > 0
             ? Math.round((docData.totalVAT / docData.totalHT) * 100)
             : 18;
@@ -3047,7 +3047,7 @@ export class MobileAppComponent {
 
          // ── HEADER ──────────────────────────────────────────────────────────
          if (garageLogoUrl) {
-            try { doc.addImage(garageLogoUrl, 'PNG', margin, y, 25, 25, undefined, 'FAST'); } catch (e) {}
+            try { doc.addImage(garageLogoUrl, 'PNG', margin, y, 25, 25, undefined, 'FAST'); } catch (e) { }
          }
 
          const textLeftX = garageLogoUrl ? margin + 30 : margin;
@@ -3056,8 +3056,8 @@ export class MobileAppComponent {
 
          doc.setFontSize(9); doc.setTextColor(80, 80, 80); doc.setFont('helvetica', 'normal');
          if (garageAddress) doc.text(garageAddress, textLeftX, y + 14);
-         if (garageCity)    doc.text(garageCity, textLeftX, y + 18);
-         if (garagePhone)   doc.text(garagePhone, textLeftX, y + 22);
+         if (garageCity) doc.text(garageCity, textLeftX, y + 18);
+         if (garagePhone) doc.text(garagePhone, textLeftX, y + 22);
 
          doc.setFontSize(24); doc.setTextColor(40, 40, 40); doc.setFont('helvetica', 'bold');
          doc.text(docData.type || 'FACTURE', pageWidth - margin, y + 8, { align: 'right' });
@@ -3089,8 +3089,8 @@ export class MobileAppComponent {
          doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80);
          if (clientInvoice) {
             if (clientInvoice.address?.street) doc.text(clientInvoice.address.street, margin, y);
-            if (clientInvoice.address?.city)   doc.text(`${clientInvoice.address.zip || ''} ${clientInvoice.address.city}`, margin, y + 4);
-            if (clientInvoice.vatNumber)        doc.text(`TVA: ${clientInvoice.vatNumber}`, margin, y + 8);
+            if (clientInvoice.address?.city) doc.text(`${clientInvoice.address.zip || ''} ${clientInvoice.address.city}`, margin, y + 4);
+            if (clientInvoice.vatNumber) doc.text(`TVA: ${clientInvoice.vatNumber}`, margin, y + 8);
          }
 
          // Right: vehicle
@@ -3122,9 +3122,9 @@ export class MobileAppComponent {
 
          doc.setFontSize(8); doc.setTextColor(100, 100, 100); doc.setFont('helvetica', 'bold');
          doc.text('DESCRIPTION', margin + 2, y + 5);
-         doc.text('QTÉ',      pageWidth - margin - 60, y + 5, { align: 'right' });
-         doc.text('P.U. HT',  pageWidth - margin - 35, y + 5, { align: 'right' });
-         doc.text('TOTAL HT', pageWidth - margin - 2,  y + 5, { align: 'right' });
+         doc.text('QTÉ', pageWidth - margin - 60, y + 5, { align: 'right' });
+         doc.text('P.U. HT', pageWidth - margin - 35, y + 5, { align: 'right' });
+         doc.text('TOTAL HT', pageWidth - margin - 2, y + 5, { align: 'right' });
          y += 14;
 
          // ── TABLE ROWS ──────────────────────────────────────────────────────
@@ -3146,15 +3146,15 @@ export class MobileAppComponent {
          y += 5;
          if (y > 250) { doc.addPage(); y = 20; }
 
-         const rightColX  = pageWidth - margin;
-         const labelColX  = pageWidth - margin - 50;
+         const rightColX = pageWidth - margin;
+         const labelColX = pageWidth - margin - 50;
 
          const printTotal = (label: string, value: string, bold = false, size = 9, color: 'gray' | 'black' | 'brand' | 'red' = 'gray') => {
             doc.setFontSize(size); doc.setFont('helvetica', bold ? 'bold' : 'normal');
-            if      (color === 'brand') doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b);
+            if (color === 'brand') doc.setTextColor(colorRgb.r, colorRgb.g, colorRgb.b);
             else if (color === 'black') doc.setTextColor(0, 0, 0);
-            else if (color === 'red')   doc.setTextColor(239, 68, 68);
-            else                        doc.setTextColor(100, 100, 100);
+            else if (color === 'red') doc.setTextColor(239, 68, 68);
+            else doc.setTextColor(100, 100, 100);
             doc.text(label, labelColX, y);
             doc.text(value, rightColX, y, { align: 'right' });
             y += 5;
@@ -3226,7 +3226,7 @@ export class MobileAppComponent {
       this.toastService.show('Paiement validé avec succès !', 'success');
    }
 
-   openProfileInfo() { 
+   openProfileInfo() {
       const phone = this.currentPhone();
       if (phone) {
          const client = this.dataService.clients().find(c => c.phone === phone && c.type === 'Particulier');
@@ -3250,7 +3250,7 @@ export class MobileAppComponent {
             });
          }
       }
-      this.showProfileInfoModal.set(true); 
+      this.showProfileInfoModal.set(true);
    }
    closeProfileInfo() { this.showProfileInfoModal.set(false); }
 
@@ -3283,7 +3283,7 @@ export class MobileAppComponent {
             let h = img.height;
             if (w > maxDim || h > maxDim) {
                if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-               else       { w = Math.round(w * maxDim / h); h = maxDim; }
+               else { w = Math.round(w * maxDim / h); h = maxDim; }
             }
             const canvas = document.createElement('canvas');
             canvas.width = w;
@@ -3307,7 +3307,7 @@ export class MobileAppComponent {
          reader.readAsDataURL(file);
       }
    }
-   
+
    async takePhoto() {
       if (!Capacitor.isNativePlatform()) {
          // Fallback to hidden file input on Desktop/Web
@@ -3323,10 +3323,10 @@ export class MobileAppComponent {
             resultType: CameraResultType.DataUrl,
             source: CameraSource.Prompt // Asks user: Gallery or Camera
          });
-         
+
          if (image.dataUrl) {
-           const compressed = await this.compressImage(image.dataUrl);
-           this.requestPhotos.update(p => [...p, compressed]);
+            const compressed = await this.compressImage(image.dataUrl);
+            this.requestPhotos.update(p => [...p, compressed]);
          }
       } catch (error) {
          console.warn('User cancelled photo or camera error:', error);
@@ -3360,17 +3360,17 @@ export class MobileAppComponent {
 
       // Build description from wizard choices
       let finalDescription = val.description || '';
-      
+
       const combinedHistory = [...this.wizardAnswers()];
-      
+
       if (this.requestServiceType() === 'towing') combinedHistory.unshift({ question: 'Service souhaité', answer: 'Remorquage' });
       if (this.requestServiceType() === 'tech_home') combinedHistory.unshift({ question: 'Service souhaité', answer: 'Technicien à domicile' });
       if (this.requestServiceType() === 'garage_drop') combinedHistory.unshift({ question: 'Service souhaité', answer: 'Dépôt garage' });
-      
-      const urgencyStr = this.requestUrgency() === 'urgency_immediate' ? 'Urgent (immédiat)' : 
-                         this.requestUrgency() === 'urgency_today' ? 'Aujourd’hui' : 'Flexible';
+
+      const urgencyStr = this.requestUrgency() === 'urgency_immediate' ? 'Urgent (immédiat)' :
+         this.requestUrgency() === 'urgency_today' ? 'Aujourd’hui' : 'Flexible';
       combinedHistory.unshift({ question: 'Urgence', answer: urgencyStr });
-      
+
       combinedHistory.unshift({ question: 'Véhicule roulant', answer: this.isVehicleDrivable() ? 'Oui' : 'Non' });
       combinedHistory.unshift({ question: 'Type de besoin', answer: this.requestNeedType() || 'Autre' });
 
@@ -3451,7 +3451,7 @@ export class MobileAppComponent {
       return desc;
    }
 
-   hasTag(req: any, tagType: 'drivable'|'not_drivable'|'technician'|'towing'): boolean {
+   hasTag(req: any, tagType: 'drivable' | 'not_drivable' | 'technician' | 'towing'): boolean {
       if (req.diagnosticHistory && req.diagnosticHistory.length > 0) {
          if (tagType === 'drivable') return req.diagnosticHistory.some((h: any) => h.question === 'Véhicule roulant' && h.answer === 'Oui');
          if (tagType === 'not_drivable') return req.diagnosticHistory.some((h: any) => h.question === 'Véhicule roulant' && h.answer === 'Non');
