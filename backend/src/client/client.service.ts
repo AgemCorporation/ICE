@@ -206,5 +206,33 @@ export class ClientService {
 
     return { success: true, tempPassword, firstName: client.firstName };
   }
+
+  async changePassword(clientId: string, oldPassword: string, newPassword: string) {
+    const client = await this.prisma.client.findUnique({ where: { id: clientId } });
+    if (!client) {
+      throw new UnauthorizedException('CLIENT_NOT_FOUND');
+    }
+
+    const bcrypt = await import('bcrypt');
+
+    // Verify old password
+    if (client.password) {
+      const isBcrypt = client.password.startsWith('$2');
+      if (isBcrypt) {
+        const isValid = await bcrypt.compare(oldPassword, client.password);
+        if (!isValid) throw new UnauthorizedException('WRONG_PASSWORD');
+      } else {
+        if (client.password !== oldPassword) throw new UnauthorizedException('WRONG_PASSWORD');
+      }
+    }
+
+    const hashedNew = await bcrypt.hash(newPassword, 10);
+    await this.prisma.client.update({
+      where: { id: clientId },
+      data: { password: hashedNew }
+    });
+
+    return { success: true };
+  }
 }
 

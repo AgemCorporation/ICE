@@ -57,5 +57,10 @@ export class ClientController {
   forgotPassword(@Body() data: { email: string }) {
     return this.clientService.forgotPassword(data.email);
   }
+
+  @Post('mobile/change-password')
+  changePassword(@Body() data: { clientId: string; oldPassword: string; newPassword: string }) {
+    return this.clientService.changePassword(data.clientId, data.oldPassword, data.newPassword);
+  }
 }
 

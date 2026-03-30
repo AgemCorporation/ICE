@@ -1018,9 +1018,53 @@ interface WizardNode {
                             <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ myInvoices().length }}</span>
                          }
                       </button>
+                      <button (click)="showChangePasswordModal.set(true)" class="w-full text-left p-4 border-b border-slate-100 dark:border-slate-800 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                         Modifier mon mot de passe
+                      </button>
                       <button (click)="openSettings()" class="w-full text-left p-4 border-b border-slate-100 dark:border-slate-800 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Paramètres</button>
                       <button (click)="logout()" class="w-full text-left p-4 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Déconnexion</button>
                    </div>
+
+                   <!-- CHANGE PASSWORD MODAL -->
+                   @if (showChangePasswordModal()) {
+                      <div class="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-md">
+                         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-in">
+                            <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-5 text-center relative">
+                               <button (click)="closeChangePassword()" class="absolute top-3 right-3 text-white/60 hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                               </button>
+                               <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                               </div>
+                               <h3 class="text-white font-bold text-lg">Modifier le mot de passe</h3>
+                               <p class="text-indigo-100 text-xs mt-1">Sécurisez votre compte</p>
+                            </div>
+                            <div class="p-6 space-y-4">
+                               <div>
+                                  <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Ancien mot de passe</label>
+                                  <input [ngModel]="changePasswordOld()" (ngModelChange)="changePasswordOld.set($event)" type="password" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                               </div>
+                               <div>
+                                  <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Nouveau mot de passe</label>
+                                  <input [ngModel]="changePasswordNew()" (ngModelChange)="changePasswordNew.set($event)" type="password" placeholder="Min. 6 caractères" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                               </div>
+                               <div>
+                                  <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Confirmer le nouveau mot de passe</label>
+                                  <input [ngModel]="changePasswordConfirm()" (ngModelChange)="changePasswordConfirm.set($event)" type="password" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                               </div>
+                               <button (click)="submitChangePassword()" [disabled]="changePasswordLoading()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2">
+                                  @if (changePasswordLoading()) {
+                                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                     Modification...
+                                  } @else {
+                                     Enregistrer
+                                  }
+                               </button>
+                            </div>
+                         </div>
+                      </div>
+                   }
                 </div>
              }
 
@@ -1679,6 +1723,12 @@ export class MobileAppComponent {
    forgotPasswordEmail = signal('');
    forgotPasswordResult = signal<{ tempPassword: string; firstName: string } | null>(null);
    forgotPasswordLoading = signal(false);
+
+   showChangePasswordModal = signal(false);
+   changePasswordOld = signal('');
+   changePasswordNew = signal('');
+   changePasswordConfirm = signal('');
+   changePasswordLoading = signal(false);
 
    userLocation = signal<{ lat: number, lng: number } | null>(null);
 
@@ -2470,6 +2520,55 @@ export class MobileAppComponent {
        this.forgotPasswordMode.set(false);
        this.forgotPasswordEmail.set('');
        this.forgotPasswordResult.set(null);
+    }
+
+    submitChangePassword() {
+       const oldPwd = this.changePasswordOld();
+       const newPwd = this.changePasswordNew();
+       const confirmPwd = this.changePasswordConfirm();
+
+       if (!oldPwd || !newPwd || !confirmPwd) {
+          this.toastService.show('Veuillez remplir tous les champs.', 'error');
+          return;
+       }
+       if (newPwd.length < 6) {
+          this.toastService.show('Le nouveau mot de passe doit contenir au moins 6 caractères.', 'error');
+          return;
+       }
+       if (newPwd !== confirmPwd) {
+          this.toastService.show('Les mots de passe ne correspondent pas.', 'error');
+          return;
+       }
+
+       const clientId = this.currentClientData()?.id;
+       if (!clientId) {
+          this.toastService.show('Erreur: utilisateur non identifié.', 'error');
+          return;
+       }
+
+       this.changePasswordLoading.set(true);
+       this.dataService.changePasswordMobile(clientId, oldPwd, newPwd).subscribe({
+          next: () => {
+             this.changePasswordLoading.set(false);
+             this.closeChangePassword();
+             this.toastService.show('Mot de passe modifié avec succès !', 'success');
+          },
+          error: (err) => {
+             this.changePasswordLoading.set(false);
+             if (err?.error?.message === 'WRONG_PASSWORD') {
+                this.toastService.show('L\'ancien mot de passe est incorrect.', 'error');
+             } else {
+                this.toastService.show('Erreur lors de la modification.', 'error');
+             }
+          }
+       });
+    }
+
+    closeChangePassword() {
+       this.showChangePasswordModal.set(false);
+       this.changePasswordOld.set('');
+       this.changePasswordNew.set('');
+       this.changePasswordConfirm.set('');
     }
 
     submitAuth() {

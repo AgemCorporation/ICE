@@ -1936,6 +1936,10 @@ export class DataService {
       return this.http.post<{ success: boolean; tempPassword: string; firstName: string }>(`${this.apiUrl}/client/mobile/forgot-password`, { email });
    }
 
+   changePasswordMobile(clientId: string, oldPassword: string, newPassword: string) {
+      return this.http.post<{ success: boolean }>(`${this.apiUrl}/client/mobile/change-password`, { clientId, oldPassword, newPassword });
+   }
+
    syncPushToken(phone: string, pushToken: string) {
       if (!phone || !pushToken) return;
       this.http.patch(`${this.apiUrl}/client/mobile/push-token`, { phone, pushToken }).subscribe({
