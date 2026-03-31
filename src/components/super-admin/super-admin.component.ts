@@ -1134,6 +1134,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                          <div class="flex justify-between"><span class="text-slate-500">Marque/Modèle</span> <span class="font-bold text-slate-900 dark:text-white">{{ req.vehicleBrand }} {{ req.vehicleModel }}</span></div>
                          <div class="flex justify-between"><span class="text-slate-500">Année</span> <span class="text-slate-900 dark:text-white">{{ req.vehicleYear }}</span></div>
                          <div class="flex justify-between"><span class="text-slate-500">Carburant</span> <span class="text-slate-900 dark:text-white">{{ req.fuel || '-' }}</span></div>
+                         <div class="flex justify-between"><span class="text-slate-500">Boîte</span> <span class="text-slate-900 dark:text-white">{{ req.gearbox || '-' }}</span></div>
                          <div class="flex justify-between"><span class="text-slate-500">Kilométrage</span> <span class="text-slate-900 dark:text-white">{{ req.mileage ? req.mileage + ' km' : '-' }}</span></div>
                          <div class="flex justify-between"><span class="text-slate-500">VIN (Série)</span> <span class="text-slate-900 dark:text-white font-mono break-all">{{ req.vehicleVin || '-' }}</span></div>
                       </div>

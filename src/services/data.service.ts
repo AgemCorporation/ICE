@@ -159,6 +159,7 @@ export interface MotoristVehicle {
    vin: string;
    mileage: number;
    fuel: string;
+   gearbox?: string;
    photos: string[]; // Base64
    color?: string;
    insuranceProvider?: string;
@@ -442,6 +443,7 @@ export interface QuoteRequest {
    vehicleVin?: string;
    fuel?: string;
    mileage?: number;
+   gearbox?: string;
    description: string;
    adminDescription?: string; // Optional official description provided by Superadmin
    photos: string[];
