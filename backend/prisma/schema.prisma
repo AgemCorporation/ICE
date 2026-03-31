@@ -198,6 +198,7 @@ model QuoteRequest {
   vehiclePlate         String?
   fuel                 String?
   mileage              Int?
+  gearbox              String?
   description          String
   adminDescription     String?
   photos               String[]  @default([])
