@@ -3392,7 +3392,7 @@ export class MobileAppComponent {
          fuel: vehicle.fuel,
          vehicleVin: vehicle.vin,
          mileage: vehicle.mileage,
-         gearbox: vehicle.gearbox || 'Manuelle',
+         gearbox: vehicle.gearbox,
          photos: this.requestPhotos().length > 0 ? this.requestPhotos() : vehicle.photos,
          description: finalDescription,
          interventionDate: val.interventionDate || undefined,

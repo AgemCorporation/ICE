@@ -254,6 +254,7 @@ model MotoristVehicle {
   vin               String
   mileage           Int       @default(0)
   fuel              String
+  gearbox           String    @default("Manuelle")
   photos            String[]  @default([])
   color             String?
   insuranceProvider String?
