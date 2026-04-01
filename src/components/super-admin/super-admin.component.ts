@@ -865,7 +865,12 @@ import { ActivatedRoute, Router } from '@angular/router';
                       <div class="flex justify-between items-start mb-6 border-b border-slate-100 dark:border-slate-800 pb-4 mt-2">
                          <div>
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Garage Émetteur</div>
-                            <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">{{ getTenantName(quote.tenantId) }}</h3>
+                            <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                                {{ getTenantName(quote.tenantId) }}
+                                @if (req.recommendedQuoteIds?.includes(quote.id)) {
+                                   <span class="text-amber-500" title="Recommandé par ICE">⭐</span>
+                                }
+                             </h3>
                             @if ((req.status === 'CONVERTED' || req.status === 'COMPLETED') && req.repairOrderId) {
                                <div class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                                   Ordre de Réparation: <span class="font-bold text-slate-900 dark:text-white">OR #{{ req.repairOrderId.substring(0, 6) }}</span>
@@ -938,17 +943,28 @@ import { ActivatedRoute, Router } from '@angular/router';
                     <div class="p-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex items-center justify-between">
                        <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                          Discussion & Demande de Révision
+                          <div class="flex items-center gap-6">
+                           <label class="flex items-center gap-2 cursor-pointer group">
+                              <span class="text-xs font-semibold" [class]="req.recommendedQuoteIds?.includes(quote?.id || '') ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'">
+                                 Recommander ce devis
+                              </span>
+                              <div class="relative flex items-center">
+                                 <input type="checkbox" [checked]="!!req.recommendedQuoteIds?.includes(quote?.id || '')" (change)="dataService.toggleQuoteRecommendation(req.id, quote?.id || '')" class="sr-only peer">
+                                 <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-500/50 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-amber-500 shadow-inner"></div>
+                              </div>
+                           </label>
+
+                           <label class="flex items-center gap-3 cursor-pointer group">
+                              <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                                 Autoriser le garage à modifier
+                              </span>
+                               <div class="relative flex items-center">
+                                  <input type="checkbox" [checked]="!!req.unlockedTenantIds?.includes(quote?.tenantId || '')" (change)="toggleQuoteUnlock(req.id, quote?.tenantId, $event)" class="sr-only peer">
+                                  <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-500/50 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-brand-500 shadow-inner"></div>
+                               </div>
+                           </label>
+                        </div>
                        </h4>
-                       <label class="flex items-center gap-3 cursor-pointer group">
-                          <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                             Autoriser le garage à modifier
-                          </span>
-                           <div class="relative flex items-center">
-                              <input type="checkbox" [checked]="!!req.unlockedTenantIds?.includes(quote?.tenantId || '')" (change)="toggleQuoteUnlock(req.id, quote?.tenantId, $event)" class="sr-only peer">
-                              <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-500/50 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-brand-500 shadow-inner"></div>
-                           </div>
-                       </label>
                     </div>
                     
                     <div class="p-4 bg-slate-50 dark:bg-slate-950/30 max-h-64 overflow-y-auto flex flex-col gap-3">

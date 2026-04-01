@@ -471,6 +471,7 @@ export interface QuoteRequest {
    hasUnreadMessagesForGarage?: boolean; // (Legacy/Global)
    unreadMessageTenantIds?: string[]; // NEW: Garages with unread messages
    hasUnreadMessagesForAdmin?: boolean; // NEW: Flag for new messages for SuperAdmin
+   recommendedQuoteIds?: string[]; // NEW: IDs of recommended quotes
    isDirectRequest?: boolean; // NEW: Flag for requests created directly via QR Scan
    directTenantId?: string; // NEW: ID of the garage that scanned the user
 
@@ -1795,6 +1796,18 @@ export class DataService {
          }
 
          this.addSystemLog('INFO', `Specific Quote #${quoteId} on Request #${requestId} TRANSMITTED TO CLIENT`, 'Global');
+         this.syncQuoteRequestDB(requestId);
+      }
+   }
+
+   toggleQuoteRecommendation(requestId: string, quoteId: string) {
+      const req = this.quoteRequests().find(r => r.id === requestId);
+      if (req) {
+         const current = req.recommendedQuoteIds || [];
+         const exists = current.includes(quoteId);
+         const next = exists ? current.filter(id => id !== quoteId) : [...current, quoteId];
+         
+         this.quoteRequests.update(list => list.map(r => r.id === requestId ? { ...r, recommendedQuoteIds: next } : r));
          this.syncQuoteRequestDB(requestId);
       }
    }

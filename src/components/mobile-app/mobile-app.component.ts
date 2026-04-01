@@ -253,10 +253,13 @@ interface WizardNode {
                                      <div class="font-bold text-slate-900 dark:text-white text-sm truncate flex items-center gap-1">
                                         {{ garage.name }}
                                         @if (garage.plan === 'ICE Full') {
-                                           <span title="Partenaire Premium" class="text-xs">💎</span>
+                                           <span class="text-xs">⭐</span>
                                         }
                                      </div>
                                      <div class="text-[10px] text-slate-500 truncate w-full">{{ garage.address || garage.city + (garage.commune ? ', ' + garage.commune : '') }}</div>
+                                     @if (garage.plan === 'ICE Full') {
+                                        <div class="text-[9px] text-amber-600 dark:text-amber-400 font-bold mt-0.5">Recommandé par Mécatech</div>
+                                     }
                                      @if(garage.rating) {
                                         <div class="flex text-[10px] text-amber-400 mt-1">
                                            @for(i of [1,2,3,4,5]; track i) { <span [class.text-slate-300]="i > garage.rating!">★</span> }
@@ -338,15 +341,15 @@ interface WizardNode {
                              <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Que se passe-t-il avec votre véhicule ?</p>
                              <div class="grid grid-cols-2 gap-3">
                                 @for (need of ['Ne démarre pas', 'Bruit / anomalie', 'Voyant allumé', 'Entretien', 'Accident', 'Autre']; track need) {
-                                   <button type="button" (click)="setNeedType(need)" class="p-3 rounded-xl border-2 text-left transition-all active:scale-95 flex items-center gap-2" [class.border-indigo-500]="requestNeedType() === need" [class.bg-indigo-50]="requestNeedType() === need" [class.text-indigo-700]="requestNeedType() === need" [class.border-slate-200]="requestNeedType() !== need" [class.bg-white]="requestNeedType() !== need" [class.text-slate-700]="requestNeedType() !== need" [class.dark:bg-slate-800]="requestNeedType() !== need" [class.dark:text-slate-300]="requestNeedType() !== need" [class.dark:border-slate-700]="requestNeedType() !== need">
-                                      <div class="w-3 h-3 rounded-full shrink-0" [class.bg-indigo-500]="requestNeedType() === need" [class.bg-slate-200]="requestNeedType() !== need" [class.dark:bg-slate-700]="requestNeedType() !== need"></div>
+                                   <button type="button" (click)="toggleNeedType(need)" class="p-3 rounded-xl border-2 text-left transition-all active:scale-95 flex items-center gap-2" [class.border-indigo-500]="requestNeedType().includes(need)" [class.bg-indigo-50]="requestNeedType().includes(need)" [class.text-indigo-700]="requestNeedType().includes(need)" [class.border-slate-200]="!requestNeedType().includes(need)" [class.bg-white]="!requestNeedType().includes(need)" [class.text-slate-700]="!requestNeedType().includes(need)" [class.dark:bg-slate-800]="!requestNeedType().includes(need)" [class.dark:text-slate-300]="!requestNeedType().includes(need)" [class.dark:border-slate-700]="!requestNeedType().includes(need)">
+                                      <div class="w-3 h-3 rounded-[3px] shrink-0" [class.bg-indigo-500]="requestNeedType().includes(need)" [class.bg-slate-200]="!requestNeedType().includes(need)" [class.dark:bg-slate-700]="!requestNeedType().includes(need)"></div>
                                       <span class="font-bold text-[13px] leading-tight">{{ need }}</span>
                                    </button>
                                 }
                              </div>
                              <div class="flex gap-3 mt-6">
                                 <button type="button" (click)="goToPrevRequestStep()" class="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-colors">Retour</button>
-                                <button type="button" (click)="goToNextRequestStep()" [disabled]="!requestNeedType()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
+                                <button type="button" (click)="goToNextRequestStep()" [disabled]="requestNeedType().length === 0" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 transition-colors active:scale-[0.98]">Suivant</button>
                              </div>
                           </div>
                        }
@@ -517,44 +520,44 @@ interface WizardNode {
                        @if (requestWizardStep() === 8) {
                           <div class="animate-fade-in">
                              <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Dernière vérification</h3>
-                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Voici votre estimation théorique :</p>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Votre demande est prête à être envoyée :</p>
                              <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-5 border border-indigo-100 dark:border-indigo-800 mb-6 shadow-sm">
                                 <div class="space-y-4">
-                                   <!-- Estimation Cost -->
-                                   <div class="flex justify-between items-center border-b border-indigo-200 dark:border-indigo-800/50 pb-3">
-                                      <div class="flex items-center gap-2">
-                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                         <span class="font-bold text-indigo-900 dark:text-indigo-300 text-sm">Prix estimé</span>
+                                   <!-- Item 1: Garages Count -->
+                                   <div class="flex items-start gap-3">
+                                      <div class="shrink-0 mt-0.5">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                       </div>
-                                      @if (requestServiceType() === 'tech_home') {
-                                         <span class="font-bold text-indigo-700 dark:text-indigo-400">15.000 FCFA</span>
-                                      } @else if (requestServiceType() === 'towing') {
-                                         <span class="font-bold text-indigo-700 dark:text-indigo-400">À partir de 15.000F</span>
-                                      } @else {
-                                         <span class="font-bold text-indigo-700 dark:text-indigo-400 text-xs italic">Sur devis</span>
-                                      }
+                                      <div class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                         <span class="font-bold text-slate-900 dark:text-white">Plusieurs garages disponibles</span> autour de vous prêts à intervenir
+                                      </div>
                                    </div>
-                                   <!-- Timing -->
-                                   <div class="flex justify-between items-center border-b border-indigo-200 dark:border-indigo-800/50 pb-3">
-                                      <div class="flex items-center gap-2">
-                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                         <span class="font-bold text-indigo-900 dark:text-indigo-300 text-sm">Délai estimé</span>
+
+                                   <!-- Item 3: Delai -->
+                                   <div class="flex items-start gap-3 border-t border-indigo-100 dark:border-indigo-800/50 pt-3">
+                                      <div class="shrink-0 mt-0.5">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                       </div>
-                                      @if (requestUrgency() === 'urgency_immediate') {
-                                         <span class="font-bold text-amber-600">- de 2 heures</span>
-                                      } @else if (requestUrgency() === 'urgency_today') {
-                                         <span class="font-bold text-amber-600">Dans la journée</span>
-                                      } @else {
-                                         <span class="font-bold text-slate-600 dark:text-slate-400">Sous 24/48h</span>
-                                      }
+                                      <div class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                         Réponse rapide
+                                         @if (requestUrgency() === 'urgency_immediate') {
+                                            <span class="font-bold text-slate-900 dark:text-white">sous 2 heures</span>
+                                         } @else if (requestUrgency() === 'urgency_today') {
+                                            <span class="font-bold text-slate-900 dark:text-white">dans la journée</span>
+                                         } @else {
+                                            <span class="font-bold text-slate-900 dark:text-white">sous 24/48h</span>
+                                         }
+                                      </div>
                                    </div>
-                                   <!-- Network Coverage -->
-                                   <div class="flex justify-between items-center">
-                                      <div class="flex items-center gap-2">
-                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                         <span class="font-bold text-indigo-900 dark:text-indigo-300 text-sm">Réseau Mécatech</span>
+
+                                   <!-- Item 4: Gratuit -->
+                                   <div class="flex items-start gap-3 border-t border-indigo-100 dark:border-indigo-800/50 pt-3">
+                                      <div class="shrink-0 mt-0.5">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                       </div>
-                                      <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ nearbyGarages().length }} garage(s) dispo(s)</span>
+                                      <div class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                         <span class="font-bold text-slate-900 dark:text-white">Devis gratuit</span> & sans engagement
+                                      </div>
                                    </div>
                                 </div>
                              </div>
@@ -687,7 +690,19 @@ interface WizardNode {
                                          @let quote = getQuote(quoteId);
                                          @let tenant = getTenantByQuoteId(quoteId);
                                          @if (quote) {
-                                            <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-800 relative z-10" [class.border-emerald-500]="req.acceptedQuoteId === quote.id">
+                                            <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border relative z-10 transition-all" 
+                                                  [class.border-emerald-500]="req.acceptedQuoteId === quote.id"
+                                                  [class.border-amber-400]="req.recommendedQuoteIds?.includes(quote.id) && req.acceptedQuoteId !== quote.id"
+                                                  [class.border-slate-100]="req.acceptedQuoteId !== quote.id && !req.recommendedQuoteIds?.includes(quote.id)"
+                                                  [class.dark:border-slate-800]="req.acceptedQuoteId !== quote.id && !req.recommendedQuoteIds?.includes(quote.id)"
+                                                  [class.shadow-md]="req.recommendedQuoteIds?.includes(quote.id) && req.acceptedQuoteId !== quote.id">
+                                                
+                                                @if (req.recommendedQuoteIds?.includes(quote.id)) {
+                                                   <div class="inline-flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded-full mb-2 border border-amber-200 dark:border-amber-800 shadow-sm">
+                                                      ✨ RECOMMANDÉ PAR ICE
+                                                   </div>
+                                                }
+
                                                <div class="flex justify-between items-start mb-2">
                                                   <div class="overflow-hidden pr-2">
                                                      <div class="font-bold text-slate-900 dark:text-white text-xs truncate w-full">{{ tenant?.name }}</div>
@@ -1567,8 +1582,9 @@ interface WizardNode {
                           <div>
                              <h4 class="font-bold text-xl text-slate-900 dark:text-white leading-tight">{{ infoGarage.name }}</h4>
                              @if (infoGarage.plan === 'ICE Full') {
-                                <span class="inline-flex items-center gap-1.5 mt-1 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs font-bold border border-amber-200 dark:border-amber-800/50">
-                                   <img src="/mr.jpg" class="h-4 w-12 object-contain rounded-sm" alt="Logo Mécatech"> Membre Mécatech Réseau
+                                <span class="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold border border-amber-200 dark:border-amber-800/50 shadow-sm shadow-amber-500/10">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-500" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                   Recommandé par Mécatech
                                 </span>
                              }
                           </div>
@@ -1793,7 +1809,7 @@ export class MobileAppComponent {
    // NEW: Step-by-step request wizard signals
    // NEW: Step-by-step optimized request wizard signals
    requestWizardStep = signal<number>(1);
-   requestNeedType = signal<string | null>(null);
+   requestNeedType = signal<string[]>([]);
    isVehicleDrivable = signal<boolean | null>(null);
    requestUrgency = signal<string | null>(null);
    requestServiceType = signal<string | null>(null);
@@ -2065,8 +2081,10 @@ export class MobileAppComponent {
                         iconAnchor: [16, 32],
                         popupAnchor: [0, -32]
                      });
+                     const star = g.plan === 'ICE Full' ? '⭐ ' : '';
+                     const recommendedText = g.plan === 'ICE Full' ? `<div style="font-size: 9px; color: #d97706; font-weight: bold; margin-top: 2px;">Recommandé par Mécatech</div>` : '';
                      const marker = L.marker([g.lat, g.lng], { icon: customIcon }).addTo(this.markersLayer!)
-                        .bindPopup(`<div style="font-family: Inter, sans-serif; text-align: center;"><b style="font-size: 14px; color: #1e293b;">${g.name || 'Garage Inconnu'}</b><br><span style="font-size: 11px; color: #64748b; font-weight: 600; display: block; margin-top: 2px;">${g.address || g.city}</span><span style="font-size: 11px; color: #4f46e5; font-weight: 600; background: #e0e7ff; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px;">À ${g.distance.toFixed(1)} km</span></div>`, { closeButton: false, className: 'premium-popup' });
+                        .bindPopup(`<div style="font-family: Inter, sans-serif; text-align: center;"><b style="font-size: 14px; color: #1e293b;">${star}${g.name || 'Garage Inconnu'}</b><br><span style="font-size: 11px; color: #64748b; font-weight: 600; display: block; margin-top: 2px;">${g.address || g.city}</span>${recommendedText}<span style="font-size: 11px; color: #4f46e5; font-weight: 600; background: #e0e7ff; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px;">À ${g.distance.toFixed(1)} km</span></div>`, { closeButton: false, className: 'premium-popup' });
                      this.garageMarkers.set(g.id, marker);
                   }
                });
@@ -2869,7 +2887,7 @@ export class MobileAppComponent {
    // NEW: Step-by-step request wizard methods
    resetRequestWizard() {
       this.requestWizardStep.set(1);
-      this.requestNeedType.set(null);
+      this.requestNeedType.set([]);
       this.isVehicleDrivable.set(null);
       this.requestUrgency.set(null);
       this.requestServiceType.set(null);
@@ -2884,7 +2902,14 @@ export class MobileAppComponent {
    }
 
    setVehicleDrivable(val: boolean) { this.isVehicleDrivable.set(val); }
-   setNeedType(val: string) { this.requestNeedType.set(val); }
+   toggleNeedType(val: string) { 
+      const current = this.requestNeedType();
+      if (current.includes(val)) {
+         this.requestNeedType.set(current.filter(n => n !== val));
+      } else {
+         this.requestNeedType.set([...current, val]);
+      }
+   }
    setUrgency(val: string) {
       this.requestUrgency.set(val);
       if (val === 'urgency_immediate' || val === 'urgency_today') {
@@ -2901,7 +2926,7 @@ export class MobileAppComponent {
          if (!this.requestForm.get('selectedVehicleId')?.value) return;
          this.requestWizardStep.set(2);
       } else if (step === 2) {
-         if (!this.requestNeedType()) return;
+         if (this.requestNeedType().length === 0) return;
          this.requestWizardStep.set(3);
       } else if (step === 3) {
          if (this.isVehicleDrivable() === null) return;
@@ -3373,7 +3398,7 @@ export class MobileAppComponent {
       combinedHistory.unshift({ question: 'Urgence', answer: urgencyStr });
 
       combinedHistory.unshift({ question: 'Véhicule roulant', answer: this.isVehicleDrivable() ? 'Oui' : 'Non' });
-      combinedHistory.unshift({ question: 'Type de besoin', answer: this.requestNeedType() || 'Autre' });
+      combinedHistory.unshift({ question: 'Type de besoin', answer: this.requestNeedType().join(', ') || 'Autre' });
 
       const newReq: QuoteRequest = {
          id: this.generateUUID(),
