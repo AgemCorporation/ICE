@@ -2815,6 +2815,7 @@ export class MobileAppComponent {
          year: v.year,
          mileage: v.mileage,
          fuel: v.fuel,
+         gearbox: v.gearbox,
          vin: v.vin?.toUpperCase() || '',
          photos: this.tempPhotos()
       };
