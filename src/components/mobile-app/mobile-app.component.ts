@@ -2789,7 +2789,7 @@ export class MobileAppComponent {
          mileage: v.mileage,
          fuel: v.fuel,
          vin: v.vin,
-         gearbox: 'Automatique'
+         gearbox: v.gearbox || 'Automatique'
       });
       this.tempPhotos.set([...(v.photos || [])]);
       this.showAddVehicleForm.set(true);
