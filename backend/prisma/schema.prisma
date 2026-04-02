@@ -230,6 +230,7 @@ model QuoteRequest {
   unlockedTenantIds         String[] @default([])
   unreadMessageTenantIds    String[] @default([])
   hasUnreadMessagesForAdmin Boolean  @default(false)
+  recommendedQuoteIds       String[] @default([]) // Quote IDs recommended by SuperAdmin
 
   // System
   paymentTransactions PaymentTransaction[]

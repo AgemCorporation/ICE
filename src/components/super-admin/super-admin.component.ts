@@ -841,13 +841,30 @@ import { ActivatedRoute, Router } from '@angular/router';
                       <div class="mb-4 flex gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800">
                          @for (qid of visibleQuotes; track qid) {
                          @let qInfo = getGarageQuote(qid);
-                         <button (click)="selectedQuotePreviewId.set(qid)" 
-                                 [class.border-indigo-500]="selectedQuotePreviewId() === qid"
-                                 [class.bg-indigo-50]="selectedQuotePreviewId() === qid"
-                                 [class.text-indigo-700]="selectedQuotePreviewId() === qid"
-                                 class="px-4 py-2 border-2 border-transparent rounded-lg text-sm font-medium transition-colors whitespace-nowrap outline-none">
-                            Devis de: {{ getTenantName(qInfo?.tenantId) }}
-                         </button>
+                         <div class="flex items-center gap-1 shrink-0">
+                            <button (click)="selectedQuotePreviewId.set(qid)" 
+                                    [class.border-indigo-500]="selectedQuotePreviewId() === qid"
+                                    [class.bg-indigo-50]="selectedQuotePreviewId() === qid"
+                                    [class.text-indigo-700]="selectedQuotePreviewId() === qid"
+                                    class="px-4 py-2 border-2 border-transparent rounded-lg text-sm font-medium transition-colors whitespace-nowrap outline-none">
+                               Devis de: {{ getTenantName(qInfo?.tenantId) }}
+                               @if (req.recommendedQuoteIds?.includes(qid)) {
+                                  <span class="ml-1 text-amber-500">⭐</span>
+                               }
+                            </button>
+                            @if (!getHasTransmittedOrAcceptedQuotes(req) && qInfo?.status !== 'REFUSE') {
+                               <button (click)="dataService.toggleRecommendedQuote(req.id, qid); $event.stopPropagation()" 
+                                       [title]="req.recommendedQuoteIds?.includes(qid) ? 'Retirer la recommandation' : 'Recommander ce devis'"
+                                       class="p-1.5 rounded-lg transition-all shrink-0"
+                                       [class.bg-amber-100]="req.recommendedQuoteIds?.includes(qid)"
+                                       [class.text-amber-600]="req.recommendedQuoteIds?.includes(qid)"
+                                       [class.hover:bg-amber-50]="!req.recommendedQuoteIds?.includes(qid)"
+                                       [class.text-slate-400]="!req.recommendedQuoteIds?.includes(qid)"
+                                       [class.hover:text-amber-500]="!req.recommendedQuoteIds?.includes(qid)">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                               </button>
+                            }
+                         </div>
                       }
                    </div>
                    }
@@ -981,19 +998,34 @@ import { ActivatedRoute, Router } from '@angular/router';
                 } @else {
                    <div></div>
                 }
-                <div class="flex gap-3 ml-auto">
-                   <button (click)="closeQuotePreview()" class="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-medium transition-colors">Fermer</button>
-                   @if (req.proposedQuotes && req.proposedQuotes.length > 1 && !getHasRefusedQuotes(req) && !getHasTransmittedOrAcceptedQuotes(req)) {
-                      <button (click)="dataService.validateQuoteRequest(req.id); closeQuotePreview(); toastService.show('Tous les devis ont été transmis au client', 'success')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-transform active:scale-95">Tout Transmettre</button>
-                   }
-                   @if (quote && quote.status === 'REFUSE') {
-                      <div class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">Devis Refusé ✕</div>
-                   } @else if (quote && quote.status !== 'ENVOYE' && quote.status !== 'ACCEPTE') {
-                      <button (click)="dataService.transmitQuoteToClient(req.id, quote.id); toastService.show('Devis transmis au client avec succès !', 'success')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-transform active:scale-95">Transmettre ce devis</button>
-                   } @else if (quote && (quote.status === 'ENVOYE' || quote.status === 'ACCEPTE')) {
-                      <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">Déjà transmis ✓</div>
-                   }
-                </div>
+                <div class="flex gap-3 ml-auto items-center">
+                    <button (click)="closeQuotePreview()" class="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-medium transition-colors">Fermer</button>
+                    @if (quote && quote.status !== 'REFUSE' && quote.status !== 'ENVOYE' && quote.status !== 'ACCEPTE') {
+                       <button (click)="dataService.toggleRecommendedQuote(req.id, quote.id)"
+                               class="flex items-center gap-1.5 px-3 py-2 rounded-lg font-bold text-sm border transition-all"
+                               [class.bg-amber-50]="req.recommendedQuoteIds?.includes(quote.id)"
+                               [class.border-amber-300]="req.recommendedQuoteIds?.includes(quote.id)"
+                               [class.text-amber-700]="req.recommendedQuoteIds?.includes(quote.id)"
+                               [class.bg-white]="!req.recommendedQuoteIds?.includes(quote.id)"
+                               [class.dark:bg-slate-800]="!req.recommendedQuoteIds?.includes(quote.id)"
+                               [class.border-slate-200]="!req.recommendedQuoteIds?.includes(quote.id)"
+                               [class.dark:border-slate-700]="!req.recommendedQuoteIds?.includes(quote.id)"
+                               [class.text-slate-500]="!req.recommendedQuoteIds?.includes(quote.id)">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                          {{ req.recommendedQuoteIds?.includes(quote.id) ? 'Recommandé ✓' : 'Recommander' }}
+                       </button>
+                    }
+                    @if (req.proposedQuotes && req.proposedQuotes.length > 1 && !getHasRefusedQuotes(req) && !getHasTransmittedOrAcceptedQuotes(req)) {
+                       <button (click)="dataService.validateQuoteRequest(req.id); closeQuotePreview(); toastService.show('Tous les devis ont été transmis au client', 'success')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-transform active:scale-95">Tout Transmettre</button>
+                    }
+                    @if (quote && quote.status === 'REFUSE') {
+                       <div class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">Devis Refusé ✕</div>
+                    } @else if (quote && quote.status !== 'ENVOYE' && quote.status !== 'ACCEPTE') {
+                       <button (click)="dataService.transmitQuoteToClient(req.id, quote.id); toastService.show('Devis transmis au client avec succès !', 'success')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-transform active:scale-95">Transmettre ce devis</button>
+                    } @else if (quote && (quote.status === 'ENVOYE' || quote.status === 'ACCEPTE')) {
+                       <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">Déjà transmis ✓</div>
+                    }
+                 </div>
              </div>
           </div>
        </div>
