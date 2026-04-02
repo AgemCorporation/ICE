@@ -690,19 +690,7 @@ interface WizardNode {
                                          @let quote = getQuote(quoteId);
                                          @let tenant = getTenantByQuoteId(quoteId);
                                          @if (quote) {
-                                            <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border relative z-10 transition-all" 
-                                                  [class.border-emerald-500]="req.acceptedQuoteId === quote.id"
-                                                  [class.border-amber-400]="req.recommendedQuoteIds?.includes(quote.id) && req.acceptedQuoteId !== quote.id"
-                                                  [class.border-slate-100]="req.acceptedQuoteId !== quote.id && !req.recommendedQuoteIds?.includes(quote.id)"
-                                                  [class.dark:border-slate-800]="req.acceptedQuoteId !== quote.id && !req.recommendedQuoteIds?.includes(quote.id)"
-                                                  [class.shadow-md]="req.recommendedQuoteIds?.includes(quote.id) && req.acceptedQuoteId !== quote.id">
-                                                
-                                                @if (req.recommendedQuoteIds?.includes(quote.id)) {
-                                                   <div class="inline-flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded-full mb-2 border border-amber-200 dark:border-amber-800 shadow-sm">
-                                                      ✨ RECOMMANDÉ PAR ICE
-                                                   </div>
-                                                }
-
+                                            <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-800 relative z-10" [class.border-emerald-500]="req.acceptedQuoteId === quote.id">
                                                <div class="flex justify-between items-start mb-2">
                                                   <div class="overflow-hidden pr-2">
                                                      <div class="font-bold text-slate-900 dark:text-white text-xs truncate w-full">{{ tenant?.name }}</div>

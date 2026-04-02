@@ -230,7 +230,6 @@ model QuoteRequest {
   unlockedTenantIds         String[] @default([])
   unreadMessageTenantIds    String[] @default([])
   hasUnreadMessagesForAdmin Boolean  @default(false)
-  recommendedQuoteIds       String[] @default([]) // Indices of recommended quotes from proposedQuotes
 
   // System
   paymentTransactions PaymentTransaction[]
