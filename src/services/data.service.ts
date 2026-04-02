@@ -473,7 +473,6 @@ export interface QuoteRequest {
    hasUnreadMessagesForAdmin?: boolean; // NEW: Flag for new messages for SuperAdmin
    isDirectRequest?: boolean; // NEW: Flag for requests created directly via QR Scan
    directTenantId?: string; // NEW: ID of the garage that scanned the user
-   recommendedQuoteIds?: string[]; // Quote IDs recommended by SuperAdmin
 
    // UI Helpers
    localStatus?: string;
@@ -1798,17 +1797,6 @@ export class DataService {
          this.addSystemLog('INFO', `Specific Quote #${quoteId} on Request #${requestId} TRANSMITTED TO CLIENT`, 'Global');
          this.syncQuoteRequestDB(requestId);
       }
-   }
-
-   toggleRecommendedQuote(requestId: string, quoteId: string) {
-      const req = this.quoteRequests().find(r => r.id === requestId);
-      if (!req) return;
-      const current = req.recommendedQuoteIds || [];
-      const updated = current.includes(quoteId)
-         ? current.filter(id => id !== quoteId)
-         : [...current, quoteId];
-      this.quoteRequests.update(list => list.map(r => r.id === requestId ? { ...r, recommendedQuoteIds: updated } : r));
-      this.syncQuoteRequestDB(requestId, { recommendedQuoteIds: updated });
    }
 
    rejectQuoteRequest(requestId: string, reason: string = '') {
