@@ -955,7 +955,7 @@ interface WizardNode {
                       <div class="relative mb-4 group">
                          <div class="w-24 h-24 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-3xl font-bold border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
                             @if (currentClientData()?.avatarUrl) {
-                               <img [src]="avatarBaseUrl() + currentClientData()?.avatarUrl.split('/avatars')[1]" class="w-full h-full object-cover">
+                               <img [src]="currentClientData()?.avatarUrl!.startsWith('data:image') ? currentClientData()?.avatarUrl : avatarBaseUrl() + currentClientData()?.avatarUrl!.split('/avatars')[1]" class="w-full h-full object-cover">
                             } @else {
                                <span>{{ currentUser()?.charAt(0) }}</span>
                             }

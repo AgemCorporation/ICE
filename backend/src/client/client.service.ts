@@ -252,26 +252,16 @@ export class ClientService {
       return this.mapToFront(updated);
     }
 
-    // Clean base64 data
-    const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
-    
-    // Create unique filename
-    const filename = `avatar-${clientId}-${crypto.randomBytes(4).toString('hex')}.jpg`;
-    const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'avatars');
-    
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    // Store the base64 directly in the database to prevent ephemeral storage loss on Render.
+    // The mobile app compresses it to ~200KB first.
+    let avatarDest = base64;
+    if (!base64.startsWith('data:image/')) {
+       avatarDest = 'data:image/jpeg;base64,' + base64;
     }
-
-    const filePath = path.join(uploadDir, filename);
-    fs.writeFileSync(filePath, buffer);
-
-    const relativeUrl = `/uploads/avatars/${filename}`;
 
     const updated = await this.prisma.client.update({
       where: { id: clientId },
-      data: { avatarUrl: relativeUrl }
+      data: { avatarUrl: avatarDest }
     });
 
     return this.mapToFront(updated);
