@@ -15,25 +15,39 @@ export class NotificationsService {
 
   private initializeFirebase() {
     try {
-      // Look for the service account key in the project root
-      // Expecting standard placement or environment variable, but defaulting to a file in root
-      const serviceAccountPath = path.resolve(process.cwd(), 'firebase-admin-key.json');
-      
-      if (fs.existsSync(serviceAccountPath)) {
-        const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-        
-        if (!admin.apps.length) {
-          this.firebaseApp = admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-          });
+      if (!admin.apps.length) {
+        let credential: admin.credential.Credential | null = null;
+
+        // 1. Try environment variable first (production on Render)
+        const envJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+        if (envJson) {
+          try {
+            const serviceAccount = JSON.parse(envJson);
+            credential = admin.credential.cert(serviceAccount);
+            this.logger.log('Firebase credentials loaded from FIREBASE_SERVICE_ACCOUNT env var.');
+          } catch (parseErr) {
+            this.logger.error('Failed to parse FIREBASE_SERVICE_ACCOUNT env var', parseErr);
+          }
+        }
+
+        // 2. Fallback to local file (development)
+        if (!credential) {
+          const serviceAccountPath = path.resolve(process.cwd(), 'firebase-admin-key.json');
+          if (fs.existsSync(serviceAccountPath)) {
+            const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+            credential = admin.credential.cert(serviceAccount);
+            this.logger.log('Firebase credentials loaded from local file.');
+          }
+        }
+
+        if (credential) {
+          this.firebaseApp = admin.initializeApp({ credential });
           this.logger.log('Firebase Admin SDK initialized successfully.');
         } else {
-          this.firebaseApp = admin.app();
+          this.logger.warn('No Firebase credentials found. Push notifications will be mocked.');
         }
       } else {
-        this.logger.warn(
-          'Firebase service account key not found at ' + serviceAccountPath + '. Push notifications will be mocked.',
-        );
+        this.firebaseApp = admin.app();
       }
     } catch (error) {
       this.logger.error('Failed to initialize Firebase Admin SDK', error);
