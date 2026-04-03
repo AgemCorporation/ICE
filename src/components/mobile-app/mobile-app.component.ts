@@ -955,7 +955,7 @@ interface WizardNode {
                       <div class="relative mb-4 group">
                          <div class="w-24 h-24 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-3xl font-bold border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
                             @if (currentClientData()?.avatarUrl) {
-                               <img [src]="currentClientData()?.avatarUrl!.startsWith('data:image') ? currentClientData()?.avatarUrl : avatarBaseUrl() + currentClientData()?.avatarUrl!.split('/avatars')[1]" class="w-full h-full object-cover">
+                               <img [src]="avatarImageSrc()" class="w-full h-full object-cover">
                             } @else {
                                <span>{{ currentUser()?.charAt(0) }}</span>
                             }
@@ -1854,6 +1854,18 @@ export class MobileAppComponent {
    avatarBaseUrl = computed(() => {
       const api = this.dataService.apiUrl;
       return api.replace('/api', '/uploads/avatars');
+   });
+
+   avatarImageSrc = computed(() => {
+      const url = this.currentClientData()?.avatarUrl;
+      if (!url) return '';
+      if (url.startsWith('data:image')) {
+         return this.sanitizer.bypassSecurityTrustUrl(url);
+      }
+      if (url.includes('/avatars')) {
+         return this.avatarBaseUrl() + url.split('/avatars')[1];
+      }
+      return url;
    });
    changePasswordOld = signal('');
    changePasswordNew = signal('');
