@@ -2766,8 +2766,12 @@ export class MobileAppComponent {
       this.initPushNotifications();
    }
 
+   private pushListenersRegistered = false;
+
    private initPushNotifications() {
-      // Remove timeout to ensure we capture notification actions (cold start)
+      if (this.pushListenersRegistered) return; // Prevent duplicate listeners
+      this.pushListenersRegistered = true;
+
       (async () => {
          if (!Capacitor.isNativePlatform()) {
             console.log('PushNotifications: Not a native platform, skipping native registration.');
