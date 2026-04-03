@@ -2143,6 +2143,27 @@ export class MobileAppComponent {
          this.initPushNotifications();
       }
 
+      // Auto-restore currentClientData from clients() after API data loads
+      effect(() => {
+         const phone = this.currentPhone();
+         const clients = this.dataService.clients();
+         if (phone && clients.length > 0 && !this.currentClientData()) {
+            const match = clients.find(c => c.phone === phone);
+            if (match) {
+               this.currentClientData.set(match);
+               // Also patch profile form with latest server data
+               const fullName = match.firstName + (match.lastName ? ' ' + match.lastName : '');
+               this.profileForm.patchValue({
+                  name: fullName,
+                  phone: match.phone,
+                  email: match.email,
+                  city: match.address?.city || '',
+                  address: match.address?.street || ''
+               });
+            }
+         }
+      });
+
       // Persist to localStorage whenever they change
       effect(() => {
          const user = this.currentUser();
