@@ -28,6 +28,12 @@
 	<string>Votre position est nécessaire pour afficher les garages partenaires autour de vous sur la carte.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Votre position est nécessaire pour afficher les garages partenaires autour de vous sur la carte.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Cette application utilise votre appareil photo pour vous permettre de prendre une photo de profil.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cette application utilise votre galerie de photos pour vous permettre de choisir une photo de profil.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Cette application utilise votre galerie de photos pour vous permettre de choisir une photo de profil.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

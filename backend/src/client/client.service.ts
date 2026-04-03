@@ -51,7 +51,8 @@ export class ClientService {
         balance: client.balance
       },
       vehicleIds: client.vehicleIds || [],
-      history: client.history || []
+      history: client.history || [],
+      avatarUrl: client.avatarUrl
     };
   }
 
@@ -233,6 +234,39 @@ export class ClientService {
     });
 
     return { success: true };
+  }
+
+  async updateAvatar(clientId: string, base64: string) {
+    const fs = require('fs');
+    const path = require('path');
+    const crypto = require('crypto');
+
+    const client = await this.prisma.client.findUnique({ where: { id: clientId } });
+    if (!client) throw new UnauthorizedException('CLIENT_NOT_FOUND');
+
+    // Clean base64 data
+    const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Create unique filename
+    const filename = `avatar-${clientId}-${crypto.randomBytes(4).toString('hex')}.jpg`;
+    const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'avatars');
+    
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const filePath = path.join(uploadDir, filename);
+    fs.writeFileSync(filePath, buffer);
+
+    const relativeUrl = `/uploads/avatars/${filename}`;
+
+    const updated = await this.prisma.client.update({
+      where: { id: clientId },
+      data: { avatarUrl: relativeUrl }
+    });
+
+    return this.mapToFront(updated);
   }
 }
 

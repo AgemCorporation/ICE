@@ -28,9 +28,41 @@ import { PlatformConfigModule } from './platform-config/platform-config.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { EventsModule } from './events/events.module';
 import { PaymentsModule } from './payments/payments.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
-  imports: [AuthModule, TenantModule, UserModule, ClientModule, VehicleModule, InvoiceModule, PrismaModule, SuperadminModule, QuoteRequestModule, SystemLogModule, MotoristVehicleModule, QrscanlogModule, RepairModule, PartModule, SupplierModule, WarehouseModule, LabourRateModule, ServicePackageModule, StockMovementModule, LeadModule, GarageRoleModule, PlatformConfigModule, NotificationsModule, EventsModule, PaymentsModule],
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads/',
+    }),
+    AuthModule, 
+    TenantModule, 
+    UserModule, 
+    ClientModule, 
+    VehicleModule, 
+    InvoiceModule, 
+    PrismaModule, 
+    SuperadminModule, 
+    QuoteRequestModule, 
+    SystemLogModule, 
+    MotoristVehicleModule, 
+    QrscanlogModule, 
+    RepairModule, 
+    PartModule, 
+    SupplierModule, 
+    WarehouseModule, 
+    LabourRateModule, 
+    ServicePackageModule, 
+    StockMovementModule, 
+    LeadModule, 
+    GarageRoleModule, 
+    PlatformConfigModule, 
+    NotificationsModule, 
+    EventsModule, 
+    PaymentsModule
+  ],
   controllers: [AppController],
   providers: [
     AppService,

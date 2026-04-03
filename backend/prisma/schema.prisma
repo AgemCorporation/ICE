@@ -104,6 +104,7 @@ model Client {
   balance         Float  @default(0)
 
   notes      String?
+  avatarUrl  String? // URL or path to the client profile photo
   tenantId   String?
   vehicleIds String[] @default([]) // Frontend-managed vehicle references
   history    Json     @default("[]") // Client interaction history

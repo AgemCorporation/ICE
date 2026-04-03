@@ -123,6 +123,7 @@ export interface Client {
    notes?: string;
    history: ModificationLog[];
    tenantId?: string;
+   avatarUrl?: string; // NEW: Profile photo URL
 }
 
 // Internal Garage Vehicle
@@ -1939,7 +1940,28 @@ export class DataService {
    }
 
    changePasswordMobile(clientId: string, oldPassword: string, newPassword: string) {
-      return this.http.post<{ success: boolean }>(`${this.apiUrl}/client/mobile/change-password`, { clientId, oldPassword, newPassword });
+      return firstValueFrom(this.http.post(`${this.apiUrl}/client/mobile/change-password`, { clientId, oldPassword, newPassword }));
+   }
+
+   async updateAvatar(clientId: string, base64: string) {
+      try {
+         const updatedUser = await firstValueFrom(this.http.patch<Client>(`${this.apiUrl}/client/mobile/avatar`, { clientId, base64 }));
+         
+         // If a garage/admin user happens to be editing their own client profile
+         if (this.currentUser()?.id === clientId) {
+            this.currentUser.set(updatedUser as any); // Update global signal
+            const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            userData.avatarUrl = updatedUser.avatarUrl;
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+         }
+
+         this._clients.update(list => list.map(c => c.id === clientId ? updatedUser : c));
+         
+         return updatedUser;
+      } catch (e) {
+         console.error('Avatar upload failed:', e);
+         throw e;
+      }
    }
 
    syncPushToken(phone: string, pushToken: string) {

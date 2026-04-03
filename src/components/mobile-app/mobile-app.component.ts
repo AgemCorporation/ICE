@@ -13,6 +13,7 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+// Camera dynamically imported
 
 interface WizardNode {
    id: string;
@@ -39,8 +40,19 @@ interface WizardNode {
                    </div>
                    <h1 class="font-bold text-lg">MonAuto</h1>
                 </div>
-                <button (click)="logout()" class="text-white/80 hover:text-white text-xs font-medium">Déconnexion</button>
-             </header>
+                 <div class="flex items-center gap-3">
+                    <button (click)="showNotificationsModal.set(true)" class="relative p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                       @if (unreadNotificationsCount() > 0) {
+                          <span class="absolute top-0.5 right-0.5 flex h-4 w-4">
+                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                             <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] items-center justify-center font-bold">{{ unreadNotificationsCount() }}</span>
+                          </span>
+                       }
+                    </button>
+                    <button (click)="logout()" class="text-white/80 hover:text-white text-xs font-medium bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">Déconnexion</button>
+                 </div>
+              </header>
           }
 
           <!-- CONTENT -->
@@ -105,9 +117,16 @@ interface WizardNode {
                          </div>
                          <!-- Password (login/signup) -->
                          <div class="relative group">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg></div>
-                            <input formControlName="password" type="password" placeholder="Mot de passe" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
-                         </div>
+                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg></div>
+                             <input formControlName="password" [type]="showPasswordAuth() ? 'text' : 'password'" placeholder="Mot de passe" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-11 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
+                             <button type="button" (click)="showPasswordAuth.set(!showPasswordAuth())" class="absolute inset-y-0 right-0 pr-4 flex items-center text-indigo-200 hover:text-white transition-colors">
+                                @if (showPasswordAuth()) {
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
+                                } @else {
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                }
+                             </button>
+                          </div>
                          
                          <!-- Disable submit dynamically -> will adjust the condition in ts -->
                          <button type="button" (click)="submitAuth()" class="w-full bg-white text-indigo-600 font-bold py-3.5 rounded-xl shadow-xl shadow-indigo-900/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed">
@@ -931,8 +950,23 @@ interface WizardNode {
              @if (currentUser() && activeTab() === 'profile') {
                 <div class="p-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
                    <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Mon Profil</h2>
-                   <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center mb-6">
-                      <div class="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl font-bold mb-3">{{ currentUser()?.charAt(0) }}</div>
+                   <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center mb-6 relative overflow-hidden text-center">
+                      <!-- AVATAR SECTION -->
+                      <div class="relative mb-4 group">
+                         <div class="w-24 h-24 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-3xl font-bold border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
+                            @if (currentClientData()?.avatarUrl) {
+                               <img [src]="avatarBaseUrl() + currentClientData()?.avatarUrl.split('/avatars')[1]" class="w-full h-full object-cover">
+                            } @else {
+                               <span>{{ currentUser()?.charAt(0) }}</span>
+                            }
+                         </div>
+                         <!-- Camera overlay button -->
+                         <button (click)="changeAvatar()" class="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-slate-900 transition-transform active:scale-90 z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                         </button>
+                         <input type="file" id="avatarFileInput" accept="image/*" class="hidden" (change)="onAvatarFileSelected($event)">
+                      </div>
+
                       <h3 class="font-bold text-lg text-slate-900 dark:text-white">{{ currentUser() }}</h3>
                       <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">{{ currentPhone() }}</p>
 
@@ -1046,15 +1080,42 @@ interface WizardNode {
                             <div class="p-6 space-y-4">
                                <div>
                                   <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Ancien mot de passe</label>
-                                  <input [ngModel]="changePasswordOld()" (ngModelChange)="changePasswordOld.set($event)" type="password" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                                  <div class="relative group">
+                                      <input [ngModel]="changePasswordOld()" (ngModelChange)="changePasswordOld.set($event)" [type]="showPasswordOld() ? 'text' : 'password'" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-11 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition-all">
+                                      <button type="button" (click)="showPasswordOld.set(!showPasswordOld())" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-indigo-500 transition-colors">
+                                         @if (showPasswordOld()) {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
+                                         } @else {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                         }
+                                      </button>
+                                   </div>
                                </div>
                                <div>
                                   <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Nouveau mot de passe</label>
-                                  <input [ngModel]="changePasswordNew()" (ngModelChange)="changePasswordNew.set($event)" type="password" placeholder="Min. 6 caractères" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                                  <div class="relative group">
+                                      <input [ngModel]="changePasswordNew()" (ngModelChange)="changePasswordNew.set($event)" [type]="showPasswordNew() ? 'text' : 'password'" placeholder="Min. 6 caractères" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-11 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition-all">
+                                      <button type="button" (click)="showPasswordNew.set(!showPasswordNew())" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-indigo-500 transition-colors">
+                                         @if (showPasswordNew()) {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
+                                         } @else {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                         }
+                                      </button>
+                                   </div>
                                </div>
                                <div>
                                   <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Confirmer le nouveau mot de passe</label>
-                                  <input [ngModel]="changePasswordConfirm()" (ngModelChange)="changePasswordConfirm.set($event)" type="password" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                                  <div class="relative group">
+                                      <input [ngModel]="changePasswordConfirm()" (ngModelChange)="changePasswordConfirm.set($event)" [type]="showPasswordConfirm() ? 'text' : 'password'" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-11 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition-all">
+                                      <button type="button" (click)="showPasswordConfirm.set(!showPasswordConfirm())" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-indigo-500 transition-colors">
+                                         @if (showPasswordConfirm()) {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
+                                         } @else {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                         }
+                                      </button>
+                                   </div>
                                </div>
                                <button (click)="submitChangePassword()" [disabled]="changePasswordLoading()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2">
                                   @if (changePasswordLoading()) {
@@ -1614,9 +1675,6 @@ interface WizardNode {
               </div>
            }
 
-        </div>
-     </div>
-
       <!-- NEW INVOICE PREVIEW MODAL -->
       @if (selectedInvoicePreview()) {
          <div class="fixed inset-0 z-[110] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in text-left">
@@ -1679,9 +1737,62 @@ interface WizardNode {
 
                <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0 flex gap-3">
                   <button (click)="closeInvoicePreview()" class="flex-1 py-3 text-slate-500 font-medium text-sm rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">Fermer</button>
-                  <button (click)="downloadInvoiceFromPreview()" class="flex-1 py-3 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm shadow-lg transition-colors">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                     Télécharger
+                  <button (click)="downloadInvoiceFromPreview()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm shadow-lg transition-colors">Télécharger</button>
+               </div>
+            </div>
+         </div>
+      }
+
+      <!-- NOTIFICATION SIDEBAR -->
+      @if (showNotificationsModal()) {
+         <div class="fixed inset-0 z-[120] flex justify-end bg-slate-900/40 backdrop-blur-sm animate-fade-in" (click)="showNotificationsModal.set(false)">
+            <div class="bg-white dark:bg-slate-900 w-[85%] max-w-sm h-full shadow-2xl flex flex-col animate-slide-from-right relative" (click)="$event.stopPropagation()">
+               
+               <div class="p-4 pt-[calc(1rem+env(safe-area-inset-top))] border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-indigo-600 text-white shrink-0 shadow-md">
+                  <h3 class="font-bold text-lg flex items-center gap-2">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                     Notifications
+                  </h3>
+                  <button (click)="showNotificationsModal.set(false)" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors">✕</button>
+               </div>
+
+               <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 scrollbar-hide">
+                  @if (notifications().length === 0) {
+                     <div class="flex flex-col items-center justify-center p-12 text-center h-full">
+                        <div class="w-20 h-20 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 text-slate-400">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0l-8 5-8-5" /></svg>
+                        </div>
+                        <h4 class="font-bold text-slate-900 dark:text-white mb-2">Tout est calme !</h4>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm">Vous n'avez pas de nouvelles notifications.</p>
+                     </div>
+                  } @else {
+                     <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                        @for (notif of notifications(); track notif.id) {
+                           <div (click)="handleNotificationClick(notif)" class="p-5 hover:bg-white dark:hover:bg-slate-900 cursor-pointer transition-all border-l-4 border-transparent hover:border-indigo-500 active:scale-[0.98] group">
+                              <div class="flex items-start gap-4">
+                                 <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-2xl flex items-center justify-center shrink-0 border border-indigo-100/50 dark:border-indigo-800/30 shadow-sm">
+                                    {{ notif.icon }}
+                                 </div>
+                                 <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-start mb-1">
+                                       <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">{{ notif.title }}</h4>
+                                       <span class="text-[10px] font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded ml-2">{{ notif.date | date:'dd/MM' }}</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 mb-3 leading-relaxed">{{ notif.message }}</p>
+                                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
+                                       Consulter <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        }
+                     </div>
+                  }
+               </div>
+
+               <div class="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 shrink-0 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+                  <button (click)="showNotificationsModal.set(false)" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold shadow-lg transition-all active:scale-95">
+                     Fermer
                   </button>
                </div>
             </div>
@@ -1691,6 +1802,8 @@ interface WizardNode {
    styles: [`
     @keyframes slide-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     .animate-slide-in { animation: slide-in 0.3s ease-out; }
+    @keyframes slide-from-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    .animate-slide-from-right { animation: slide-from-right 0.3s ease-out; }
     @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
     .animate-fade-in { animation: fade-in 0.3s ease-out; }
     .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -1729,10 +1842,21 @@ export class MobileAppComponent {
    forgotPasswordLoading = signal(false);
 
    showChangePasswordModal = signal(false);
+   
+   // Base URL for avatars (derived from apiUrl)
+   avatarBaseUrl = computed(() => {
+      const api = this.dataService.apiUrl;
+      return api.replace('/api', '/uploads/avatars');
+   });
    changePasswordOld = signal('');
    changePasswordNew = signal('');
    changePasswordConfirm = signal('');
    changePasswordLoading = signal(false);
+   showPasswordAuth = signal(false);
+   showPasswordOld = signal(false);
+   showPasswordNew = signal(false);
+   showPasswordConfirm = signal(false);
+
 
    userLocation = signal<{ lat: number, lng: number } | null>(null);
 
@@ -1780,6 +1904,80 @@ export class MobileAppComponent {
    schedulingDate = signal('');
    minDate = new Date().toISOString().slice(0, 16);
    mobileRequestFilter = signal<'ALL' | 'PENDING' | 'CLOSED'>('ALL');
+
+   // NOTIFICATIONS CENTER
+   showNotificationsModal = signal(false);
+   notifications = computed(() => {
+      const phone = this.currentPhone();
+      if (!phone) return [];
+
+      const list: any[] = [];
+      const now = new Date();
+
+      // 1. Pending Quotes (Devis reçus mais pas encore acceptés)
+      const pendingQuotes = this.dataService.quoteRequests().filter(req => 
+         req.status === 'QUOTE_SUBMITTED' // Quotes arrived from garage
+      );
+      pendingQuotes.forEach(q => {
+         list.push({
+            id: `quote-${q.id}`,
+            type: 'QUOTE',
+            title: 'Nouveau devis reçu',
+            message: `Un garage a répondu à votre demande pour votre ${q.vehicleBrand} ${q.vehicleModel}.`,
+            date: q.date,
+            data: q,
+            icon: '📋'
+         });
+      });
+
+      // 2. Unpaid Invoices
+      const unpaidInvoices = this.myInvoices().filter(inv => inv.status === 'ENVOYE' || inv.status === 'PARTIEL');
+      unpaidInvoices.forEach(inv => {
+         list.push({
+            id: `inv-${inv.id}`,
+            type: 'INVOICE',
+            title: 'Nouvelle facture',
+            message: `Une facture de ${inv.totalTTC.toLocaleString()} CFA est disponible pour votre intervention.`,
+            date: inv.date,
+            data: inv,
+            icon: '💰'
+         });
+      });
+
+      // 3. Completed Repairs (Véhicules prêts)
+      const completedRepairs = this.dataService.quoteRequests().filter(req => {
+          const status = req.repairStatus || this.getRepairStatus(req.repairOrderId);
+          return status === 'Terminé' && req.status !== 'COMPLETED'; // Not yet acknowledged as closed by user
+      });
+      completedRepairs.forEach(req => {
+         list.push({
+            id: `repair-${req.id}`,
+            type: 'REPAIR',
+            title: 'Véhicule prêt !',
+            message: `Les réparations sur votre ${req.vehicleBrand} sont terminées. Vous pouvez récupérer votre véhicule.`,
+            date: new Date().toISOString(), // Repairs don't have a simple "completed date" in current model, using now as hint
+            data: req,
+            icon: '🏎️'
+         });
+      });
+
+      // 4. Global Announcements
+      const globalAnn = this.dataService.globalAnnouncement();
+      if (globalAnn) {
+         list.push({
+            id: 'global-ann',
+            type: 'ANNOUNCEMENT',
+            title: 'Annonce Mécatech',
+            message: globalAnn.message,
+            date: globalAnn.date,
+            icon: '📢'
+         });
+      }
+
+      return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+   });
+
+   unreadNotificationsCount = computed(() => this.notifications().length);
 
    // Requests Filters
    requestsVehicleFilter = signal<string>('');
@@ -2456,48 +2654,87 @@ export class MobileAppComponent {
    }
 
    private initPushNotifications() {
-      setTimeout(async () => {
-         if (!Capacitor.isNativePlatform()) return;
+      // Remove timeout to ensure we capture notification actions (cold start)
+      (async () => {
+         if (!Capacitor.isNativePlatform()) {
+            console.log('PushNotifications: Not a native platform, skipping native registration.');
+            return;
+         }
 
          const phone = this.currentPhone();
          if (!phone) return;
 
-         let permStatus = await PushNotifications.checkPermissions();
-         if (permStatus.receive === 'prompt') {
-            permStatus = await PushNotifications.requestPermissions();
-         }
-
-         if (permStatus.receive !== 'granted') {
-            console.warn('Push permissions denied.');
-            return;
-         }
-
-         await PushNotifications.register();
-
-         PushNotifications.addListener('registration', (token) => {
-            this.dataService.syncPushToken(phone, token.value);
-         });
-
-         PushNotifications.addListener('pushNotificationReceived', (notification) => {
-            this.toastService.show(notification.title || 'Vous avez reçu une notification', 'success');
-            // Refresh background data
-            this.dataService.loadApiData();
-         });
-
-         PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-            const type = notification.notification.data?.type;
-
-            if (type === 'DEVIS' || type === 'FACTURE') {
-               this.requestsView.set('factures');
-               this.activeTab.set('requests');
-            } else if (type === 'QUOTE_REQUEST' || type === 'REPAIR_ORDER') {
-               this.requestsView.set('demandes');
-               this.activeTab.set('requests');
+         try {
+            let permStatus = await PushNotifications.checkPermissions();
+            if (permStatus.receive === 'prompt') {
+               permStatus = await PushNotifications.requestPermissions();
             }
-            this.dataService.loadApiData();
-         });
-      }, 6000);
+
+            if (permStatus.receive !== 'granted') {
+               console.warn('PushNotifications: Permissions denied.');
+               return;
+            }
+
+            await PushNotifications.register();
+            console.log('PushNotifications: Registered successfully.');
+
+            // Listeners
+            PushNotifications.addListener('registration', (token) => {
+               console.log('PushNotifications: Token received:', token.value);
+               this.dataService.syncPushToken(phone, token.value);
+            });
+
+            PushNotifications.addListener('pushNotificationReceived', (notification) => {
+               console.log('PushNotifications: Received:', notification);
+               this.toastService.show(notification.title || 'Vous avez reçu une notification', 'success');
+               this.dataService.loadApiData();
+            });
+
+            PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+               console.log('PushNotifications: Action performed:', notification);
+               const type = notification.notification.data?.type;
+
+               if (type === 'DEVIS' || type === 'FACTURE') {
+                  this.requestsView.set('factures');
+                  this.activeTab.set('requests');
+               } else if (type === 'QUOTE_REQUEST' || type === 'REPAIR_ORDER') {
+                  this.requestsView.set('demandes');
+                  this.activeTab.set('requests');
+               }
+               this.dataService.loadApiData();
+            });
+         } catch (err) {
+            console.error('PushNotifications: Initialization error', err);
+         }
+      })();
    }
+
+   handleNotificationClick(notif: any) {
+      this.showNotificationsModal.set(false);
+      
+      switch (notif.type) {
+         case 'QUOTE':
+            this.activeTab.set('requests');
+            this.requestsView.set('demandes');
+            this.viewRequestInfo(notif.data);
+            break;
+         case 'INVOICE':
+            this.activeTab.set('requests');
+            this.requestsView.set('factures');
+            this.viewInvoice(notif.data);
+            break;
+         case 'REPAIR':
+            this.activeTab.set('requests');
+            this.requestsView.set('demandes');
+            this.viewRequestInfo(notif.data);
+            break;
+         case 'ANNOUNCEMENT':
+            // Announcements are shown on Home, already handled by dataService
+            this.activeTab.set('home');
+            break;
+      }
+   }
+
 
    submitForgotPassword() {
       const email = this.forgotPasswordEmail().trim().toLowerCase();
@@ -2528,7 +2765,7 @@ export class MobileAppComponent {
       this.forgotPasswordResult.set(null);
    }
 
-   submitChangePassword() {
+   async submitChangePassword() {
       const oldPwd = this.changePasswordOld();
       const newPwd = this.changePasswordNew();
       const confirmPwd = this.changePasswordConfirm();
@@ -2558,21 +2795,19 @@ export class MobileAppComponent {
       }
 
       this.changePasswordLoading.set(true);
-      this.dataService.changePasswordMobile(clientId, oldPwd, newPwd).subscribe({
-         next: () => {
-            this.changePasswordLoading.set(false);
-            this.closeChangePassword();
-            this.toastService.show('Mot de passe modifié avec succès !', 'success');
-         },
-         error: (err) => {
-            this.changePasswordLoading.set(false);
-            if (err?.error?.message === 'WRONG_PASSWORD') {
-               this.toastService.show('L\'ancien mot de passe est incorrect.', 'error');
-            } else {
-               this.toastService.show('Erreur lors de la modification.', 'error');
-            }
+      try {
+         await this.dataService.changePasswordMobile(clientId, oldPwd, newPwd);
+         this.changePasswordLoading.set(false);
+         this.closeChangePassword();
+         this.toastService.show('Mot de passe modifié avec succès !', 'success');
+      } catch (err: any) {
+         this.changePasswordLoading.set(false);
+         if (err?.error?.message === 'WRONG_PASSWORD') {
+            this.toastService.show('L\'ancien mot de passe est incorrect.', 'error');
+         } else {
+            this.toastService.show('Erreur lors de la modification.', 'error');
          }
-      });
+      }
    }
 
    closeChangePassword() {
@@ -3545,5 +3780,96 @@ export class MobileAppComponent {
 
    closeGarageInfo() {
       this.selectedGarageForInfo.set(null);
+   }
+
+   async changeAvatar() {
+      const user = this.currentClientData();
+      let clientId = user?.id;
+      if (!clientId) {
+         const phone = this.currentPhone();
+         const found = this.dataService.clients().find(c => c.phone === phone);
+         clientId = found?.id;
+      }
+      
+      if (!clientId) {
+         this.toastService.show('Erreur: Impossible de t\'identifier', 'error');
+         return;
+      }
+
+      if (!Capacitor.isNativePlatform()) {
+         document.getElementById('avatarFileInput')?.click();
+         return;
+      }
+
+      let image;
+      try {
+         const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
+         image = await Camera.getPhoto({
+            quality: 70,
+            allowEditing: false,
+            resultType: CameraResultType.DataUrl, // DataUrl is needed for compressImage
+            source: CameraSource.Prompt // Ask user: Take photo or Pick from gallery
+         });
+      } catch (e: any) {
+         console.error('Camera interaction failed:', e);
+         if (e?.message !== 'User cancelled photos app' && e?.message !== 'User cancelled') {
+            this.toastService.show('Impossible d\'ouvrir l\'appareil photo', 'error');
+         }
+         return;
+      }
+
+      if (image && image.dataUrl) {
+         this.toastService.show('Compression et envoi...', 'info');
+         try {
+            const compressed = await this.compressImage(image.dataUrl);
+            let base64 = compressed;
+            if (base64.includes(',')) {
+               base64 = base64.split(',')[1];
+            }
+
+            const updatedUser = await this.dataService.updateAvatar(clientId, base64);
+            if (updatedUser) {
+               this.currentClientData.set(updatedUser);
+            }
+            this.toastService.show('Photo de profil mise à jour !', 'success');
+         } catch (apiError) {
+            console.error('Avatar API update failed:', apiError);
+            this.toastService.show('Erreur de réseau ou serveur', 'error');
+         }
+      }
+   }
+
+   async onAvatarFileSelected(event: any) {
+      const file = event.target.files[0];
+      if (file) {
+         const user = this.currentClientData();
+         let clientId = user?.id;
+         if (!clientId) {
+            const phone = this.currentPhone();
+            const found = this.dataService.clients().find(c => c.phone === phone);
+            clientId = found?.id;
+         }
+         if (!clientId) return;
+
+         const reader = new FileReader();
+         reader.onload = async (e: any) => {
+            try {
+               const compressed = await this.compressImage(e.target.result.toString());
+               let base64 = compressed;
+               if (base64.includes(',')) {
+                   base64 = base64.split(',')[1];
+               }
+               this.toastService.show('Envoi de la photo...', 'info');
+               const updatedUser = await this.dataService.updateAvatar(clientId, base64);
+               if (updatedUser) this.currentClientData.set(updatedUser);
+               this.toastService.show('Photo de profil mise à jour !', 'success');
+            } catch (err) {
+               console.error('File API upload failed:', err);
+               this.toastService.show('Erreur de réseau ou serveur', 'error');
+            }
+         };
+         reader.readAsDataURL(file);
+      }
+      event.target.value = '';
    }
 }

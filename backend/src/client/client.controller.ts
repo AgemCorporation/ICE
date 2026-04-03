@@ -58,9 +58,14 @@ export class ClientController {
     return this.clientService.forgotPassword(data.email);
   }
 
-  @Post('mobile/change-password')
+  @Patch('mobile/change-password')
   changePassword(@Body() data: { clientId: string; oldPassword: string; newPassword: string }) {
     return this.clientService.changePassword(data.clientId, data.oldPassword, data.newPassword);
+  }
+
+  @Patch('mobile/avatar')
+  updateAvatar(@Body() data: { clientId: string; base64: string }) {
+    return this.clientService.updateAvatar(data.clientId, data.base64);
   }
 }
 
