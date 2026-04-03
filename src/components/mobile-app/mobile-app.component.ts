@@ -1361,7 +1361,7 @@ interface WizardNode {
           }          <!-- ADD/EDIT VEHICLE MODAL -->
           @if (showAddVehicleForm()) {
              <div class="fixed inset-0 z-[60] bg-slate-900/90 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in p-0 sm:p-6" (click)="closeAddVehicleForm()">
-                <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] relative shadow-2xl animate-slide-up sm:animate-zoom-in" (click)="$event.stopPropagation()">
+                <div class="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] relative shadow-2xl animate-slide-up sm:animate-zoom-in max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
                    <div class="absolute top-4 inset-x-0 flex justify-center sm:hidden"><div class="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div></div>
                    <button (click)="closeAddVehicleForm()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white bg-slate-100 dark:bg-slate-800 rounded-full w-8 h-8 flex items-center justify-center transition-colors">✕</button>
                    
@@ -1422,6 +1422,32 @@ interface WizardNode {
                                 <option value="Automatique">Automatique</option>
                              </select>
                           </div>
+                      </div>
+
+                      <!-- VEHICLE PHOTOS SECTION -->
+                      <div>
+                         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Photos du véhicule</label>
+                         <div class="flex flex-wrap gap-3 mb-3">
+                            @for (photo of tempPhotos(); track $index) {
+                               <div class="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm group">
+                                  <img [src]="photo" class="w-full h-full object-cover">
+                                  <button (click)="removePhoto($index)" type="button" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                                     ✕
+                                  </button>
+                                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all"></div>
+                               </div>
+                            }
+                            @if (tempPhotos().length < 6) {
+                               <button type="button" (click)="takeVehiclePhoto()" class="w-20 h-20 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/30 flex flex-col items-center justify-center text-indigo-500 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all active:scale-95 gap-1">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                  <span class="text-[10px] font-bold">Ajouter</span>
+                               </button>
+                            }
+                         </div>
+                         <input type="file" id="vehiclePhotoInput" accept="image/*" class="hidden" (change)="onVehiclePhotoSelected($event)">
+                         @if (tempPhotos().length > 0) {
+                            <p class="text-[10px] text-slate-400">{{ tempPhotos().length }}/6 photos • Appuyez sur une photo pour la supprimer</p>
+                         }
                       </div>
 
                       <div class="pt-4 flex flex-col gap-3">
@@ -3652,6 +3678,45 @@ export class MobileAppComponent {
       }
    }
    removePhoto(index: number) { this.tempPhotos.update(p => p.filter((_, i) => i !== index)); }
+
+   async takeVehiclePhoto() {
+      if (!Capacitor.isNativePlatform()) {
+         document.getElementById('vehiclePhotoInput')?.click();
+         return;
+      }
+
+      try {
+         const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
+         const image = await Camera.getPhoto({
+            quality: 60,
+            allowEditing: false,
+            resultType: CameraResultType.DataUrl,
+            source: CameraSource.Prompt
+         });
+
+         if (image.dataUrl) {
+            const compressed = await this.compressImage(image.dataUrl);
+            this.tempPhotos.update(p => [...p, compressed]);
+         }
+      } catch (e: any) {
+         if (e?.message !== 'User cancelled photos app' && e?.message !== 'User cancelled') {
+            this.toastService.show('Impossible d\'ouvrir l\'appareil photo', 'error');
+         }
+      }
+   }
+
+   onVehiclePhotoSelected(event: any) {
+      const file = event.target.files[0];
+      if (file) {
+         const reader = new FileReader();
+         reader.onload = async (e: any) => {
+            const compressed = await this.compressImage(e.target.result.toString());
+            this.tempPhotos.update(p => [...p, compressed]);
+         };
+         reader.readAsDataURL(file);
+      }
+      event.target.value = '';
+   }
    /**
     * Compress and resize a base64 image to reduce payload size.
     * Max dimension: 800px, JPEG quality: 0.5
