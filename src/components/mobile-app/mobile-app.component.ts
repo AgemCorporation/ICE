@@ -1429,12 +1429,11 @@ interface WizardNode {
                          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Photos du véhicule</label>
                          <div class="flex flex-wrap gap-3 mb-3">
                             @for (photo of tempPhotos(); track $index) {
-                               <div class="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm group">
+                               <div class="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm group cursor-pointer" (click)="openPhotoViewer($index)">
                                   <img [src]="photo" class="w-full h-full object-cover">
-                                  <button (click)="removePhoto($index)" type="button" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button (click)="removePhoto($index); $event.stopPropagation()" type="button" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center shadow-md opacity-80 transition-opacity z-10">
                                      ✕
                                   </button>
-                                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all"></div>
                                </div>
                             }
                             @if (tempPhotos().length < 6) {
@@ -1446,9 +1445,46 @@ interface WizardNode {
                          </div>
                          <input type="file" id="vehiclePhotoInput" accept="image/*" class="hidden" (change)="onVehiclePhotoSelected($event)">
                          @if (tempPhotos().length > 0) {
-                            <p class="text-[10px] text-slate-400">{{ tempPhotos().length }}/6 photos • Appuyez sur une photo pour la supprimer</p>
+                            <p class="text-[10px] text-slate-400">{{ tempPhotos().length }}/6 photos • Appuyez pour agrandir</p>
                          }
                       </div>
+
+                      <!-- FULLSCREEN PHOTO VIEWER -->
+                      @if (photoViewerOpen()) {
+                         <div class="fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center animate-fade-in" (click)="closePhotoViewer()">
+                            <!-- Header -->
+                            <div class="absolute top-0 left-0 right-0 flex justify-between items-center p-4 pt-[calc(1rem+env(safe-area-inset-top))] z-10">
+                               <span class="text-white/70 text-sm font-medium bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">{{ photoViewerIndex() + 1 }} / {{ tempPhotos().length }}</span>
+                               <button (click)="closePhotoViewer()" class="w-10 h-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors text-lg font-bold">✕</button>
+                            </div>
+
+                            <!-- Image -->
+                            <div class="flex-1 flex items-center justify-center w-full px-4" (click)="$event.stopPropagation()">
+                               <img [src]="tempPhotos()[photoViewerIndex()]" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl select-none" style="touch-action: pinch-zoom;">
+                            </div>
+
+                            <!-- Navigation -->
+                            @if (tempPhotos().length > 1) {
+                               <div class="absolute inset-y-0 left-0 flex items-center pl-2" (click)="$event.stopPropagation()">
+                                  <button (click)="prevPhoto()" class="w-10 h-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all active:scale-90">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                                  </button>
+                               </div>
+                               <div class="absolute inset-y-0 right-0 flex items-center pr-2" (click)="$event.stopPropagation()">
+                                  <button (click)="nextPhoto()" class="w-10 h-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all active:scale-90">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                  </button>
+                               </div>
+
+                               <!-- Dots indicator -->
+                               <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-2 pb-[env(safe-area-inset-bottom)]">
+                                  @for (p of tempPhotos(); track $index) {
+                                     <button (click)="photoViewerIndex.set($index); $event.stopPropagation()" [class]="'w-2 h-2 rounded-full transition-all ' + ($index === photoViewerIndex() ? 'bg-white w-6' : 'bg-white/40')"></button>
+                                  }
+                               </div>
+                            }
+                         </div>
+                      }
 
                       <div class="pt-4 flex flex-col gap-3">
                          <button type="button" (click)="saveVehicle()" [disabled]="vehicleForm.invalid" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] transition-all disabled:opacity-50 disabled:shadow-none active:scale-95 text-lg">
@@ -1946,6 +1982,8 @@ export class MobileAppComponent {
    ratingComment = signal<string>('');
 
    tempPhotos = signal<string[]>([]);
+   photoViewerOpen = signal(false);
+   photoViewerIndex = signal(0);
    showAddVehicleForm = signal(false);
    editingVehicleId = signal<string | null>(null);
 
@@ -3678,6 +3716,20 @@ export class MobileAppComponent {
       }
    }
    removePhoto(index: number) { this.tempPhotos.update(p => p.filter((_, i) => i !== index)); }
+
+   openPhotoViewer(index: number) {
+      this.photoViewerIndex.set(index);
+      this.photoViewerOpen.set(true);
+   }
+   closePhotoViewer() { this.photoViewerOpen.set(false); }
+   prevPhoto() {
+      const total = this.tempPhotos().length;
+      this.photoViewerIndex.update(i => (i - 1 + total) % total);
+   }
+   nextPhoto() {
+      const total = this.tempPhotos().length;
+      this.photoViewerIndex.update(i => (i + 1) % total);
+   }
 
    async takeVehiclePhoto() {
       if (!Capacitor.isNativePlatform()) {
