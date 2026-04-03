@@ -1759,8 +1759,16 @@ interface WizardNode {
                   <h3 class="font-bold text-lg flex items-center gap-2">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                      Notifications
+                     @if (unreadNotificationsCount() > 0) {
+                        <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">{{ unreadNotificationsCount() }}</span>
+                     }
                   </h3>
-                  <button (click)="showNotificationsModal.set(false)" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors">✕</button>
+                  <div class="flex items-center gap-2">
+                     @if (notifications().length > 0) {
+                        <button (click)="clearAllNotifications()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors">Tout effacer</button>
+                     }
+                     <button (click)="showNotificationsModal.set(false)" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors">✕</button>
+                  </div>
                </div>
 
                <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 scrollbar-hide">
@@ -1775,7 +1783,7 @@ interface WizardNode {
                   } @else {
                      <div class="divide-y divide-slate-100 dark:divide-slate-800">
                         @for (notif of notifications(); track notif.id) {
-                           <div (click)="handleNotificationClick(notif)" class="p-5 hover:bg-white dark:hover:bg-slate-900 cursor-pointer transition-all border-l-4 border-transparent hover:border-indigo-500 active:scale-[0.98] group">
+                           <div (click)="handleNotificationClick(notif)" [class]="'p-5 hover:bg-white dark:hover:bg-slate-900 cursor-pointer transition-all border-l-4 active:scale-[0.98] group ' + (notif.read ? 'border-transparent opacity-60' : 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20')">
                               <div class="flex items-start gap-4">
                                  <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-2xl flex items-center justify-center shrink-0 border border-indigo-100/50 dark:border-indigo-800/30 shadow-sm">
                                     {{ notif.icon }}
@@ -1926,77 +1934,141 @@ export class MobileAppComponent {
 
    // NOTIFICATIONS CENTER
    showNotificationsModal = signal(false);
+   _receivedPushNotifications = signal<any[]>([]);
+   _readNotificationIds = signal<Set<string>>(new Set());
+
    notifications = computed(() => {
       const phone = this.currentPhone();
       if (!phone) return [];
 
       const list: any[] = [];
-      const now = new Date();
+      const readIds = this._readNotificationIds();
 
       // 1. Pending Quotes (Devis reçus mais pas encore acceptés)
       const pendingQuotes = this.dataService.quoteRequests().filter(req => 
-         req.status === 'QUOTE_SUBMITTED' // Quotes arrived from garage
+         req.status === 'QUOTE_SUBMITTED'
       );
       pendingQuotes.forEach(q => {
+         const id = `quote-${q.id}`;
          list.push({
-            id: `quote-${q.id}`,
+            id,
             type: 'QUOTE',
             title: 'Nouveau devis reçu',
             message: `Un garage a répondu à votre demande pour votre ${q.vehicleBrand} ${q.vehicleModel}.`,
             date: q.date,
             data: q,
-            icon: '📋'
+            icon: '📋',
+            read: readIds.has(id)
          });
       });
 
       // 2. Unpaid Invoices
       const unpaidInvoices = this.myInvoices().filter(inv => inv.status === 'ENVOYE' || inv.status === 'PARTIEL');
       unpaidInvoices.forEach(inv => {
+         const id = `inv-${inv.id}`;
          list.push({
-            id: `inv-${inv.id}`,
+            id,
             type: 'INVOICE',
             title: 'Nouvelle facture',
             message: `Une facture de ${inv.totalTTC.toLocaleString()} CFA est disponible pour votre intervention.`,
             date: inv.date,
             data: inv,
-            icon: '💰'
+            icon: '💰',
+            read: readIds.has(id)
          });
       });
 
       // 3. Completed Repairs (Véhicules prêts)
       const completedRepairs = this.dataService.quoteRequests().filter(req => {
           const status = req.repairStatus || this.getRepairStatus(req.repairOrderId);
-          return status === 'Terminé' && req.status !== 'COMPLETED'; // Not yet acknowledged as closed by user
+          return status === 'Terminé' && req.status !== 'COMPLETED';
       });
       completedRepairs.forEach(req => {
+         const id = `repair-${req.id}`;
          list.push({
-            id: `repair-${req.id}`,
+            id,
             type: 'REPAIR',
             title: 'Véhicule prêt !',
             message: `Les réparations sur votre ${req.vehicleBrand} sont terminées. Vous pouvez récupérer votre véhicule.`,
-            date: new Date().toISOString(), // Repairs don't have a simple "completed date" in current model, using now as hint
+            date: new Date().toISOString(),
             data: req,
-            icon: '🏎️'
+            icon: '🏎️',
+            read: readIds.has(id)
          });
       });
 
       // 4. Global Announcements
       const globalAnn = this.dataService.globalAnnouncement();
       if (globalAnn) {
+         const id = 'global-ann';
          list.push({
-            id: 'global-ann',
+            id,
             type: 'ANNOUNCEMENT',
             title: 'Annonce Mécatech',
             message: globalAnn.message,
             date: globalAnn.date,
-            icon: '📢'
+            icon: '📢',
+            read: readIds.has(id)
          });
       }
+
+      // 5. Received Push Notifications (real-time from FCM)
+      const pushNotifs = this._receivedPushNotifications();
+      pushNotifs.forEach(pn => {
+         // Avoid duplicates if the push matches an existing state-derived notification
+         if (!list.find(n => n.title === pn.title && n.message === pn.message)) {
+            list.push({ ...pn, read: readIds.has(pn.id) });
+         }
+      });
 
       return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
    });
 
-   unreadNotificationsCount = computed(() => this.notifications().length);
+   unreadNotificationsCount = computed(() => this.notifications().filter(n => !n.read).length);
+
+   private restorePushNotifications() {
+      try {
+         const saved = localStorage.getItem('mobile_push_notifications');
+         if (saved) this._receivedPushNotifications.set(JSON.parse(saved));
+         const readSaved = localStorage.getItem('mobile_read_notification_ids');
+         if (readSaved) this._readNotificationIds.set(new Set(JSON.parse(readSaved)));
+      } catch (e) { /* ignore parse errors */ }
+   }
+
+   private persistPushNotifications() {
+      localStorage.setItem('mobile_push_notifications', JSON.stringify(this._receivedPushNotifications()));
+      localStorage.setItem('mobile_read_notification_ids', JSON.stringify([...this._readNotificationIds()]));
+   }
+
+   addPushNotification(title: string, body: string, data?: any) {
+      const id = `push-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      let icon = '🔔';
+      const type = data?.type || '';
+      if (type === 'QUOTE_REQUEST') icon = '📋';
+      else if (type === 'DEVIS' || type === 'FACTURE') icon = '💰';
+      else if (type === 'REPAIR_ORDER') icon = '🏎️';
+
+      const notif = {
+         id,
+         type: type || 'PUSH',
+         title: title || 'Notification',
+         message: body || '',
+         date: new Date().toISOString(),
+         data: data || null,
+         icon
+      };
+
+      this._receivedPushNotifications.update(list => [notif, ...list].slice(0, 50)); // Keep max 50
+      this.persistPushNotifications();
+   }
+
+   clearAllNotifications() {
+      this._receivedPushNotifications.set([]);
+      // Mark all state-derived notifications as read
+      const allIds = this.notifications().map(n => n.id);
+      this._readNotificationIds.set(new Set(allIds));
+      this.persistPushNotifications();
+   }
 
    // Requests Filters
    requestsVehicleFilter = signal<string>('');
@@ -2141,6 +2213,7 @@ export class MobileAppComponent {
          // Reload API data so quoteRequests, invoices, repairs are available
          this.dataService.loadApiData();
          this.initPushNotifications();
+         this.restorePushNotifications();
       }
 
       // Auto-restore currentClientData from clients() after API data loads
@@ -2726,8 +2799,15 @@ export class MobileAppComponent {
 
             PushNotifications.addListener('pushNotificationReceived', (notification) => {
                console.log('PushNotifications: Received:', notification);
-               this.toastService.show(notification.title || 'Vous avez reçu une notification', 'success');
-               this.dataService.loadApiData();
+               this.zone.run(() => {
+                  this.addPushNotification(
+                     notification.title || 'Notification',
+                     notification.body || '',
+                     notification.data
+                  );
+                  this.toastService.show(notification.title || 'Vous avez reçu une notification', 'success');
+                  this.dataService.loadApiData();
+               });
             });
 
             PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
@@ -2750,6 +2830,14 @@ export class MobileAppComponent {
    }
 
    handleNotificationClick(notif: any) {
+      // Mark as read
+      this._readNotificationIds.update(set => {
+         const newSet = new Set(set);
+         newSet.add(notif.id);
+         return newSet;
+      });
+      this.persistPushNotifications();
+
       this.showNotificationsModal.set(false);
       
       switch (notif.type) {
