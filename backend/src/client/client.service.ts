@@ -244,6 +244,14 @@ export class ClientService {
     const client = await this.prisma.client.findUnique({ where: { id: clientId } });
     if (!client) throw new UnauthorizedException('CLIENT_NOT_FOUND');
 
+    if (!base64 || base64.trim() === '') {
+      const updated = await this.prisma.client.update({
+        where: { id: clientId },
+        data: { avatarUrl: null }
+      });
+      return this.mapToFront(updated);
+    }
+
     // Clean base64 data
     const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
