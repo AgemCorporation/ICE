@@ -1526,15 +1526,17 @@ import { ActivatedRoute, Router } from '@angular/router';
                                    <option value="Résolu">Résolu (Clos)</option>
                                </select>
                            </div>
-                           <div>
-                               <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Assigné à</label>
-                               <select formControlName="assignedTo" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white">
-                                   <option value="">-- Créateur --</option>
-                                   @for (admin of dataService.admins(); track admin.id) {
-                                       <option [value]="admin.id">{{ admin.firstName }} {{ admin.lastName }}</option>
-                                   }
-                               </select>
-                           </div>
+                           @if (currentEditingTicketId()) {
+                               <div>
+                                   <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Assigné à</label>
+                                   <select formControlName="assignedTo" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white">
+                                       <option value="">-- Créateur --</option>
+                                       @for (admin of dataService.admins(); track admin.id) {
+                                           <option [value]="admin.id">{{ admin.firstName }} {{ admin.lastName }}</option>
+                                       }
+                                   </select>
+                               </div>
+                           }
                        </div>
 
                        <div>
