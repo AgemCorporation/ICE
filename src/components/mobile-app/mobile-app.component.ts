@@ -2446,6 +2446,8 @@ export class MobileAppComponent {
          this.dataService.loadApiData();
          this.initPushNotifications();
          this.restorePushNotifications();
+         // Request location immediately on session restore
+         setTimeout(() => this.requestLocation(), 500);
       }
 
       // Auto-restore currentClientData from clients() after API data loads
@@ -2811,7 +2813,7 @@ export class MobileAppComponent {
       };
 
       effect(() => {
-         if (this.currentUser() && this.activeTab() === 'home' && !this.userLocation()) {
+         if (this.currentUser() && !this.userLocation()) {
             this.requestLocation();
          }
       });
@@ -3004,6 +3006,9 @@ export class MobileAppComponent {
 
       // Init Push Notifications for this logged-in user
       this.initPushNotifications();
+
+      // Request location immediately after login
+      this.requestLocation();
    }
 
    private pushListenersRegistered = false;
