@@ -2175,13 +2175,16 @@ export class DataService {
       this._clients.update(list => list.map(c => {
          if (c.phone === oldPhone) {
             const log: ModificationLog = { date: new Date().toISOString(), action: 'Mise à jour profil via App Mobile', user: 'Client' };
-            const newName = profileData.name || c.firstName + ' ' + (c.lastName || '');
-            const firstName = newName.split(' ')[0] || c.firstName;
-            const lastName = newName.split(' ').slice(1).join(' ') || c.lastName || '';
+            const isEntreprise = c.type === 'Entreprise';
+            const newName = profileData.name || (isEntreprise ? c.companyName : c.firstName + ' ' + (c.lastName || ''));
+            const firstName = isEntreprise ? c.firstName : (newName.split(' ')[0] || c.firstName);
+            const lastName = isEntreprise ? c.lastName : (newName.split(' ').slice(1).join(' ') || c.lastName || '');
             const newClient = { 
                ...c, 
                firstName, 
                lastName, 
+               companyName: isEntreprise ? newName : c.companyName,
+               fleetSize: isEntreprise && profileData.fleetSize !== null ? Number(profileData.fleetSize) : c.fleetSize,
                email: profileData.email || c.email,
                address: {
                   ...(c.address || {}),

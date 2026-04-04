@@ -1603,7 +1603,12 @@ interface WizardNode {
                 </div>
                 <div class="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] flex-1 overflow-y-auto">
                    <form [formGroup]="profileForm" class="space-y-4">
-                      <div><label class="text-xs font-bold text-slate-400 uppercase">Nom Complet</label><input formControlName="name" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-slate-900 dark:text-white"></div>
+                      @if (profileForm.value.type === 'Entreprise') {
+                         <div><label class="text-xs font-bold text-slate-400 uppercase">Nom de l'entreprise</label><input formControlName="name" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-slate-900 dark:text-white"></div>
+                         <div><label class="text-xs font-bold text-slate-400 uppercase">Nombre de véhicules</label><input formControlName="fleetSize" type="number" min="1" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-slate-900 dark:text-white"></div>
+                      } @else {
+                         <div><label class="text-xs font-bold text-slate-400 uppercase">Nom Complet</label><input formControlName="name" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-slate-900 dark:text-white"></div>
+                      }
                       <div><label class="text-xs font-bold text-slate-400 uppercase">Téléphone</label><input formControlName="phone" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-slate-900 dark:text-white"></div>
                       <div><label class="text-xs font-bold text-slate-400 uppercase">Email</label><input formControlName="email" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-slate-900 dark:text-white"></div>
                       <div><label class="text-xs font-bold text-slate-400 uppercase">Ville</label><input formControlName="city" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-slate-900 dark:text-white"></div>
@@ -2605,6 +2610,8 @@ export class MobileAppComponent {
       });
       this.profileForm = this.fb.group({
          name: ['', Validators.required],
+         type: ['Particulier'],
+         fleetSize: [null],
          phone: ['', Validators.required],
          email: ['', [Validators.required, Validators.email]],
          city: [''],
@@ -3925,12 +3932,14 @@ export class MobileAppComponent {
    openProfileInfo() {
       const phone = this.currentPhone();
       if (phone) {
-         const client = this.dataService.clients().find(c => c.phone === phone && c.type === 'Particulier');
+         const client = this.dataService.clients().find(c => c.phone === phone);
          const fallback = this.currentClientData();
          const source = client || fallback;
          if (source) {
             this.profileForm.patchValue({
-               name: source.firstName + (source.lastName ? ' ' + source.lastName : ''),
+               type: source.type || 'Particulier',
+               name: source.type === 'Entreprise' ? source.companyName : source.firstName + (source.lastName ? ' ' + source.lastName : ''),
+               fleetSize: source.fleetSize || null,
                phone: source.phone,
                email: source.email || '',
                city: source.address?.city || '',
@@ -3939,6 +3948,8 @@ export class MobileAppComponent {
          } else {
             this.profileForm.patchValue({
                name: this.currentUser() || '',
+               type: 'Particulier',
+               fleetSize: null,
                phone: phone,
                email: '',
                city: '',
