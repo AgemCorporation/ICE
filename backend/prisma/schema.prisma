@@ -434,4 +434,6 @@ model CallCenterTicket {
   // Responsabilités
   createdBy      String        // ID de l'agent
   assignedTo     String?       // ID d'un autre agent si transfert
+
+  actions        Json          @default("[]") // [{ id, text, completed }]
 }

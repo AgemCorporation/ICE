@@ -252,6 +252,7 @@ export interface CallCenterTicket {
    client?: any;
    createdBy: string;
    assignedTo?: string;
+   actions?: { id: string; text: string; completed: boolean }[];
 }
 
 export interface RepairItem {
