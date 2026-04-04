@@ -694,9 +694,16 @@ import { ActivatedRoute, Router } from '@angular/router';
                                <tr (click)="openTicketDetails(ticket)" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
                                   <td class="px-6 py-4">
                                      <div class="font-medium text-slate-900 dark:text-white">{{ ticket.date | date:'dd/MM/yyyy HH:mm' }}</div>
-                                     <div class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        {{ ticket.durationSecs }} secs
+                                     <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+                                        <span class="flex items-center gap-1">
+                                           <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                           {{ ticket.durationSecs }} secs
+                                        </span>
+                                        <span class="text-slate-300 dark:text-slate-600">•</span>
+                                        <span class="flex items-center gap-1 text-slate-600 dark:text-slate-400 font-medium">
+                                           <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                           {{ getAgentName(ticket.createdBy) }}
+                                        </span>
                                      </div>
                                   </td>
                                   <td class="px-6 py-4 text-center">
@@ -2237,6 +2244,7 @@ export class SuperAdminComponent {
                this.dataService.fetchAuditLogs();
             } else if (tabId === 'callcenter') {
                this.dataService.fetchCallCenterTickets();
+               this.dataService.fetchAdmins();
             }
          }
       });
@@ -2730,6 +2738,15 @@ export class SuperAdminComponent {
    }
 
    getRef(id?: string): string { return id ? id.substring(0,8).toUpperCase() : ''; }
+
+   getAgentName(id: string): string {
+       if (!id || id === 'SYSTEM') return 'Système';
+       const admin = this.dataService.admins().find(a => a.id === id);
+       if (admin) return `${admin.firstName} ${admin.lastName}`;
+       const current = this.dataService.currentUser();
+       if (current && current.id === id) return `${current.firstName} ${current.lastName}`;
+       return 'Agent inconnu';
+   }
 
    getTenantNames(ids?: string[]) {
       if (!ids || ids.length === 0) return '-';
