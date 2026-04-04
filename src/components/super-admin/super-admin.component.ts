@@ -679,8 +679,8 @@ import { ActivatedRoute, Router } from '@angular/router';
                                   <td class="px-6 py-4 text-center">
                                      @if (ticket.quoteRequestId) {
                                         <span class="inline-flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-2.5 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider ring-1 ring-inset ring-indigo-200 dark:ring-indigo-800/50">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" /></svg>
-                                            n˚ur
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" /></svg>
+                                            <span class="max-w-24 truncate">N˚UR {{ getRef(ticket.quoteRequestId) }}</span>
                                         </span>
                                      } @else if (ticket.clientId) {
                                         <span class="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider ring-1 ring-inset ring-slate-200 dark:ring-slate-700">
