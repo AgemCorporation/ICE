@@ -645,8 +645,31 @@ import { ActivatedRoute, Router } from '@angular/router';
                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
-                   @if (dataService.callCenterTickets().length === 0) {
+                                 <!-- FILTRES CALL CENTER -->
+                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 mb-6 shadow-sm flex flex-col md:flex-row gap-4 shrink-0">
+                    <div class="flex-1 relative">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="size-5 absolute left-3 top-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                       <input type="text" [ngModel]="callCenterFilterTerm()" (ngModelChange)="callCenterFilterTerm.set($event)" [ngModelOptions]="{standalone: true}" placeholder="Rechercher par sujet, UR, numéro, notes..." class="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 rounded-lg text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
+                    </div>
+                    <div class="flex gap-4">
+                       <select [ngModel]="callCenterFilterStatus()" (ngModelChange)="callCenterFilterStatus.set($event)" [ngModelOptions]="{standalone: true}" class="border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                          <option value="ALL">Statut: Tous</option>
+                          <option value="Ouvert">Ouvert</option>
+                          <option value="En attente client">En attente client</option>
+                          <option value="A rappeler">A rappeler</option>
+                          <option value="Résolu">Résolu</option>
+                       </select>
+                       <select [ngModel]="callCenterFilterType()" (ngModelChange)="callCenterFilterType.set($event)" [ngModelOptions]="{standalone: true}" class="border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                          <option value="ALL">Canal: Tous</option>
+                          <option value="Appel Entrant">Appel Entrant</option>
+                          <option value="Appel Sortant">Appel Sortant</option>
+                          <option value="WhatsApp / SMS">WhatsApp / SMS</option>
+                       </select>
+                    </div>
+                 </div>
+
+                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                    @if (filteredCallCenterTickets().length === 0) {
                       <div class="p-16 flex flex-col items-center justify-center text-center">
                          <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 mb-4 border border-slate-200 dark:border-slate-700">
                              <svg xmlns="http://www.w3.org/2000/svg" class="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
