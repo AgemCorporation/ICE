@@ -2449,8 +2449,8 @@ export class MobileAppComponent {
          this.dataService.loadApiData();
          this.initPushNotifications();
          this.restorePushNotifications();
-         // Request location after app is fully ready (longer delay for Android)
-         setTimeout(() => this.requestLocation(true), 3000);
+         // Request location quickly after app ready
+         setTimeout(() => this.requestLocation(true), 800);
       } else if (savedUser || savedPhone) {
          // Stale session data without token (e.g. after reinstall) — clear everything
          localStorage.removeItem('mobileUserName');
@@ -2921,7 +2921,7 @@ export class MobileAppComponent {
                   if (this.locationRetryCount < 3) {
                      this.locationRetryCount++;
                      this.locationInProgress = false;
-                     const delay = 3000 + (this.locationRetryCount * 3000);
+                     const delay = 1500 + (this.locationRetryCount * 1500); // 3s, 4.5s, 6s
                      console.log(`Geolocation: Retrying in ${delay}ms (attempt ${this.locationRetryCount})`);
                      setTimeout(() => this.requestLocation(true), delay);
                   }
@@ -3035,8 +3035,8 @@ export class MobileAppComponent {
       // Init Push Notifications for this logged-in user
       this.initPushNotifications();
 
-      // Request location after login (with delay for Android Activity binding)
-      setTimeout(() => this.requestLocation(true), 3000);
+      // Request location right after login
+      setTimeout(() => this.requestLocation(true), 800);
    }
 
    private pushListenersRegistered = false;
