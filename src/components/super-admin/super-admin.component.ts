@@ -599,9 +599,61 @@ import { ActivatedRoute, Router } from '@angular/router';
                    </button>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                   <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm flex items-center justify-between relative overflow-hidden">
+                      <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-indigo-50 dark:from-indigo-900/20 to-transparent"></div>
+                      <div class="relative z-10">
+                         <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Appels</p>
+                         <h3 class="text-2xl font-black text-slate-900 dark:text-white">{{ callCenterKPIs().total }}</h3>
+                      </div>
+                      <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 relative z-10 border border-indigo-200 dark:border-indigo-800/50">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                      </div>
+                   </div>
+
+                   <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm flex items-center justify-between relative overflow-hidden">
+                      <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-amber-50 dark:from-amber-900/20 to-transparent"></div>
+                      <div class="relative z-10">
+                         <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">En Attente</p>
+                         <h3 class="text-2xl font-black text-slate-900 dark:text-white">{{ callCenterKPIs().opened }}</h3>
+                      </div>
+                      <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 relative z-10 border border-amber-200 dark:border-amber-800/50">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </div>
+                   </div>
+
+                   <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm flex items-center justify-between relative overflow-hidden">
+                      <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-emerald-50 dark:from-emerald-900/20 to-transparent"></div>
+                      <div class="relative z-10">
+                         <p class="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Résolus</p>
+                         <h3 class="text-2xl font-black text-slate-900 dark:text-white">{{ callCenterKPIs().resolved }}</h3>
+                      </div>
+                      <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 relative z-10 border border-emerald-200 dark:border-emerald-800/50">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                   </div>
+
+                   <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm flex items-center justify-between relative overflow-hidden">
+                      <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-50 dark:from-slate-800/50 to-transparent"></div>
+                      <div class="relative z-10">
+                         <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Durée Moyenne</p>
+                         <h3 class="text-2xl font-black text-slate-900 dark:text-white">{{ callCenterKPIs().avgWait }}s</h3>
+                      </div>
+                      <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 relative z-10 border border-slate-200 dark:border-slate-700">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                      </div>
+                   </div>
+                </div>
+
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
                    @if (dataService.callCenterTickets().length === 0) {
-                      <div class="p-12 text-center text-slate-500">Aucun ticket pour le moment.</div>
+                      <div class="p-16 flex flex-col items-center justify-center text-center">
+                         <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 mb-4 border border-slate-200 dark:border-slate-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                         </div>
+                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">Aucun ticket consigné</h3>
+                         <p class="text-slate-500 mt-1 max-w-sm">Vous n'avez pas encore tracé d'appel entrant ou sortant. Tous vos futurs échanges s'afficheront ici.</p>
+                      </div>
                    } @else {
                       <div class="overflow-x-auto">
                       <table class="w-full text-left text-sm whitespace-nowrap">
@@ -615,7 +667,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                          </thead>
                          <tbody class="divide-y border-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                             @for (ticket of dataService.callCenterTickets(); track ticket.id) {
-                               <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+                               <tr (click)="openTicketDetails(ticket)" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
                                   <td class="p-4">
                                      <div class="font-medium text-slate-900 dark:text-white">{{ ticket.date | date:'dd/MM/yyyy HH:mm' }}</div>
                                      <div class="text-xs text-slate-500">{{ ticket.durationSecs }} secs</div>
@@ -2149,13 +2201,42 @@ export class SuperAdminComponent {
    showTicketModal = signal(false);
    ticketSearchTerm = signal('');
    ticketTimer = signal(0);
+   currentEditingTicketId = signal<string | null>(null);
    private timerInterval: any;
+
+   callCenterKPIs = computed(() => {
+      const tickets = this.dataService.callCenterTickets();
+      const total = tickets.length;
+      const opened = tickets.filter(t => t.status === 'Ouvert' || t.status === 'A rappeler' || t.status === 'En attente client').length;
+      const resolved = tickets.filter(t => t.status === 'Résolu').length;
+      const avgWait = tickets.length > 0 ? Math.round(tickets.reduce((a,b) => a + (b.durationSecs||0), 0) / tickets.length) : 0;
+      return { total, opened, resolved, avgWait };
+   });
    
    openNewTicketModal() {
+      this.currentEditingTicketId.set(null);
       this.ticketForm.reset({ type: 'Appel Entrant', status: 'Ouvert', durationSecs: 0 });
       this.ticketSearchTerm.set('');
       this.ticketTimer.set(0);
       this.startTimer();
+      this.showTicketModal.set(true);
+   }
+
+   openTicketDetails(ticket: any) {
+      this.currentEditingTicketId.set(ticket.id);
+      this.ticketForm.patchValue({
+         type: ticket.type,
+         subject: ticket.subject,
+         notes: ticket.notes,
+         status: ticket.status,
+         durationSecs: ticket.durationSecs,
+         quoteRequestId: ticket.quoteRequestId,
+         clientId: ticket.clientId
+      });
+      this.ticketSearchTerm.set('');
+      this.ticketTimer.set(ticket.durationSecs || 0);
+      // Wait, let's not restart the timer on editing unless they want it.
+      this.stopTimer();
       this.showTicketModal.set(true);
    }
    
@@ -2224,9 +2305,18 @@ export class SuperAdminComponent {
       if (this.ticketForm.invalid) return;
       this.stopTimer();
       const val = this.ticketForm.value;
-      val.durationSecs = this.ticketTimer();
-      this.dataService.createCallCenterTicket(val);
-      this.toastService.show('Ticket Call Center enregistré', 'success');
+      const id = this.currentEditingTicketId();
+
+      if (id) {
+          // Si édition de ticket (on garde la durée manuelle fixée ?)
+          val.durationSecs = this.ticketTimer();
+          this.dataService.updateCallCenterTicket(id, val);
+          this.toastService.show('Ticket Call Center mis à jour', 'success');
+      } else {
+          val.durationSecs = this.ticketTimer();
+          this.dataService.createCallCenterTicket(val);
+          this.toastService.show('Ticket Call Center enregistré', 'success');
+      }
       this.closeTicketModal();
    }
 
