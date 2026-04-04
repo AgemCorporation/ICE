@@ -112,8 +112,9 @@ model Client {
   history    Json     @default("[]") // Client interaction history
   pushToken  String? // Device token for Capacitor Push Notifications
 
-  tenant   Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  invoices Invoice[]
+  tenant            Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  invoices          Invoice[]
+  callCenterTickets CallCenterTicket[]
 }
 
 model Vehicle {
@@ -236,6 +237,7 @@ model QuoteRequest {
 
   // System
   paymentTransactions PaymentTransaction[]
+  callCenterTickets   CallCenterTicket[]
 }
 
 model SystemLog {
@@ -411,4 +413,25 @@ model PaymentTransaction {
   updatedAt      DateTime @updatedAt
 
   quoteRequest QuoteRequest @relation(fields: [quoteRequestId], references: [id])
+}
+
+model CallCenterTicket {
+  id             String        @id @default(uuid())
+  date           DateTime      @default(now())
+  type           String        @default("Appel Entrant") // Appel Entrant, Sortant, WhatsApp, etc.
+  subject        String        // Raison de l'appel
+  notes          String        // Contenu de la transcription
+  status         String        @default("Ouvert") // Ouvert, Résolu, En attente
+  durationSecs   Int           @default(0)
+
+  // Relations optionnelles (Ticket orphelin possible)
+  quoteRequestId String?
+  quoteRequest   QuoteRequest? @relation(fields: [quoteRequestId], references: [id])
+  
+  clientId       String?
+  client         Client?       @relation(fields: [clientId], references: [id])
+  
+  // Responsabilités
+  createdBy      String        // ID de l'agent
+  assignedTo     String?       // ID d'un autre agent si transfert
 }

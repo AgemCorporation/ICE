@@ -28,6 +28,7 @@ import { PlatformConfigModule } from './platform-config/platform-config.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { EventsModule } from './events/events.module';
 import { PaymentsModule } from './payments/payments.module';
+import { CallCenterTicketModule } from './call-center-ticket/call-center-ticket.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -61,7 +62,8 @@ import { join } from 'path';
     PlatformConfigModule, 
     NotificationsModule, 
     EventsModule, 
-    PaymentsModule
+    PaymentsModule,
+    CallCenterTicketModule
   ],
   controllers: [AppController],
   providers: [

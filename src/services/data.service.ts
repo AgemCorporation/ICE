@@ -238,6 +238,22 @@ export interface ServicePackage {
    tenantId?: string;
 }
 
+export interface CallCenterTicket {
+   id: string;
+   date: string;
+   type: string;
+   subject: string;
+   notes: string;
+   status: string;
+   durationSecs: number;
+   quoteRequestId?: string;
+   quoteRequest?: any;
+   clientId?: string;
+   client?: any;
+   createdBy: string;
+   assignedTo?: string;
+}
+
 export interface RepairItem {
    type: 'part' | 'labor';
    partId?: string;
@@ -647,6 +663,7 @@ export class DataService {
    // --- ADMIN / AUDIT DATA ---
    private _admins = signal<AppUser[]>([]);
    private _auditLogs = signal<any[]>([]);
+   private _callCenterTickets = signal<CallCenterTicket[]>([]);
 
 
 
@@ -2351,6 +2368,7 @@ export class DataService {
 
    admins = computed(() => this._admins());
    auditLogs = computed(() => this._auditLogs());
+   callCenterTickets = computed(() => this._callCenterTickets());
 
    fetchAdmins() {
       if (this.currentUser()?.role !== 'Root') return;
@@ -2400,6 +2418,34 @@ export class DataService {
       this.http.get<any[]>(`${this.apiUrl}/superadmin/audit`).subscribe({
          next: (data) => this._auditLogs.set(data),
          error: (err) => console.error('Fetch audit logs error', err)
+      });
+   }
+
+   // --- CALL CENTER TICKETS ---
+   fetchCallCenterTickets() {
+      this.http.get<CallCenterTicket[]>(`${this.apiUrl}/call-center-ticket`).subscribe({
+         next: data => this._callCenterTickets.set(data),
+         error: err => console.error('Error fetching call center tickets', err)
+      });
+   }
+   
+   createCallCenterTicket(ticket: any) {
+      if (!ticket.id) ticket.id = this.generateUUID();
+      ticket.createdBy = ticket.createdBy || this.currentUser()?.id || 'SYSTEM';
+      
+      return this.http.post<CallCenterTicket>(`${this.apiUrl}/call-center-ticket`, ticket).subscribe({
+         next: data => this._callCenterTickets.update(list => [data, ...list]),
+         error: err => {
+             console.error('Error creating ticket', err);
+             this.toastService.show('Erreur de création ticket', 'error');
+         }
+      });
+   }
+
+   updateCallCenterTicket(id: string, ticket: any) {
+      return this.http.patch<CallCenterTicket>(`${this.apiUrl}/call-center-ticket/${id}`, ticket).subscribe({
+         next: data => this._callCenterTickets.update(list => list.map(t => t.id === id ? data : t)),
+         error: err => console.error('Error updating ticket', err)
       });
    }
 

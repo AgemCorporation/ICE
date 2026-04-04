@@ -584,6 +584,76 @@ import { ActivatedRoute, Router } from '@angular/router';
          }
 
          <!-- 3. TENANTS TAB -->
+         @if (activeTab() === 'callcenter') {
+             <div class="space-y-6">
+                <!-- Action Bar -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                   <!-- Search / stats -->
+                   <div>
+                       <h2 class="text-xl font-bold text-slate-800 dark:text-white">Tickets d'appels</h2>
+                       <p class="text-slate-500 text-sm">Gérez et suivez toutes vos interactions téléhoniques.</p>
+                   </div>
+                   <button (click)="openNewTicketModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium shadow-md transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                      Nouveau Ticket d'Appel
+                   </button>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                   @if (dataService.callCenterTickets().length === 0) {
+                      <div class="p-12 text-center text-slate-500">Aucun ticket pour le moment.</div>
+                   } @else {
+                      <div class="overflow-x-auto">
+                      <table class="w-full text-left text-sm whitespace-nowrap">
+                         <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800">
+                           <tr>
+                              <th class="p-4">Date</th>
+                              <th class="p-4">Lié À</th>
+                              <th class="p-4">Motif</th>
+                              <th class="p-4 text-right">Statut</th>
+                           </tr>
+                         </thead>
+                         <tbody class="divide-y border-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                            @for (ticket of dataService.callCenterTickets(); track ticket.id) {
+                               <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+                                  <td class="p-4">
+                                     <div class="font-medium text-slate-900 dark:text-white">{{ ticket.date | date:'dd/MM/yyyy HH:mm' }}</div>
+                                     <div class="text-xs text-slate-500">{{ ticket.durationSecs }} secs</div>
+                                  </td>
+                                  <td class="p-4">
+                                     @if (ticket.quoteRequestId) {
+                                        <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide">Dossier UR</span>
+                                     } @else if (ticket.clientId) {
+                                        <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide">Client</span>
+                                     } @else {
+                                        <span class="text-slate-400 dark:text-slate-500 text-[10px] italic">Orphelin</span>
+                                     }
+                                  </td>
+                                  <td class="p-4">
+                                     <div class="font-medium max-w-[200px] truncate text-slate-900 dark:text-white">{{ ticket.subject }}</div>
+                                     <div class="text-xs text-slate-500">{{ ticket.type }}</div>
+                                  </td>
+                                  <td class="p-4 text-right">
+                                     <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                                           [class.bg-slate-100]="ticket.status === 'Ouvert'" [class.text-slate-600]="ticket.status === 'Ouvert'"
+                                           [class.dark:bg-slate-800]="ticket.status === 'Ouvert'" [class.dark:text-slate-400]="ticket.status === 'Ouvert'"
+                                           [class.bg-amber-100]="ticket.status === 'A rappeler'" [class.text-amber-700]="ticket.status === 'A rappeler'"
+                                           [class.dark:bg-amber-900/30]="ticket.status === 'A rappeler'" [class.dark:text-amber-400]="ticket.status === 'A rappeler'"
+                                           [class.bg-emerald-100]="ticket.status === 'Résolu'" [class.text-emerald-700]="ticket.status === 'Résolu'"
+                                           [class.dark:bg-emerald-900/30]="ticket.status === 'Résolu'" [class.dark:text-emerald-400]="ticket.status === 'Résolu'">
+                                           {{ ticket.status }}
+                                     </span>
+                                  </td>
+                               </tr>
+                            }
+                         </tbody>
+                      </table>
+                      </div>
+                   }
+                </div>
+             </div>
+         }
+
          @if (activeTab() === 'tenants') {
             <div class="flex flex-col h-full">
                <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex flex-wrap gap-4 items-center justify-between">
@@ -1301,6 +1371,136 @@ import { ActivatedRoute, Router } from '@angular/router';
        </div>
     }
 
+    <!-- CALL CENTER TICKET MODAL -->
+    @if (showTicketModal()) {
+       <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+             <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex justify-between items-center">
+                <h2 class="font-bold text-slate-900 dark:text-white text-lg">Retranscription Appel</h2>
+                <div class="flex items-center gap-4">
+                   <span class="font-mono text-xl font-bold" [class.text-red-500]="ticketTimer() > 120" [class.text-slate-400]="ticketTimer() <= 120">
+                      {{ formatTimer(ticketTimer()) }}
+                   </span>
+                   <button (click)="closeTicketModal()" class="text-slate-400 hover:text-white">✕</button>
+                </div>
+             </div>
+             
+             <div class="flex-1 overflow-y-auto flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x border-slate-200 dark:divide-slate-800">
+                <!-- Main Ticket Form -->
+                <div class="flex-1 p-6 space-y-6">
+                   <form [formGroup]="ticketForm" (ngSubmit)="saveTicket()" class="space-y-4 shadow-none">
+                       <div class="grid grid-cols-2 gap-4">
+                           <div>
+                               <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Type d'interaction</label>
+                               <select formControlName="type" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white">
+                                   <option value="Appel Entrant">Appel Entrant</option>
+                                   <option value="Appel Sortant">Appel Sortant</option>
+                                   <option value="WhatsApp / SMS">WhatsApp / SMS</option>
+                               </select>
+                           </div>
+                           <div>
+                               <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Statut du billet</label>
+                               <select formControlName="status" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white">
+                                   <option value="Ouvert">Ouvert (À traiter)</option>
+                                   <option value="En attente client">En attente client</option>
+                                   <option value="A rappeler">A rappeler</option>
+                                   <option value="Résolu">Résolu (Clos)</option>
+                               </select>
+                           </div>
+                       </div>
+
+                       <div>
+                           <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Sujet / Motif</label>
+                           <input formControlName="subject" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white">
+                       </div>
+
+                       <div>
+                           <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Notes & Résumé</label>
+                           <textarea formControlName="notes" rows="6" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white"></textarea>
+                       </div>
+                   </form>
+                </div>
+
+                <!-- Context / Linker Column -->
+                <div class="w-full md:w-96 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col relative shrink-0">
+                    @let context = getLinkedRecordType();
+                    
+                    <div class="p-6">
+                       @if (!context) {
+                          <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Rechercher le dossier</h3>
+                          <div class="relative">
+                              <input type="text" [ngModel]="ticketSearchTerm()" (ngModelChange)="ticketSearchTerm.set($event)" placeholder="Nom, Téléphone, ou N˚UR..." class="w-full bg-white dark:bg-slate-950 border border-indigo-200 dark:border-indigo-900/50 rounded-lg px-4 py-3 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors shadow-inner text-sm">
+                              
+                              @if (ticketAutocompleteResults().requests.length > 0 || ticketAutocompleteResults().clients.length > 0) {
+                                  <div class="absolute z-10 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden text-sm max-h-64 overflow-y-auto">
+                                      @if (ticketAutocompleteResults().requests.length > 0) {
+                                          <div class="bg-slate-50 dark:bg-slate-900 px-3 py-1 text-xs font-bold text-slate-500 uppercase tracking-widest">Dossiers N˚UR</div>
+                                          @for (req of ticketAutocompleteResults().requests; track req.id) {
+                                              <div (click)="selectTicketRecord('request', req.id)" class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                                                  <div class="font-bold text-indigo-600 dark:text-indigo-400">{{ getRef(req.id) }} <span class="text-slate-500 dark:text-slate-400 font-normal pl-2">{{ req.motoristName }}</span></div>
+                                                  <div class="text-xs text-slate-500">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
+                                              </div>
+                                          }
+                                      }
+                                      @if (ticketAutocompleteResults().clients.length > 0) {
+                                          <div class="bg-slate-50 dark:bg-slate-900 px-3 py-1 text-xs font-bold text-slate-500 uppercase tracking-widest border-t border-slate-200 dark:border-slate-700">Clients App</div>
+                                          @for (cli of ticketAutocompleteResults().clients; track cli.id) {
+                                              <div (click)="selectTicketRecord('client', cli.id)" class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                                                  <div class="font-bold text-slate-900 dark:text-white">{{ cli.firstName }} {{ cli.lastName }}</div>
+                                                  <div class="text-xs text-slate-500">{{ cli.phone }} • {{ cli.email }}</div>
+                                              </div>
+                                          }
+                                      }
+                                  </div>
+                              }
+                          </div>
+                          <p class="text-[10px] text-slate-500 mt-4 leading-relaxed bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded border border-indigo-100 dark:border-indigo-900/30">
+                             Si aucun dossier, laissez ce ticket <strong class="font-bold">Orphelin</strong> en validant.
+                          </p>
+                       } @else {
+                          <div class="flex items-center justify-between mb-4">
+                             <h3 class="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                Lié à un {{ context.type }}
+                             </h3>
+                             <button (click)="removeLinkedRecord()" class="text-[10px] py-1 px-2 border border-slate-200 dark:border-slate-700 rounded text-slate-500 hover:text-red-500 transition-colors uppercase font-bold tracking-wider">Détacher</button>
+                          </div>
+                          
+                          <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+                             @if (context.type === 'QuoteRequest') {
+                                 <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded">{{ getRef(context.data.id) }}</span>
+                                    <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold uppercase rounded">{{ context.data.status }}</span>
+                                 </div>
+                                 <div class="font-bold text-slate-900 dark:text-white">{{ context.data.motoristName }}</div>
+                                 <div class="text-slate-500 text-sm mb-3">{{ context.data.motoristPhone }}</div>
+                                 <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                                    <div><span class="font-bold border bg-slate-100 dark:bg-slate-800 px-1 rounded">{{ context.data.vehicleBrand }} {{ context.data.vehicleModel }}</span></div>
+                                 </div>
+                             } @else {
+                                 <div class="font-bold text-slate-900 dark:text-white">{{ context.data.firstName }} {{ context.data.lastName }}</div>
+                                 <div class="text-slate-500 text-sm mb-3">{{ context.data.phone }}</div>
+                                 <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                                    <div><span class="font-bold border bg-slate-100 dark:bg-slate-800 px-1 rounded">Utilisateur Mobile</span></div>
+                                 </div>
+                             }
+                          </div>
+                       }
+                    </div>
+                </div>
+             </div>
+             
+             <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-end gap-3 shrink-0 rounded-b-xl">
+                 <button type="button" (click)="closeTicketModal()" class="px-4 py-2 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 rounded font-medium transition-colors">Fermer</button>
+                 <button (click)="saveTicket()" [disabled]="ticketForm.invalid" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-medium shadow transition-colors disabled:opacity-50 flex items-center gap-2">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                     Enregistrer
+                 </button>
+             </div>
+          </div>
+       </div>
+    }
+
     <!-- ADMIN MODAL (SUPERADMIN DELEGATES) -->
     @if (showAdminModal()) {
        <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
@@ -1653,7 +1853,7 @@ export class SuperAdminComponent {
    router: Router = inject(Router);
    route: ActivatedRoute = inject(ActivatedRoute);
 
-   activeTab = signal<'dashboard' | 'tenants' | 'leads' | 'logs' | 'config' | 'moderation' | 'scans' | 'customers' | 'admins' | 'audit'>('dashboard');
+   activeTab = signal<'dashboard' | 'callcenter' | 'tenants' | 'leads' | 'logs' | 'config' | 'moderation' | 'scans' | 'customers' | 'admins' | 'audit'>('dashboard');
 
    // Scans Search Logic
    scanSearchTerm = signal('');
@@ -1771,6 +1971,7 @@ export class SuperAdminComponent {
    configForm: FormGroup;
    tenantForm: FormGroup;
    adminForm: FormGroup;
+   ticketForm: FormGroup;
 
    cities = CITIES;
    dispatchCommunes = computed(() => {
@@ -1838,10 +2039,20 @@ export class SuperAdminComponent {
          perms_view_mobile_users: [false]
       });
 
+      this.ticketForm = this.fb.group({
+         type: ['Appel Entrant', Validators.required],
+         subject: ['', Validators.required],
+         notes: ['', Validators.required],
+         status: ['Ouvert', Validators.required],
+         durationSecs: [0],
+         quoteRequestId: [null],
+         clientId: [null]
+      });
+
       // Sync Route Params to Tab
       this.route.params.subscribe(params => {
          const tabId = params['tabId'];
-         if (tabId && ['dashboard', 'tenants', 'leads', 'logs', 'config', 'moderation', 'scans', 'customers', 'admins', 'audit'].includes(tabId)) {
+         if (tabId && ['dashboard', 'callcenter', 'tenants', 'leads', 'logs', 'config', 'moderation', 'scans', 'customers', 'admins', 'audit'].includes(tabId)) {
 
             const user = this.dataService.currentUser();
             if (user && user.role === 'SuperAdmin') {
@@ -1849,6 +2060,7 @@ export class SuperAdminComponent {
                let canAccess = false;
 
                if (tabId === 'dashboard') canAccess = perms.includes('VIEW_DASHBOARD');
+               else if (tabId === 'callcenter') canAccess = perms.includes('MANAGE_MODERATION') || perms.includes('VIEW_DASHBOARD');
                else if (tabId === 'moderation') canAccess = perms.includes('MANAGE_MODERATION');
                else if (tabId === 'tenants') canAccess = perms.includes('MANAGE_TENANTS') || perms.includes('VIEW_TENANTS');
                else if (tabId === 'customers') canAccess = perms.includes('VIEW_MOBILE_USERS');
@@ -1861,6 +2073,7 @@ export class SuperAdminComponent {
                if (!canAccess) {
                   // Redirect to the first available permitted tab if trying to access a blocked one
                   if (perms.includes('VIEW_DASHBOARD')) this.router.navigate(['/super-admin/dashboard']);
+                  else if (perms.includes('MANAGE_MODERATION')) this.router.navigate(['/super-admin/callcenter']); // Prefer callcenter if no dashboard
                   else if (perms.includes('MANAGE_MODERATION')) this.router.navigate(['/super-admin/moderation']);
                   else if (perms.includes('MANAGE_TENANTS') || perms.includes('VIEW_TENANTS')) this.router.navigate(['/super-admin/tenants']);
                   else if (perms.includes('VIEW_MOBILE_USERS')) this.router.navigate(['/super-admin/customers']);
@@ -1883,6 +2096,8 @@ export class SuperAdminComponent {
                this.dataService.fetchAdmins();
             } else if (tabId === 'audit') {
                this.dataService.fetchAuditLogs();
+            } else if (tabId === 'callcenter') {
+               this.dataService.fetchCallCenterTickets();
             }
          }
       });
@@ -1899,6 +2114,7 @@ export class SuperAdminComponent {
    pageTitle = computed(() => {
       switch (this.activeTab()) {
          case 'dashboard': return 'Tableau de Bord Super-Admin';
+         case 'callcenter': return 'Centre d\'appels & Ticketing';
          case 'tenants': return 'Gestion des Garages';
          case 'leads': return 'Prospects Commerciaux';
          case 'logs': return 'Journaux Système';
@@ -1915,6 +2131,7 @@ export class SuperAdminComponent {
    pageDescription = computed(() => {
       switch (this.activeTab()) {
          case 'dashboard': return 'Vue d\'ensemble de la plateforme SaaS.';
+         case 'callcenter': return 'Consignez et gérez les interactions téléphoniques liées aux dossiers.';
          case 'tenants': return 'Gérez les abonnements et les comptes des garages partenaires.';
          case 'leads': return 'Suivi des garages intéressés par la solution.';
          case 'logs': return 'Audit de sécurité et erreurs techniques.';
@@ -1927,6 +2144,91 @@ export class SuperAdminComponent {
          default: return '';
       }
    });
+
+   // --- CALL CENTER TICKETS LOGIC ---
+   showTicketModal = signal(false);
+   ticketSearchTerm = signal('');
+   ticketTimer = signal(0);
+   private timerInterval: any;
+   
+   openNewTicketModal() {
+      this.ticketForm.reset({ type: 'Appel Entrant', status: 'Ouvert', durationSecs: 0 });
+      this.ticketSearchTerm.set('');
+      this.ticketTimer.set(0);
+      this.startTimer();
+      this.showTicketModal.set(true);
+   }
+   
+   closeTicketModal() {
+      this.stopTimer();
+      this.showTicketModal.set(false);
+   }
+
+   startTimer() {
+      this.stopTimer();
+      this.timerInterval = setInterval(() => {
+         this.ticketTimer.update(t => t + 1);
+      }, 1000);
+   }
+   
+   stopTimer() {
+      if (this.timerInterval) clearInterval(this.timerInterval);
+   }
+   
+   formatTimer(seconds: number) {
+      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const s = (seconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+   }
+   
+   ticketAutocompleteResults = computed(() => {
+       const term = this.ticketSearchTerm().toLowerCase().trim();
+       if (!term || term.length < 2) return { requests: [], clients: [] };
+       
+       const requests = this.dataService.quoteRequests().filter(r => 
+           this.getRef(r.id).toLowerCase().includes(term) || 
+           r.motoristName?.toLowerCase().includes(term) || 
+           r.motoristPhone?.includes(term)
+       ).slice(0, 5);
+       
+       const clients = this.dataService.clients().filter(c => 
+           (c.firstName + ' ' + (c.lastName||'')).toLowerCase().includes(term) || 
+           c.phone?.includes(term)
+       ).slice(0, 5);
+       
+       return { requests, clients };
+   });
+
+   selectTicketRecord(type: 'request' | 'client', id: string) {
+       if (type === 'request') {
+           this.ticketForm.patchValue({ quoteRequestId: id, clientId: null });
+       } else {
+           this.ticketForm.patchValue({ clientId: id, quoteRequestId: null });
+       }
+       this.ticketSearchTerm.set('');
+   }
+
+   getLinkedRecordType() {
+      const qid = this.ticketForm.get('quoteRequestId')?.value;
+      const cid = this.ticketForm.get('clientId')?.value;
+      if (qid) return { type: 'QuoteRequest', data: this.dataService.quoteRequests().find(r => r.id === qid) };
+      if (cid) return { type: 'Client', data: this.dataService.clients().find(c => c.id === cid) };
+      return null;
+   }
+
+   removeLinkedRecord() {
+      this.ticketForm.patchValue({ quoteRequestId: null, clientId: null });
+   }
+   
+   saveTicket() {
+      if (this.ticketForm.invalid) return;
+      this.stopTimer();
+      const val = this.ticketForm.value;
+      val.durationSecs = this.ticketTimer();
+      this.dataService.createCallCenterTicket(val);
+      this.toastService.show('Ticket Call Center enregistré', 'success');
+      this.closeTicketModal();
+   }
 
    // --- MODERATION LOGIC ---
 
