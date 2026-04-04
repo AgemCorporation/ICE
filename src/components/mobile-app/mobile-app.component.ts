@@ -224,7 +224,7 @@ interface WizardNode {
                          <p class="text-slate-500 dark:text-slate-400 text-sm">Prêt pour la route ? Trouvez le meilleur garage autour de vous.</p>
                       </div>
                       
-                      <button (click)="activeTab.set('create')" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white p-4 rounded-xl shadow-lg shadow-indigo-500/20 flex items-center justify-between group transition-all active:scale-[0.98]">
+                      <button (click)="openRequestWizard()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white p-4 rounded-xl shadow-lg shadow-indigo-500/20 flex items-center justify-between group transition-all active:scale-[0.98]">
                          <div class="text-left"><div class="font-bold text-lg">Demander Devis</div><div class="text-xs text-indigo-100 opacity-80">Gratuit & Sans engagement</div></div>
                          <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white">➜</div>
                       </button>
@@ -378,8 +378,21 @@ interface WizardNode {
                           <div class="animate-fade-in">
                              <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 3</h3>
                              <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Pouvez-vous encore rouler avec votre véhicule ?</p>
+                             
+                             @if (requestNeedType().includes('Ne démarre pas')) {
+                                <div class="bg-indigo-50 dark:bg-indigo-900/30 p-3 rounded-lg flex items-center gap-2 mb-4 text-xs font-medium text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/50">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                   Votre sélection précédente indique que le véhicule ne démarre pas.
+                                </div>
+                             }
+                             
                              <div class="grid grid-cols-2 gap-4">
-                                <button type="button" (click)="setVehicleDrivable(true)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-emerald-500]="isVehicleDrivable() === true" [class.bg-emerald-50]="isVehicleDrivable() === true" [class.border-slate-200]="isVehicleDrivable() !== true" [class.bg-white]="isVehicleDrivable() !== true" [class.dark:bg-slate-800]="isVehicleDrivable() !== true" [class.dark:border-slate-700]="isVehicleDrivable() !== true">
+                                <button type="button" (click)="!requestNeedType().includes('Ne démarre pas') && setVehicleDrivable(true)" 
+                                        class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" 
+                                        [class.border-emerald-500]="isVehicleDrivable() === true" [class.bg-emerald-50]="isVehicleDrivable() === true" 
+                                        [class.border-slate-200]="isVehicleDrivable() !== true" [class.bg-white]="isVehicleDrivable() !== true" 
+                                        [class.dark:bg-slate-800]="isVehicleDrivable() !== true" [class.dark:border-slate-700]="isVehicleDrivable() !== true"
+                                        [class.opacity-40]="requestNeedType().includes('Ne démarre pas')" [class.cursor-not-allowed]="requestNeedType().includes('Ne démarre pas')">
                                    <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3" [class.bg-emerald-100]="isVehicleDrivable() === true" [class.bg-slate-100]="isVehicleDrivable() !== true"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" [class.text-emerald-600]="isVehicleDrivable() === true" [class.text-slate-400]="isVehicleDrivable() !== true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
                                    <span class="font-bold text-slate-900 dark:text-white">Oui</span>
                                    <span class="text-[10px] text-slate-400 mt-1">Il roule normalement</span>
@@ -440,10 +453,15 @@ interface WizardNode {
                              <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                                 <div>
                                    <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Description du problème</label>
-                                   <textarea formControlName="description" rows="4" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm text-slate-900 dark:text-white" placeholder="Décrivez le problème de votre véhicule... (bruits, voyants allumés, circonstances)"></textarea>
+                                   <textarea formControlName="description" rows="4" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm text-slate-900 dark:text-white" [placeholder]="step5Placeholder()"></textarea>
                                 </div>
                                 <div>
-                                   <label class="text-xs font-bold text-slate-400 uppercase block mb-2">Photos (Optionnel)</label>
+                                   <label class="text-xs font-bold text-slate-400 uppercase flex items-center gap-2 mb-2">
+                                      Photos (Optionnel)
+                                      @if (requestNeedType().includes('Accident') || requestNeedType().includes('Voyant allumé')) {
+                                         <span class="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide animate-pulse">Très Recommandé</span>
+                                      }
+                                   </label>
                                    <div class="flex gap-2 overflow-x-auto pb-2">
                                       <button type="button" (click)="takePhoto()" class="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg cursor-pointer bg-white dark:bg-slate-900 hover:bg-indigo-50 transition-colors shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span class="text-[10px] text-indigo-600 font-bold">Ajouter</span></button>
                                       <input type="file" id="mobilePhotoInput" accept="image/*" capture="environment" (change)="onRequestPhotoSelected($event)" class="hidden">
@@ -469,25 +487,58 @@ interface WizardNode {
                              <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 6</h3>
                              <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Comment souhaitez-vous être pris en charge ?</p>
                              <div class="space-y-3">
-                                <button type="button" (click)="setServiceType('tech_home')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-indigo-500]="requestServiceType() === 'tech_home'" [class.bg-indigo-50]="requestServiceType() === 'tech_home'" [class.border-slate-200]="requestServiceType() !== 'tech_home'" [class.bg-white]="requestServiceType() !== 'tech_home'" [class.dark:bg-slate-800]="requestServiceType() !== 'tech_home'" [class.dark:border-slate-700]="requestServiceType() !== 'tech_home'">
+                                <button type="button" (click)="!isTowingForced() && setServiceType('tech_home')" 
+                                        class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" 
+                                        [class.border-indigo-500]="requestServiceType() === 'tech_home'" [class.bg-indigo-50]="requestServiceType() === 'tech_home'" 
+                                        [class.border-slate-200]="requestServiceType() !== 'tech_home'" [class.bg-white]="requestServiceType() !== 'tech_home'" 
+                                        [class.dark:bg-slate-800]="requestServiceType() !== 'tech_home'" [class.dark:border-slate-700]="requestServiceType() !== 'tech_home'"
+                                        [class.opacity-40]="isTowingForced()" [class.cursor-not-allowed]="isTowingForced()">
                                    <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></div>
                                    <div class="flex flex-col flex-1">
-                                      <span class="font-bold text-slate-900 dark:text-white">Technicien à domicile</span>
+                                      <span class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                         Technicien à domicile
+                                         @if (recommendedServices().includes('tech_home') && !isTowingForced()) {
+                                            <span class="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 px-1.5 py-0.5 rounded font-bold">Recommandé</span>
+                                         }
+                                      </span>
                                       <span class="text-[11px] text-slate-500 leading-tight">Intervention sur place + diagnostic complet</span>
                                    </div>
                                 </button>
-                                <button type="button" (click)="setServiceType('towing')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-amber-500]="requestServiceType() === 'towing'" [class.bg-amber-50]="requestServiceType() === 'towing'" [class.border-slate-200]="requestServiceType() !== 'towing'" [class.bg-white]="requestServiceType() !== 'towing'" [class.dark:bg-slate-800]="requestServiceType() !== 'towing'" [class.dark:border-slate-700]="requestServiceType() !== 'towing'">
-                                   <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg></div>
-                                   <div class="flex flex-col flex-1">
-                                      <span class="font-bold text-slate-900 dark:text-white">Remorquage</span>
-                                      <span class="text-[11px] text-slate-500 leading-tight">Vers notre garage le plus proche</span>
+                                <button type="button" (click)="setServiceType('towing')" 
+                                        class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95 justify-between" 
+                                        [class.border-amber-500]="requestServiceType() === 'towing'" [class.bg-amber-50]="requestServiceType() === 'towing'" 
+                                        [class.border-slate-200]="requestServiceType() !== 'towing'" [class.bg-white]="requestServiceType() !== 'towing'" 
+                                        [class.dark:bg-slate-800]="requestServiceType() !== 'towing'" [class.dark:border-slate-700]="requestServiceType() !== 'towing'">
+                                   <div class="flex items-center gap-4 flex-1">
+                                      <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg></div>
+                                      <div class="flex flex-col flex-1">
+                                         <span class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            Remorquage
+                                            @if (recommendedServices().includes('towing')) {
+                                               <span class="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 px-1.5 py-0.5 rounded font-bold">Recommandé</span>
+                                            }
+                                         </span>
+                                         <span class="text-[11px] text-slate-500 leading-tight">Vers notre garage le plus proche</span>
+                                      </div>
                                    </div>
+                                   @if(isTowingForced()) {
+                                      <div class="shrink-0 text-amber-600 dark:text-amber-500 font-medium text-xs hidden sm:block">Automatique</div>
+                                   }
                                 </button>
-                                <button type="button" (click)="setServiceType('garage_drop')" class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" [class.border-emerald-500]="requestServiceType() === 'garage_drop'" [class.bg-emerald-50]="requestServiceType() === 'garage_drop'" [class.border-slate-200]="requestServiceType() !== 'garage_drop'" [class.bg-white]="requestServiceType() !== 'garage_drop'" [class.dark:bg-slate-800]="requestServiceType() !== 'garage_drop'" [class.dark:border-slate-700]="requestServiceType() !== 'garage_drop'">
+                                <button type="button" (click)="!isGarageDropDisabled() && !isTowingForced() && setServiceType('garage_drop')" 
+                                        class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all active:scale-95" 
+                                        [class.border-emerald-500]="requestServiceType() === 'garage_drop'" [class.bg-emerald-50]="requestServiceType() === 'garage_drop'" 
+                                        [class.border-slate-200]="requestServiceType() !== 'garage_drop'" [class.bg-white]="requestServiceType() !== 'garage_drop'" 
+                                        [class.dark:bg-slate-800]="requestServiceType() !== 'garage_drop'" [class.dark:border-slate-700]="requestServiceType() !== 'garage_drop'"
+                                        [class.opacity-40]="isGarageDropDisabled() || isTowingForced()" [class.cursor-not-allowed]="isGarageDropDisabled() || isTowingForced()">
                                    <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>
                                    <div class="flex flex-col flex-1">
                                       <span class="font-bold text-slate-900 dark:text-white">Dépôt garage</span>
-                                      <span class="text-[11px] text-slate-500 leading-tight">Je peux me rendre au garage par moi-même</span>
+                                      @if (isGarageDropDisabled()) {
+                                         <span class="text-[11px] text-red-500 leading-tight italic mt-0.5">Indisponible (véhicule en panne)</span>
+                                      } @else {
+                                         <span class="text-[11px] text-slate-500 leading-tight">Je peux me rendre au garage par moi-même</span>
+                                      }
                                    </div>
                                 </button>
                              </div>
@@ -511,21 +562,56 @@ interface WizardNode {
                        @if (requestWizardStep() === 7) {
                           <div class="animate-fade-in">
                              <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 7</h3>
-                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Où et quand voulez-vous être pris en charge ?</p>
+                             <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ requestServiceType() === 'garage_drop' ? 'Quand voulez-vous être pris en charge ?' : 'Où et quand voulez-vous être pris en charge ?' }}</p>
                              <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                                 <div>
-                                   <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Localisation</label>
+                                   <div class="flex items-center justify-between mb-2">
+                                      <label class="text-xs font-bold text-slate-400 uppercase">{{ step7LocationLabel() }}</label>
+                                      <button type="button" (click)="autoLocateFill()" [disabled]="isLocating()" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all active:scale-95 border border-indigo-100 dark:border-indigo-800/50 disabled:opacity-50">
+                                         @if(isLocating()) {
+                                            <svg class="animate-spin h-3.5 w-3.5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            Recherche...
+                                         } @else {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                            Me géolocaliser
+                                         }
+                                      </button>
+                                   </div>
                                    <div class="flex gap-2">
                                       <select formControlName="locationCity" (change)="onRequestCityChange()" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white"><option value="">Ville...</option>@for(c of requestWizardCities(); track c) { <option [value]="c">{{ c }}</option> }</select>
                                       <select formControlName="locationCommune" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white"><option value="">Commune...</option>@for(c of requestCommunes(); track c) { <option [value]="c">{{ c }}</option> }</select>
                                    </div>
                                    <div class="mt-2">
-                                      <input type="text" formControlName="locationQuarter" placeholder="Quartier (Ex: Zone 4, Riviera...)" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white">
+                                      <input type="text" formControlName="locationQuarter" placeholder="Quartier ou Précision (Ex: GPS capté, Zone 4...)" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm p-2 text-slate-900 dark:text-white">
                                    </div>
                                 </div>
                                 <div>
                                    <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Date souhaitée</label>
-                                   <input type="date" formControlName="interventionDate" [min]="minInterventionDate()" [max]="maxInterventionDate()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
+                                   
+                                   @if(requestUrgency() === 'urgency_immediate' || requestUrgency() === 'urgency_today') {
+                                      <div class="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/50 rounded-lg p-3 text-sm font-medium flex items-center gap-2">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                         {{ requestUrgency() === 'urgency_immediate' ? 'Intervention dès que possible' : 'Intervention dans la journée' }}
+                                      </div>
+                                      <!-- Hidden input to keep form valid -->
+                                      <input type="date" formControlName="interventionDate" class="hidden">
+                                   } @else {
+                                      <!-- urgence flexible -> full calendar, min date J+1 -->
+                                      <div class="flex gap-2">
+                                         <div class="flex-1">
+                                            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Jour</label>
+                                            <input type="date" formControlName="interventionDate" [min]="minInterventionDate()" [max]="maxInterventionDate()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
+                                         </div>
+                                         <div class="flex-1">
+                                            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Période</label>
+                                            <select formControlName="preferredSlot" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm text-slate-900 dark:text-white">
+                                               <option value="">Peu importe l'heure</option>
+                                               <option value="Matin">Matin (8h - 12h)</option>
+                                               <option value="Après-midi">Après-midi (13h - 18h)</option>
+                                            </select>
+                                         </div>
+                                      </div>
+                                   }
                                 </div>
                              </div>
                              <div class="flex gap-3 mt-6">
@@ -1451,36 +1537,36 @@ interface WizardNode {
 
                       <!-- FULLSCREEN PHOTO VIEWER -->
                       @if (photoViewerOpen()) {
-                         <div class="fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center animate-fade-in" (click)="closePhotoViewer()">
+                         <div class="fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center animate-fade-in"
+                              (touchstart)="onPhotoSwipeStart($event)"
+                              (touchend)="onPhotoSwipeEnd($event)"
+                              (click)="closePhotoViewer()">
                             <!-- Header -->
                             <div class="absolute top-0 left-0 right-0 flex justify-between items-center p-4 pt-[calc(1rem+env(safe-area-inset-top))] z-10">
                                <span class="text-white/70 text-sm font-medium bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">{{ photoViewerIndex() + 1 }} / {{ tempPhotos().length }}</span>
-                               <button (click)="closePhotoViewer()" class="w-10 h-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors text-lg font-bold">✕</button>
+                               <button (click)="closePhotoViewer(); $event.stopPropagation()" class="w-10 h-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors text-lg font-bold">✕</button>
                             </div>
 
                             <!-- Image -->
-                            <div class="flex-1 flex items-center justify-center w-full px-4" (click)="$event.stopPropagation()">
-                               <img [src]="tempPhotos()[photoViewerIndex()]" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl select-none" style="touch-action: pinch-zoom;">
+                            <div class="flex-1 flex items-center justify-center w-full overflow-hidden" (click)="$event.stopPropagation()">
+                               <div class="relative w-full h-full flex items-center justify-center px-4">
+                                  <img [src]="tempPhotos()[photoViewerIndex()]" 
+                                       class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl select-none transition-transform duration-200"
+                                       [style.transform]="'translateX(' + photoSwipeOffset() + 'px)'"
+                                       draggable="false">
+                               </div>
                             </div>
 
-                            <!-- Navigation -->
+                            <!-- Dots indicator -->
                             @if (tempPhotos().length > 1) {
-                               <div class="absolute inset-y-0 left-0 flex items-center pl-2" (click)="$event.stopPropagation()">
-                                  <button (click)="prevPhoto()" class="w-10 h-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all active:scale-90">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                                  </button>
-                               </div>
-                               <div class="absolute inset-y-0 right-0 flex items-center pr-2" (click)="$event.stopPropagation()">
-                                  <button (click)="nextPhoto()" class="w-10 h-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all active:scale-90">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                                  </button>
-                               </div>
-
-                               <!-- Dots indicator -->
                                <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-2 pb-[env(safe-area-inset-bottom)]">
                                   @for (p of tempPhotos(); track $index) {
                                      <button (click)="photoViewerIndex.set($index); $event.stopPropagation()" [class]="'w-2 h-2 rounded-full transition-all ' + ($index === photoViewerIndex() ? 'bg-white w-6' : 'bg-white/40')"></button>
                                   }
+                               </div>
+                               <!-- Swipe hint (shown briefly) -->
+                               <div class="absolute bottom-16 left-0 right-0 flex justify-center pb-[env(safe-area-inset-bottom)] pointer-events-none">
+                                  <span class="text-white/30 text-xs font-medium">Glissez pour naviguer</span>
                                </div>
                             }
                          </div>
@@ -2163,6 +2249,65 @@ export class MobileAppComponent {
    requestWizardNeedsForm = computed(() => true);
    requestWizardShowDescription = computed(() => true);
 
+   // NEW: Step logic computed signals (Wizard v2)
+   isTowingForced = computed(() => this.isVehicleDrivable() === false && this.requestUrgency() === 'urgency_immediate');
+   isGarageDropDisabled = computed(() => this.isVehicleDrivable() === false);
+   recommendedServices = computed(() => {
+      const rec = new Set<string>();
+      if (this.requestNeedType().includes('Accident')) {
+         rec.add('towing'); rec.add('tech_home');
+      }
+      if (this.requestUrgency() === 'urgency_immediate' && this.isVehicleDrivable() === true) {
+         rec.add('tech_home');
+      }
+      if (this.isVehicleDrivable() === false) {
+         rec.add('towing');
+      }
+      return Array.from(rec);
+   });
+   step5Placeholder = computed(() => {
+       const needs = this.requestNeedType();
+       const hasNDP = needs.includes('Ne démarre pas');
+       const hasAccident = needs.includes('Accident');
+       const hasVoyant = needs.includes('Voyant allumé');
+       const hasBruit = needs.includes('Bruit / anomalie');
+       const hasEntretien = needs.includes('Entretien');
+       
+       const selectedVehicleId = this.requestForm.get('selectedVehicleId')?.value;
+       const vehicle = this.myVehicles().find(v => v.id === selectedVehicleId);
+       const hasMileage = vehicle && vehicle.mileage && vehicle.mileage > 0;
+
+       // Combinaisons
+       if (hasNDP && hasAccident) return "Décrivez l'accident et ses conséquences : votre véhicule ne démarre plus suite au choc ? Précisez la zone impactée, les dommages visibles, et ce qui se passe lorsque vous tentez de démarrer (bruit, clic, silence). Y a-t-il eu un constat ou une intervention des forces de l'ordre ?";
+       if (hasNDP && hasVoyant) return "Décrivez la situation : le véhicule ne démarre plus et un ou plusieurs voyants sont allumés. Quels voyants sont visibles (batterie, moteur, huile...) ? Sont-ils fixes ou clignotants ? Avez-vous entendu un bruit particulier lors de la dernière tentative de démarrage ?";
+       if (hasBruit && hasVoyant) return "Décrivez les deux symptômes : quel voyant est allumé (moteur, ABS, huile...) ? Est-il apparu en même temps que le bruit ou avant ? Caractérisez le bruit (sourd, sifflant, claquant) et précisez dans quelles conditions il se manifeste (vitesse, freinage, virage).";
+       if (hasNDP && hasBruit) return "Décrivez ce qui se passe lors de la tentative de démarrage : entendez-vous un bruit particulier (claquement, sifflement, ronronnement) ou rien du tout ? Le moteur tourne-t-il sans partir, ou la clé reste-t-elle sans réponse ? Ce bruit était-il présent avant la panne ?";
+       
+       // Individuels
+       if (hasNDP) return "Décrivez la situation : le moteur tourne mais ne part pas, ou rien ne se passe du tout au démarrage ? Avez-vous entendu un claquement, un clic répété, ou un silence complet ? La batterie a-t-elle été rechargée récemment ? Le problème est-il apparu soudainement ou progressivement ?";
+       if (hasBruit) return "Décrivez le bruit : sourd, sifflant, claquant, grondant ? À quelle vitesse apparaît-il ? Plutôt à froid, au freinage, en virage ou en accélérant ? Vient-il plutôt du moteur, des roues, de la direction ou de l'habitacle ?";
+       if (hasVoyant) return "Quel voyant est allumé (moteur, huile, ABS, batterie, température...) ? Est-il fixe ou clignotant ? Depuis combien de temps est-il apparu ? Avez-vous remarqué d'autres symptômes associés : bruit inhabituel, perte de puissance, odeur ou fumée ?";
+       
+       if (hasEntretien) {
+           if (hasMileage) {
+               return "Précisez le type d'entretien souhaité : vidange, révision complète, pneus, freins, courroie... Indiquez si possible la date du dernier entretien effectué et si vous avez reçu un rappel constructeur.";
+           } else {
+               return "Précisez le type d'entretien souhaité : vidange, révision complète, pneus, freins... Indiquez si possible le kilométrage actuel, la date du dernier entretien effectué et si un rappel constructeur est en cours.";
+           }
+       }
+       
+       if (hasAccident) return "Décrivez les circonstances de l'accident : choc à l'avant, à l'arrière, sur le côté ? Quels dommages sont visibles (carrosserie, vitres, roues) ? Les airbags se sont-ils déclenchés ? Y a-t-il eu un constat à l'amiable ou une intervention des forces de l'ordre ?";
+       
+       return "Décrivez librement ce que vous observez sur votre véhicule : comportement inhabituel, odeur suspecte, fuite de fluide, difficulté de conduite, usure anormale... Soyez aussi précis que possible pour obtenir un devis fiable.";
+   });
+   step7LocationLabel = computed(() => {
+       const svc = this.requestServiceType();
+       if (svc === 'towing') return "Où se trouve votre véhicule ?";
+       if (svc === 'tech_home') return "Adresse d'intervention";
+       if (svc === 'garage_drop') return "Où vous trouvez vous ?";
+       return "Localisation";
+   });
+
    // New Photo Logic
    wantToAddPhotos = signal(false);
 
@@ -2708,6 +2853,69 @@ export class MobileAppComponent {
    }
 
    private locationRetryCount = 0;
+   isLocating = signal(false);
+
+   async autoLocateFill() {
+      this.isLocating.set(true);
+      try {
+         await this.requestLocation();
+         const pos = this.userLocation();
+         if (pos) {
+            try {
+               const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}`);
+               const data = await response.json();
+               if (data && data.display_name) {
+                  const addr = data.address || {};
+                  const displayName = data.display_name || '';
+
+                  // Match City
+                  const cityName = addr.city || addr.town || addr.state || 'Abidjan';
+                  const matchedCity = this.requestWizardCities().find(c => displayName.includes(c) || cityName.includes(c) || c.includes(cityName)) || 'Abidjan';
+                  
+                  this.requestForm.patchValue({ locationCity: matchedCity });
+                  this.onRequestCityChange(); // Important to load communes for this city
+
+                  // Match Commune via display_name directly
+                  const validCommunes = this.requestCommunes();
+                  const matchedCommune = validCommunes.find(c => displayName.includes(c));
+                  
+                  if (matchedCommune) {
+                     this.requestForm.patchValue({ locationCommune: matchedCommune });
+                  } else {
+                     this.requestForm.patchValue({ locationCommune: '' });
+                  }
+
+                  // Precise address construction
+                  let preciseAddress = '';
+                  if (matchedCommune && displayName.includes(matchedCommune)) {
+                     // Extract everything before the commune name for maximum accuracy
+                     preciseAddress = displayName.split(matchedCommune)[0].replace(/, $/, '').trim();
+                  } else {
+                     // Fallback: take the first 2 segments of the display name
+                     preciseAddress = displayName.split(',').slice(0, 2).join(', ').trim();
+                  }
+                  
+                  // Final fallback if parsing resulted in empty string
+                  if (!preciseAddress) {
+                     preciseAddress = addr.neighbourhood || addr.road || addr.suburb || addr.village || 'Secteur exact';
+                  }
+
+                  this.requestForm.patchValue({ locationQuarter: preciseAddress });
+               }
+            } catch (err) {
+               // Echec de l'API de reverse geocoding, on fallback
+               this.requestForm.patchValue({ locationQuarter: "Position GPS exacte captée" });
+               if (!this.requestForm.get('locationCity')?.value && this.requestWizardCities().includes('Abidjan')) {
+                  this.requestForm.patchValue({ locationCity: 'Abidjan' });
+                  this.onRequestCityChange();
+               }
+            }
+            this.toastService.show('Adresse résolue avec succès !', 'success');
+         }
+      } finally {
+         this.isLocating.set(false);
+      }
+   }
 
    async requestLocation() {
       try {
@@ -2791,8 +2999,11 @@ export class MobileAppComponent {
 
    // Date validation helpers
    minInterventionDate(): string {
-      const today = new Date();
-      return today.toISOString().split('T')[0];
+      const date = new Date();
+      if (this.requestUrgency() === 'urgency_flexible') {
+         date.setDate(date.getDate() + 1);
+      }
+      return date.toISOString().split('T')[0];
    }
 
    maxInterventionDate(): string {
@@ -3304,6 +3515,17 @@ export class MobileAppComponent {
    }
 
    // NEW: Step-by-step request wizard methods
+   openRequestWizard() {
+      this.resetRequestWizard();
+      this.activeTab.set('create');
+      
+      // Step 1: Auto-select vehicle if only 1 registered
+      const vehicles = this.myVehicles();
+      if (vehicles.length === 1) {
+          this.requestForm.patchValue({ selectedVehicleId: vehicles[0].id });
+      }
+   }
+
    resetRequestWizard() {
       this.requestWizardStep.set(1);
       this.requestNeedType.set([]);
@@ -3340,31 +3562,76 @@ export class MobileAppComponent {
    setServiceType(val: string) { this.requestServiceType.set(val); }
 
    goToNextRequestStep() {
-      const step = this.requestWizardStep();
+      let step = this.requestWizardStep();
+      
       if (step === 1) {
          if (!this.requestForm.get('selectedVehicleId')?.value) return;
-         this.requestWizardStep.set(2);
+         step = 2;
       } else if (step === 2) {
          if (this.requestNeedType().length === 0) return;
-         this.requestWizardStep.set(3);
+         
+         // Auto-selection Step 3 check
+         if (this.requestNeedType().includes('Ne démarre pas')) {
+             this.isVehicleDrivable.set(false);
+         }
+         
+         // Auto-selection Step 4 check
+         const needs = this.requestNeedType();
+         if (needs.length === 1 && needs.includes('Entretien')) {
+             this.requestUrgency.set('urgency_flexible');
+         }
+         
+         step = 3;
       } else if (step === 3) {
          if (this.isVehicleDrivable() === null) return;
-         this.requestWizardStep.set(4);
+         step = 4;
       } else if (step === 4) {
          if (!this.requestUrgency()) return;
-         this.requestWizardStep.set(5);
+         
+         // Pre-select today for immediate and configure dates
+         const val = this.requestUrgency();
+         if (val === 'urgency_immediate' || val === 'urgency_today') {
+             const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+             const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
+             this.requestForm.patchValue({ interventionDate: localISOTime });
+         } else {
+             // Let user pick a date, reset just in case
+             this.requestForm.patchValue({ interventionDate: '' });
+         }
+         
+         step = 5;
       } else if (step === 5) {
-         this.requestWizardStep.set(6);
+         // Auto-selection step 6 for towing
+         if (this.isTowingForced()) {
+             this.requestServiceType.set('towing');
+         }
+         // Clear service type if disabled
+         if (this.isGarageDropDisabled() && this.requestServiceType() === 'garage_drop') {
+             this.requestServiceType.set(null);
+         }
+         
+         step = 6;
       } else if (step === 6) {
          if (!this.requestServiceType()) return;
-         this.requestWizardStep.set(7);
+         step = 7;
       } else if (step === 7) {
          if (!this.requestForm.get('locationCity')?.value) {
             this.toastService.show('Veuillez spécifier un lieu.', 'error');
             return;
          }
-         this.requestWizardStep.set(8);
+         
+         // Custom Date validation Check
+         const u = this.requestUrgency();
+         const d = this.requestForm.get('interventionDate')?.value;
+         if (u === 'urgency_flexible' && !d) {
+             this.toastService.show('Veuillez spécifier une date souhaitée.', 'error');
+             return;
+         }
+
+         step = 8;
       }
+      
+      this.requestWizardStep.set(step);
    }
 
    goToPrevRequestStep() {
@@ -3721,7 +3988,7 @@ export class MobileAppComponent {
       this.photoViewerIndex.set(index);
       this.photoViewerOpen.set(true);
    }
-   closePhotoViewer() { this.photoViewerOpen.set(false); }
+   closePhotoViewer() { this.photoViewerOpen.set(false); this.photoSwipeOffset.set(0); }
    prevPhoto() {
       const total = this.tempPhotos().length;
       this.photoViewerIndex.update(i => (i - 1 + total) % total);
@@ -3729,6 +3996,36 @@ export class MobileAppComponent {
    nextPhoto() {
       const total = this.tempPhotos().length;
       this.photoViewerIndex.update(i => (i + 1) % total);
+   }
+
+   // Touch swipe support
+   private swipeStartX = 0;
+   private swipeStartY = 0;
+   photoSwipeOffset = signal(0);
+
+   onPhotoSwipeStart(e: TouchEvent) {
+      this.swipeStartX = e.touches[0].clientX;
+      this.swipeStartY = e.touches[0].clientY;
+      this.photoSwipeOffset.set(0);
+   }
+
+   onPhotoSwipeEnd(e: TouchEvent) {
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = endX - this.swipeStartX;
+      const diffY = endY - this.swipeStartY;
+
+      // Only swipe horizontally if the gesture is mostly horizontal
+      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+         e.preventDefault();
+         e.stopPropagation();
+         if (diffX < 0) {
+            this.nextPhoto();
+         } else {
+            this.prevPhoto();
+         }
+      }
+      this.photoSwipeOffset.set(0);
    }
 
    async takeVehiclePhoto() {
