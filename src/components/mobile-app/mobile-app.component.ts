@@ -95,6 +95,13 @@ interface WizardNode {
                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></div>
                                <input formControlName="name" [placeholder]="loginForm.value.type === 'Entreprise' ? 'Nom de l\\'entreprise' : 'Nom Complet'" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
                             </div>
+                            <!-- Entreprise : Nombre de véhicules -->
+                            @if (loginForm.value.type === 'Entreprise') {
+                               <div class="relative group animate-slide-in">
+                                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></div>
+                                  <input formControlName="fleetSize" type="number" min="1" placeholder="Nombre de véhicules (Optionnel)" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
+                               </div>
+                            }
                             <!-- Numéro de téléphone -->
                             <div class="relative group animate-slide-in">
                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg></div>
@@ -2564,7 +2571,8 @@ export class MobileAppComponent {
          phone: [''],
          city: [''],
          address: [''],
-         password: ['', Validators.required]
+         password: ['', Validators.required],
+         fleetSize: [null]
       });
       this.requestForm = this.fb.group({
          locationCity: [''],
@@ -3237,7 +3245,8 @@ export class MobileAppComponent {
             address: { street: val.address, city: val.city, zip: '' },
             vehicleIds: [],
             financial: { paymentMethod: 'Cash', paymentTerms: 'Comptant', discountPercent: 0, balance: 0 },
-            history: []
+            history: [],
+            fleetSize: val.type === 'Entreprise' ? Number(val.fleetSize) || 0 : 0
          };
 
          this.dataService.registerMobileClient(newClientData).subscribe({

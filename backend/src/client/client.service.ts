@@ -29,6 +29,7 @@ export class ClientService {
       balance: financial?.balance || 0,
       vehicleIds: client.vehicleIds || [],
       history: client.history || [],
+      fleetSize: client.fleetSize || 0,
     } as Prisma.ClientCreateInput;
   }
 
@@ -52,6 +53,7 @@ export class ClientService {
       },
       vehicleIds: client.vehicleIds || [],
       history: client.history || [],
+      fleetSize: client.fleetSize || 0,
       avatarUrl: client.avatarUrl
     };
   }

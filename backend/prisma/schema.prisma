@@ -97,6 +97,8 @@ model Client {
   commune String?
   zip     String
 
+  fleetSize Int?    @default(0)
+
   // Financial
   paymentMethod   String @default("Espèces")
   paymentTerms    String @default("Comptant")
