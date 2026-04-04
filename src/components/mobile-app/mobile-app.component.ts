@@ -2893,31 +2893,36 @@ export class MobileAppComponent {
       }
    }
 
+   private locationInProgress = false;
+
    async requestLocation() {
+      // Prevent concurrent calls from effect + quickLogin + constructor
+      if (this.locationInProgress) return;
+      if (this.userLocation()) return; // Already have location
+      this.locationInProgress = true;
+
       try {
          if (Capacitor.isNativePlatform()) {
             const { Geolocation } = await import('@capacitor/geolocation');
 
-            // Allow more time for Android to fully bind the Activity
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Give Android extra time to fully bind the Activity on cold start
+            await new Promise(resolve => setTimeout(resolve, 2000));
 
             let perms = await Geolocation.checkPermissions();
-            if (perms.location !== 'granted') {
+            if (perms.location === 'prompt' || perms.location === 'prompt-with-rationale' || perms.location !== 'granted') {
                perms = await Geolocation.requestPermissions();
             }
 
             if (perms.location !== 'granted') {
-               // Only show rejection toast if user explicitly denied it, not on system boot skip
-               if (this.locationRetryCount > 0) {
-                  this.toastService.show('Permission de localisation refusée', 'error');
-               }
+               console.warn('Geolocation: Permission denied by user');
+               this.toastService.show('Permission de localisation refusée', 'error');
                return;
             }
 
             const pos = await Geolocation.getCurrentPosition({
                enableHighAccuracy: true,
-               timeout: 10000,
-               maximumAge: 3000
+               timeout: 15000,
+               maximumAge: 5000
             });
             this.userLocation.set({ lat: pos.coords.latitude, lng: pos.coords.longitude });
             this.requestForm.patchValue({ gpsCoordinates: `${pos.coords.latitude}, ${pos.coords.longitude}` });
@@ -2937,14 +2942,18 @@ export class MobileAppComponent {
             }
          }
       } catch (e: any) {
-         // On Android, calling this too early can throw an internal plugin error.
          console.error('Geolocation Error:', e);
-         if (this.locationRetryCount < 2) {
+         if (this.locationRetryCount < 4) {
             this.locationRetryCount++;
-            setTimeout(() => this.requestLocation(), 2500); // Retry silently
+            this.locationInProgress = false; // Allow retry
+            const delay = 2000 + (this.locationRetryCount * 1500); // Increasing delay: 3.5s, 5s, 6.5s, 8s
+            setTimeout(() => this.requestLocation(), delay);
+            return; // Don't reset locationInProgress, the retry will handle it
          } else {
-            this.toastService.show('Erreur de localisation interne (' + (e?.message || 'Inconnue') + ')', 'error');
+            this.toastService.show('Erreur de localisation (' + (e?.message || 'Inconnue') + ')', 'error');
          }
+      } finally {
+         this.locationInProgress = false;
       }
    }
    myRequests = computed(() => { if (!this.currentPhone()) return []; return this.dataService.quoteRequests().filter(r => r.motoristPhone === this.currentPhone()); });
