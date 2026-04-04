@@ -1508,7 +1508,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <!-- Main Ticket Form -->
                 <div class="flex-1 p-6 space-y-6">
                    <form [formGroup]="ticketForm" (ngSubmit)="saveTicket()" class="space-y-4 shadow-none">
-                       <div class="grid grid-cols-3 gap-4">
+                       <div class="grid gap-4" [class.grid-cols-2]="!currentEditingTicketId()" [class.grid-cols-3]="currentEditingTicketId()">
                            <div>
                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Type d'interaction</label>
                                <select formControlName="type" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white">
