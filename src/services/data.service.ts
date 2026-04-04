@@ -107,6 +107,7 @@ export interface Client {
    companyName?: string;
    rccm?: string;
    vatNumber?: string;
+   fleetSize?: number;
    vehicleIds: string[];
    address: {
       street: string;
