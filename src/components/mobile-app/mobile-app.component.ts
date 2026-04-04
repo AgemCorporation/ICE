@@ -2449,8 +2449,8 @@ export class MobileAppComponent {
          this.dataService.loadApiData();
          this.initPushNotifications();
          this.restorePushNotifications();
-         // Request location immediately on session restore
-         setTimeout(() => this.requestLocation(), 500);
+         // Request location after app is fully ready (longer delay for Android)
+         setTimeout(() => this.requestLocation(true), 3000);
       } else if (savedUser || savedPhone) {
          // Stale session data without token (e.g. after reinstall) — clear everything
          localStorage.removeItem('mobileUserName');
@@ -2821,11 +2821,7 @@ export class MobileAppComponent {
          'END': { id: 'END', question: "Diagnostic terminé", type: 'END' }
       };
 
-      effect(() => {
-         if (this.currentUser() && !this.userLocation()) {
-            this.requestLocation();
-         }
-      });
+      // Location effect removed — now called explicitly from quickLogin/constructor with delay
    }
 
    private locationRetryCount = 0;
@@ -2895,8 +2891,8 @@ export class MobileAppComponent {
 
    private locationInProgress = false;
 
-   async requestLocation() {
-      // Prevent concurrent calls from effect + quickLogin + constructor
+   async requestLocation(silent = false) {
+      // Prevent concurrent calls
       if (this.locationInProgress) return;
       if (this.userLocation()) return; // Already have location
       this.locationInProgress = true;
@@ -2905,17 +2901,31 @@ export class MobileAppComponent {
          if (Capacitor.isNativePlatform()) {
             const { Geolocation } = await import('@capacitor/geolocation');
 
-            // Give Android extra time to fully bind the Activity on cold start
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
             let perms = await Geolocation.checkPermissions();
-            if (perms.location === 'prompt' || perms.location === 'prompt-with-rationale' || perms.location !== 'granted') {
+            console.log('Geolocation: checkPermissions result:', perms.location);
+
+            if (perms.location !== 'granted') {
+               // On Android, if called too early, requestPermissions silently returns 'denied'
+               // without showing the dialog. Wait and retry if that happens.
                perms = await Geolocation.requestPermissions();
+               console.log('Geolocation: requestPermissions result:', perms.location);
             }
 
             if (perms.location !== 'granted') {
-               console.warn('Geolocation: Permission denied by user');
-               this.toastService.show('Permission de localisation refusée', 'error');
+               console.warn('Geolocation: Permission not granted:', perms.location);
+               // Only show toast if this was a user-initiated request, not an automatic one
+               if (!silent) {
+                  this.toastService.show('Permission de localisation refusée. Activez-la dans les paramètres.', 'error');
+               } else {
+                  // Silent mode: schedule another attempt later (Android may need the Activity to be fully visible)
+                  if (this.locationRetryCount < 3) {
+                     this.locationRetryCount++;
+                     this.locationInProgress = false;
+                     const delay = 3000 + (this.locationRetryCount * 3000);
+                     console.log(`Geolocation: Retrying in ${delay}ms (attempt ${this.locationRetryCount})`);
+                     setTimeout(() => this.requestLocation(true), delay);
+                  }
+               }
                return;
             }
 
@@ -2934,22 +2944,22 @@ export class MobileAppComponent {
                      this.requestForm.patchValue({ gpsCoordinates: `${pos.coords.latitude}, ${pos.coords.longitude}` });
                   },
                   (err) => {
-                     this.toastService.show('Impossible de récupérer la position sur ce navigateur', 'error');
+                     if (!silent) this.toastService.show('Impossible de récupérer la position sur ce navigateur', 'error');
                   }
                );
             } else {
-               this.toastService.show('Géolocalisation non supportée', 'error');
+               if (!silent) this.toastService.show('Géolocalisation non supportée', 'error');
             }
          }
       } catch (e: any) {
          console.error('Geolocation Error:', e);
          if (this.locationRetryCount < 4) {
             this.locationRetryCount++;
-            this.locationInProgress = false; // Allow retry
-            const delay = 2000 + (this.locationRetryCount * 1500); // Increasing delay: 3.5s, 5s, 6.5s, 8s
-            setTimeout(() => this.requestLocation(), delay);
-            return; // Don't reset locationInProgress, the retry will handle it
-         } else {
+            this.locationInProgress = false;
+            const delay = 3000 + (this.locationRetryCount * 2000);
+            setTimeout(() => this.requestLocation(silent), delay);
+            return;
+         } else if (!silent) {
             this.toastService.show('Erreur de localisation (' + (e?.message || 'Inconnue') + ')', 'error');
          }
       } finally {
@@ -3025,8 +3035,8 @@ export class MobileAppComponent {
       // Init Push Notifications for this logged-in user
       this.initPushNotifications();
 
-      // Request location immediately after login
-      this.requestLocation();
+      // Request location after login (with delay for Android Activity binding)
+      setTimeout(() => this.requestLocation(true), 3000);
    }
 
    private pushListenersRegistered = false;
