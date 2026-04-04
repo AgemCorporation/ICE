@@ -1452,9 +1452,18 @@ import { ActivatedRoute, Router } from '@angular/router';
              <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex justify-between items-center">
                 <h2 class="font-bold text-slate-900 dark:text-white text-lg">Retranscription Appel</h2>
                 <div class="flex items-center gap-4">
-                   <span class="font-mono text-xl font-bold" [class.text-red-500]="ticketTimer() > 120" [class.text-slate-400]="ticketTimer() <= 120">
-                      {{ formatTimer(ticketTimer()) }}
-                   </span>
+                   <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-1">
+                      <button type="button" (click)="toggleTimerPlay()" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors" title="Démarrer/Mettre en pause le chrono">
+                         @if (isTimerRunning()) {
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                         } @else {
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                         }
+                      </button>
+                      <span class="font-mono text-xl font-bold" [class.text-red-500]="ticketTimer() > 120" [class.text-slate-600]="ticketTimer() <= 120" [class.dark:text-slate-300]="ticketTimer() <= 120">
+                         {{ formatTimer(ticketTimer()) }}
+                      </span>
+                   </div>
                    <button (click)="closeTicketModal()" class="text-slate-400 hover:text-white">✕</button>
                 </div>
              </div>
@@ -2258,6 +2267,7 @@ export class SuperAdminComponent {
    ticketTimer = signal(0);
    currentEditingTicketId = signal<string | null>(null);
    ticketActions = signal<{id:string, text:string, completed:boolean}[]>([]);
+   isTimerRunning = signal(false);
    newActionText = signal('');
    private timerInterval: any;
 
@@ -2277,7 +2287,7 @@ export class SuperAdminComponent {
       this.ticketTimer.set(0);
       this.ticketActions.set([]);
       this.newActionText.set('');
-      this.startTimer();
+      this.isTimerRunning.set(false);
       this.showTicketModal.set(true);
    }
 
@@ -2308,6 +2318,7 @@ export class SuperAdminComponent {
 
    startTimer() {
       this.stopTimer();
+      this.isTimerRunning.set(true);
       this.timerInterval = setInterval(() => {
          this.ticketTimer.update(t => t + 1);
       }, 1000);
@@ -2315,6 +2326,12 @@ export class SuperAdminComponent {
    
    stopTimer() {
       if (this.timerInterval) clearInterval(this.timerInterval);
+      this.isTimerRunning.set(false);
+   }
+   
+   toggleTimerPlay() {
+      if (this.isTimerRunning()) this.stopTimer();
+      else this.startTimer();
    }
    
    formatTimer(seconds: number) {
