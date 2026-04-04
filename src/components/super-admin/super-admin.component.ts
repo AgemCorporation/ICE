@@ -652,6 +652,12 @@ import { ActivatedRoute, Router } from '@angular/router';
                        <input type="text" [ngModel]="callCenterFilterTerm()" (ngModelChange)="callCenterFilterTerm.set($event)" [ngModelOptions]="{standalone: true}" placeholder="Rechercher par sujet, UR, numéro, notes..." class="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 rounded-lg text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
                     </div>
                     <div class="flex gap-4">
+                       <select [ngModel]="callCenterFilterAgent()" (ngModelChange)="callCenterFilterAgent.set($event)" [ngModelOptions]="{standalone: true}" class="border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                          <option value="ALL">Agent : Tous</option>
+                          @for (admin of dataService.admins(); track admin.id) {
+                             <option [value]="admin.id">{{ admin.firstName }} {{ admin.lastName }}</option>
+                          }
+                       </select>
                        <select [ngModel]="callCenterFilterStatus()" (ngModelChange)="callCenterFilterStatus.set($event)" [ngModelOptions]="{standalone: true}" class="border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
                           <option value="ALL">Statut: Tous</option>
                           <option value="Ouvert">Ouvert</option>
@@ -2304,13 +2310,19 @@ export class SuperAdminComponent {
 
    callCenterFilterTerm = signal('');
    callCenterFilterStatus = signal('ALL');
+   callCenterFilterAgent = signal('ALL');
    callCenterFilterType = signal('ALL');
 
    filteredCallCenterTickets = computed(() => {
        let tickets = this.dataService.callCenterTickets();
        const term = this.callCenterFilterTerm().toLowerCase().trim();
        const status = this.callCenterFilterStatus();
-       const type = this.callCenterFilterType();
+              const type = this.callCenterFilterType();
+       const agent = this.callCenterFilterAgent();
+
+       if (agent !== 'ALL') {
+          tickets = tickets.filter(t => t.createdBy === agent);
+       }
 
        if (status !== 'ALL') {
           tickets = tickets.filter(t => t.status === status);
