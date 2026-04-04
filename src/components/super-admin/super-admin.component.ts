@@ -667,7 +667,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                             </tr>
                          </thead>
                          <tbody class="divide-y border-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                            @for (ticket of dataService.callCenterTickets(); track ticket.id) {
+                            @for (ticket of filteredCallCenterTickets(); track ticket.id) {
                                <tr (click)="openTicketDetails(ticket)" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
                                   <td class="px-6 py-4">
                                      <div class="font-medium text-slate-900 dark:text-white">{{ ticket.date | date:'dd/MM/yyyy HH:mm' }}</div>
@@ -2270,6 +2270,34 @@ export class SuperAdminComponent {
    isTimerRunning = signal(false);
    newActionText = signal('');
    private timerInterval: any;
+
+   callCenterFilterTerm = signal('');
+   callCenterFilterStatus = signal('ALL');
+   callCenterFilterType = signal('ALL');
+
+   filteredCallCenterTickets = computed(() => {
+       let tickets = this.dataService.callCenterTickets();
+       const term = this.callCenterFilterTerm().toLowerCase().trim();
+       const status = this.callCenterFilterStatus();
+       const type = this.callCenterFilterType();
+
+       if (status !== 'ALL') {
+          tickets = tickets.filter(t => t.status === status);
+       }
+       if (type !== 'ALL') {
+          tickets = tickets.filter(t => t.type === type);
+       }
+       if (term) {
+           tickets = tickets.filter(t => 
+               t.subject.toLowerCase().includes(term) ||
+               t.notes.toLowerCase().includes(term) ||
+               this.getRef(t.quoteRequestId).toLowerCase().includes(term)
+           );
+       }
+       
+       // Trier du plus récent au plus ancien
+       return tickets.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+   });
 
    callCenterKPIs = computed(() => {
       const tickets = this.dataService.callCenterTickets();
