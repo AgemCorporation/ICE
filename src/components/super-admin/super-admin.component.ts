@@ -585,9 +585,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 
          <!-- 3. TENANTS TAB -->
          @if (activeTab() === 'callcenter') {
-             <div class="space-y-6">
+             <div class="p-6 h-full flex flex-col">
                 <!-- Action Bar -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 shrink-0">
                    <!-- Search / stats -->
                    <div>
                        <h2 class="text-xl font-bold text-slate-800 dark:text-white">Tickets d'appels</h2>
@@ -599,7 +599,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 shrink-0">
                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm flex items-center justify-between relative overflow-hidden">
                       <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-indigo-50 dark:from-indigo-900/20 to-transparent"></div>
                       <div class="relative z-10">
