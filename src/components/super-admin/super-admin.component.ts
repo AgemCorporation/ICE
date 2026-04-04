@@ -708,7 +708,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                                         <span class="text-slate-300 dark:text-slate-600">•</span>
                                         <span class="flex items-center gap-1 text-slate-600 dark:text-slate-400 font-medium">
                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                           {{ getAgentName(ticket.createdBy) }}
+                                           {{ getAgentName(ticket.assignedTo || ticket.createdBy) }}
                                         </span>
                                      </div>
                                   </td>
@@ -1508,7 +1508,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <!-- Main Ticket Form -->
                 <div class="flex-1 p-6 space-y-6">
                    <form [formGroup]="ticketForm" (ngSubmit)="saveTicket()" class="space-y-4 shadow-none">
-                       <div class="grid grid-cols-2 gap-4">
+                       <div class="grid grid-cols-3 gap-4">
                            <div>
                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Type d'interaction</label>
                                <select formControlName="type" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white">
@@ -1524,6 +1524,15 @@ import { ActivatedRoute, Router } from '@angular/router';
                                    <option value="En attente client">En attente client</option>
                                    <option value="A rappeler">A rappeler</option>
                                    <option value="Résolu">Résolu (Clos)</option>
+                               </select>
+                           </div>
+                           <div>
+                               <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Assigné à</label>
+                               <select formControlName="assignedTo" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white">
+                                   <option value="">-- Créateur --</option>
+                                   @for (admin of dataService.admins(); track admin.id) {
+                                       <option [value]="admin.id">{{ admin.firstName }} {{ admin.lastName }}</option>
+                                   }
                                </select>
                            </div>
                        </div>
@@ -2321,7 +2330,7 @@ export class SuperAdminComponent {
        const agent = this.callCenterFilterAgent();
 
        if (agent !== 'ALL') {
-          tickets = tickets.filter(t => t.createdBy === agent);
+          tickets = tickets.filter(t => (t.assignedTo || t.createdBy) === agent);
        }
 
        if (status !== 'ALL') {
@@ -2371,7 +2380,8 @@ export class SuperAdminComponent {
          status: ticket.status,
          durationSecs: ticket.durationSecs,
          quoteRequestId: ticket.quoteRequestId,
-         clientId: ticket.clientId
+         clientId: ticket.clientId,
+         assignedTo: ticket.assignedTo || ''
       });
       this.ticketSearchTerm.set('');
       this.ticketTimer.set(ticket.durationSecs || 0);
