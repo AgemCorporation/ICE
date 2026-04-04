@@ -377,7 +377,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                                </div>
                                <div class="flex items-center gap-2 mb-1">
                                   <h3 class="font-bold text-slate-900 dark:text-white text-lg leading-none">{{ req.vehicleBrand }} {{ req.vehicleModel }}</h3>
-                                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(req.id) }}</span>
+                                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">N˚UR: {{ getRef(req.id) }}</span>
                                </div>
                                
                                <div class="mt-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" (click)="openRequestDetails(req)">
@@ -444,7 +444,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                                      </td>
                                      <td class="px-6 py-4">
                                         <div class="font-bold text-slate-900 dark:text-white">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
-                                        <div class="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0 inline-block mt-1 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(req.id) }}</div>
+                                        <div class="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0 inline-block mt-1 border border-slate-200 dark:border-slate-700">N˚UR: {{ getRef(req.id) }}</div>
                                      </td>
                                      <td class="px-6 py-4 text-center">
                                         @if ((req.status === 'CONVERTED' || req.status === 'COMPLETED' || req.acceptedQuoteId) && getWinnerTenantName(req)) {
@@ -983,7 +983,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                 }
                 <div class="flex gap-3 ml-auto">
                    <button (click)="closeQuotePreview()" class="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-medium transition-colors">Fermer</button>
-                   @if (req.proposedQuotes && req.proposedQuotes.length > 1 && !getHasRefusedQuotes(req) && !getHasTransmittedOrAcceptedQuotes(req)) {
+                   @if (req.proposedQuotes && req.proposedQuotes.length > 1 && !getHasRefusedQuotes(req) && !getHasTransmittedOrAcceptedQuotes(req) && req.status !== 'REJECTED') {
                       <button (click)="dataService.validateQuoteRequest(req.id); closeQuotePreview(); toastService.show('Tous les devis ont été transmis au client', 'success')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-transform active:scale-95">Tout Transmettre</button>
                    }
                    @if (quote && quote.status === 'REFUSE') {
@@ -1025,7 +1025,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-800 mb-6">
                    <div class="flex items-center gap-2 mb-1">
                        <div class="font-bold text-slate-900 dark:text-white">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
-                       <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">Réf: {{ getRef(req.id) }}</span>
+                       <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">N˚UR: {{ getRef(req.id) }}</span>
                     </div>
                    <div class="text-sm text-slate-500 italic mb-2">"{{ req.description }}"</div>
                    <div class="flex gap-2 text-xs mb-4">
@@ -1100,7 +1100,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <div>
                    <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-3">
                       Détail Demande
-                       <span class="px-2 py-0.5 rounded text-[14px] font-bold font-mono bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 leading-none">Réf: {{ getRef(req.id) }}</span>
+                       <span class="px-2 py-0.5 rounded text-[14px] font-bold font-mono bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 leading-none">N˚UR: {{ getRef(req.id) }}</span>
                        <span class="text-xs px-2 py-0.5 rounded-full border uppercase tracking-wide bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 mt-1 md:mt-0">
                           {{ req.status }}
                        </span>

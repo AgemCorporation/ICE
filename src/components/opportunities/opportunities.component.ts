@@ -155,7 +155,7 @@ import { Capacitor } from '@capacitor/core';
                               <div>
                                  <div class="flex items-center gap-2 mb-1">
                                     <div class="font-bold text-base lg:text-lg text-slate-900 dark:text-white leading-none">{{ opp.vehicleBrand }} {{ opp.vehicleModel }}</div>
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(opp.id) }}</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">N˚UR: {{ getRef(opp.id) }}</span>
                                  </div>
                                  <div class="flex items-center gap-2">
                                     <div class="text-slate-500 text-xs flex items-center gap-1">
@@ -228,7 +228,7 @@ import { Capacitor } from '@capacitor/core';
              <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-start bg-slate-50 dark:bg-slate-900 shrink-0">
                 <div>
                   <div class="flex gap-2 items-center mb-1">
-                     <span class="px-2 py-0.5 rounded text-[12px] font-bold font-mono bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 leading-none">Réf: {{ getRef(opp.id) }}</span>
+                     <span class="px-2 py-0.5 rounded text-[12px] font-bold font-mono bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 leading-none">N˚UR: {{ getRef(opp.id) }}</span>
                      @if (opp.localStatus === 'QUOTE_SUBMITTED') { <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">En Revue Admin</span> }
                      @if (opp.localStatus === 'COMPLETED') { <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">Envoyé Client</span> }
                      @if (opp.localStatus === 'CONVERTED') { <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Gagné</span> }

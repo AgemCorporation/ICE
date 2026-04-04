@@ -721,262 +721,239 @@ interface WizardNode {
               }
              <!-- 4. REQUESTS LIST TAB -->
              @if (currentUser() && activeTab() === 'requests') {
-                <div class="p-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-                   <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-4">Mon Suivi</h2>
+                <div class="p-6 pb-[calc(6rem+env(safe-area-inset-bottom))] bg-slate-50/50 dark:bg-slate-950/50 min-h-screen">
+                   <div class="mb-6">
+                       <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Mon Suivi</h2>
+                       <p class="text-xs text-slate-500 mt-1">Gérez vos demandes et factures</p>
+                   </div>
                    
                    <!-- VIEW TOGGLE -->
-                   <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg mb-4">
-                      <button (click)="requestsView.set('demandes')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition-all" [class.bg-white]="requestsView() === 'demandes'" [class.dark:bg-slate-700]="requestsView() === 'demandes'" [class.shadow]="requestsView() === 'demandes'" [class.text-indigo-600]="requestsView() === 'demandes'" [class.dark:text-indigo-400]="requestsView() === 'demandes'" [class.text-slate-500]="requestsView() !== 'demandes'">Mes demandes</button>
-                      <button (click)="requestsView.set('factures')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1" [class.bg-white]="requestsView() === 'factures'" [class.dark:bg-slate-700]="requestsView() === 'factures'" [class.shadow]="requestsView() === 'factures'" [class.text-indigo-600]="requestsView() === 'factures'" [class.dark:text-indigo-400]="requestsView() === 'factures'" [class.text-slate-500]="requestsView() !== 'factures'">
+                   <div class="flex bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-xl mb-6 backdrop-blur-sm">
+                      <button (click)="requestsView.set('demandes')" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-300 relative" [class.bg-white]="requestsView() === 'demandes'" [class.dark:bg-slate-700]="requestsView() === 'demandes'" [class.shadow-md]="requestsView() === 'demandes'" [class.text-indigo-600]="requestsView() === 'demandes'" [class.dark:text-indigo-400]="requestsView() === 'demandes'" [class.text-slate-500]="requestsView() !== 'demandes'">Mes demandes</button>
+                      <button (click)="requestsView.set('factures')" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 relative" [class.bg-white]="requestsView() === 'factures'" [class.dark:bg-slate-700]="requestsView() === 'factures'" [class.shadow-md]="requestsView() === 'factures'" [class.text-indigo-600]="requestsView() === 'factures'" [class.dark:text-indigo-400]="requestsView() === 'factures'" [class.text-slate-500]="requestsView() !== 'factures'">
                          Mes factures
                          @if (myInvoices().length > 0) {
-                            <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-[9px] px-1.5 py-0.5 rounded-full">{{ myInvoices().length }}</span>
+                            <span class="bg-indigo-500 text-white shadow-[0_2px_4px_rgba(99,102,241,0.4)] text-[10px] px-1.5 py-0.5 rounded-full leading-none flex items-center justify-center min-w-[20px]">{{ myInvoices().length }}</span>
                          }
                       </button>
                    </div>
 
                    @if (requestsView() === 'demandes') {
                       <!-- FILTERS -->
-                      <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-                        <select [ngModel]="requestsVehicleFilter()" (ngModelChange)="requestsVehicleFilter.set($event)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">Tous véhicules</option>
-                            @for(v of myVehicles(); track v.id) { <option [value]="v.id">{{ v.brand }} {{ v.model }}</option> }
-                        </select>
-                        <select [ngModel]="requestsStatusFilter()" (ngModelChange)="requestsStatusFilter.set($event)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">Tous statuts</option>
-                            <option value="NEW">En attente</option>
-                            <option value="QUOTE_SUBMITTED">Demande Envoyée</option>
-                            <option value="CONVERTED">Terminé/Validé</option>
-                        </select>
+                      <div class="flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                        <div class="relative min-w-[150px] snap-start">
+                            <select [ngModel]="requestsVehicleFilter()" (ngModelChange)="requestsVehicleFilter.set($event)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 rounded-xl pl-4 pr-10 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-sm transition-all focus:border-indigo-500">
+                                <option value="">Tous les véhicules</option>
+                                @for(v of myVehicles(); track v.id) { <option [value]="v.id">{{ v.brand }} {{ v.model }}</option> }
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                        </div>
+                        <div class="relative min-w-[150px] snap-start">
+                            <select [ngModel]="requestsStatusFilter()" (ngModelChange)="requestsStatusFilter.set($event)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 rounded-xl pl-4 pr-10 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-sm transition-all focus:border-indigo-500">
+                                <option value="">Tous les statuts</option>
+                                <option value="NEW">En attente</option>
+                                <option value="QUOTE_SUBMITTED">Devis reçus</option>
+                                <option value="CONVERTED">Validé / Terminé</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                        </div>
                    </div>
 
                    <div class="space-y-4">
                       @for (req of filteredRequests(); track req.id) {
-                         <div (click)="viewRequestInfo(req)" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 cursor-pointer active:scale-[0.99] transition-transform">
-                            <div class="flex items-center gap-2">
-                               <div class="flex-1 min-w-0">
-                                  <div class="flex justify-between items-start mb-2">
-                               <div class="flex flex-col">
-                                  <div class="flex items-center gap-2 mb-1">
-                                     <div class="font-bold text-slate-900 dark:text-white leading-none">{{ req.vehicleBrand }} {{ req.vehicleModel }}</div>
-                                     <span class="px-1.5 py-0.5 rounded text-[9px] font-bold font-mono bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Réf: {{ getRef(req.id) }}</span>
-                                  </div>
-                                  @if (req.isDirectRequest) {
-                                     <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                                        Demande Directe: {{ getGarageName(req.directTenantId!) }}
-                                     </span>
-                                  }
-                               </div>
-                               <span class="text-[10px] px-2 py-1 rounded-full font-bold uppercase" 
-                                  [class.bg-blue-100]="req.status === 'NEW' || req.status === 'DISPATCHED'" [class.text-blue-700]="req.status === 'NEW' || req.status === 'DISPATCHED'"
-                                  [class.bg-emerald-100]="req.status === 'CONVERTED' || req.status === 'COMPLETED'" [class.text-emerald-700]="req.status === 'CONVERTED' || req.status === 'COMPLETED'">
-                                  {{ translateStatus(req.status) }}
-                               </span>
-                            </div>
-                            <!-- Tags -->
-                            <div class="flex flex-wrap gap-1.5 mb-2 mt-1">
-                               @if (hasTag(req, 'drivable')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" /></svg> Roulant</span> }
-                               @if (hasTag(req, 'not_drivable')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg> En panne</span> }
-                               @if (hasTag(req, 'technician')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg> Technicien</span> }
-                               @if (hasTag(req, 'towing')) { <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 flex items-center gap-1 leading-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg> Remorquage</span> }
-                            </div>
-                            @if(getCleanDescription(req.adminDescription)) {
-                               <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2"><span class="font-bold text-indigo-600 dark:text-indigo-400 mr-1">Diag ICE:</span>{{ getCleanDescription(req.adminDescription) }}</p>
-                            } @else {
-                               <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">{{ getCleanDescription(req.description) }}</p>
-                            }
-                            
-                            <!-- Display Proposed Quotes (Only if Validated by Admin) -->
-                            @if (req.status === 'COMPLETED' || req.status === 'CONVERTED') {
-                               @if (req.proposedQuotes && req.proposedQuotes.length > 0) {
-                                   <div class="space-y-2">
-                                      @let visibleQuotes = getVisibleQuotes(req);
-                                      @for (quoteId of visibleQuotes; track quoteId) {
-                                         @let quote = getQuote(quoteId);
-                                         @let tenant = getTenantByQuoteId(quoteId);
-                                         @if (quote) {
-                                            <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-800 relative z-10" [class.border-emerald-500]="req.acceptedQuoteId === quote.id">
-                                               <div class="flex justify-between items-start mb-2">
-                                                  <div class="overflow-hidden pr-2">
-                                                     <div class="font-bold text-slate-900 dark:text-white text-xs truncate w-full">{{ tenant?.name }}</div>
-                                                     <div class="text-[10px] text-slate-500 mb-1 truncate w-full">{{ tenant?.address || tenant?.city + (tenant?.commune ? ', ' + tenant?.commune : '') }}</div>
-                                                     @if(tenant?.rating) {
-                                                        <div class="flex text-[10px] text-amber-400">
-                                                           @for(i of [1,2,3,4,5]; track i) { <span [class.text-slate-300]="i > tenant!.rating!">★</span> }
-                                                           <span class="ml-1 text-slate-400 font-medium">({{ tenant!.rating }})</span>
-                                                        </div>
-                                                     }
-                                                  </div>
-                                                  <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-sm">{{ quote.totalTTC | number }} F</span>
-                                               </div>
-                                               
-                                               @if (req.status === 'CONVERTED' && req.acceptedQuoteId === quote.id) {
-                                                  <div class="text-center text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 py-1 rounded">Devis Accepté ✓</div>
-                                                  @let repairStatus = req.repairStatus || getRepairStatus(req.repairOrderId);
-                                                  @if (quote.restitutionDate && repairStatus !== 'Clôturé') {
-                                                     <div class="mt-2 text-center text-[11px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 py-1 rounded">
-                                                         Restitution prévue le : <b>{{ quote.restitutionDate | date:'dd/MM/yyyy' }}</b>
-                                                     </div>
-                                                  }
-                                                  
-                                                  @if(repairStatus) {
-                                                      @if(req.repairOrderId) {
-                                                         <div class="mt-2 text-center text-xs font-bold text-slate-700 dark:text-slate-300">
-                                                            Réf. Atelier : <span class="font-mono text-indigo-600 dark:text-indigo-400">OR #{{ req.repairOrderId.substring(0,6) }}</span>
-                                                         </div>
-                                                      }
-                                                      <div class="mt-2 text-center text-xs font-bold px-2 py-1 rounded"
-                                                          [ngClass]="{
-                                                              'bg-amber-100 text-amber-700': repairStatus === 'En attente',
-                                                              'bg-blue-100 text-blue-700': repairStatus === 'En cours',
-                                                              'bg-purple-100 text-purple-700': repairStatus === 'Terminé',
-                                                              'bg-emerald-100 text-emerald-700': repairStatus === 'Clôturé'
-                                                          }">
-                                                          Travaux : {{ repairStatus }}
-                                                      </div>
-                                                      @if(repairStatus === 'Clôturé' && !req.clientRating) {
-                                                         <button (click)="$event.stopPropagation(); openRateModal(req)" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 rounded transition-colors flex items-center justify-center gap-1 z-20 relative">
-                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                                             Évaluer la prestation
-                                                         </button>
-                                                      }
-                                                      @if(req.clientRating) {
-                                                          <div class="mt-2 text-center text-xs text-slate-500 flex items-center justify-center gap-1">
-                                                             Avis laissé : <span class="text-amber-500 font-bold">{{ req.clientRating }} ★</span>
-                                                          </div>
-                                                      }
-                                                  } @else {
-                                                      <div class="mt-2 text-center text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 py-1 rounded">
-                                                          En attente de prise en charge par l'atelier...
-                                                      </div>
-                                                  }
-                                               } @else if (req.status !== 'CONVERTED') {
-                                                  <button (click)="$event.stopPropagation(); viewQuoteDetails(req, quote)" class="w-full text-center text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2 rounded text-indigo-600 dark:text-indigo-400 font-bold hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors z-20 relative">Voir détails</button>
-                                               }
-                                            </div>
-                                         }
-                                      }
-                                      @if (visibleQuotes.length === 0) {
-                                         <div class="text-center p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-lg">
-                                            <span class="text-xs text-slate-500 dark:text-slate-400 italic">Vos devis sont en cours de préparation par nos experts... De retour très vite !</span>
-                                         </div>
-                                      }
-                                   </div>
-                               } @else if (req.garageQuoteId) {
-                                  <!-- Fallback for legacy / direct scan single quote -->
-                                  @let quote = getQuote(req.garageQuoteId);
-                                  @if (quote) {
-                                     <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-800 mb-3 relative z-10">
-                                         <div class="flex justify-between items-center mb-1">
-                                            <span class="font-bold text-slate-700 dark:text-slate-300 text-xs">Devis de {{ getTenantByQuoteId(req.garageQuoteId!)?.name || 'Garage Inconnu' }}</span>
-                                           <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ quote.totalTTC | number }} CFA</span>
-                                        </div>
-                                        
-                                        @if (req.status === 'CONVERTED' && req.acceptedQuoteId === quote.id) {
-                                           <div class="text-center text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 py-1 rounded mt-2">Devis Accepté ✓</div>
-                                           @let repairStatus = getRepairStatus(req.repairOrderId);
-                                           @if(repairStatus) {
-                                               @if(req.repairOrderId) {
-                                                  <div class="mt-2 text-center text-xs font-bold text-slate-700 dark:text-slate-300">
-                                                     Réf. Atelier : <span class="font-mono text-indigo-600 dark:text-indigo-400">OR #{{ req.repairOrderId.substring(0,6) }}</span>
-                                                  </div>
-                                               }
-                                               <div class="mt-2 text-center text-xs font-bold px-2 py-1 rounded"
-                                                   [ngClass]="{
-                                                       'bg-amber-100 text-amber-700': repairStatus === 'En attente',
-                                                       'bg-blue-100 text-blue-700': repairStatus === 'En cours',
-                                                       'bg-purple-100 text-purple-700': repairStatus === 'Terminé',
-                                                       'bg-emerald-100 text-emerald-700': repairStatus === 'Clôturé'
-                                                   }">
-                                                   Travaux : {{ repairStatus }}
-                                               </div>
-                                               @if(repairStatus === 'Clôturé' && !req.clientRating) {
-                                                  <button (click)="$event.stopPropagation(); openRateModal(req)" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 rounded transition-colors flex items-center justify-center gap-1 z-20 relative">
-                                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                                      Évaluer la prestation
-                                                  </button>
-                                               }
-                                               @if(req.clientRating) {
-                                                   <div class="mt-2 text-center text-xs text-slate-500 flex items-center justify-center gap-1">
-                                                      Avis laissé : <span class="text-amber-500 font-bold">{{ req.clientRating }} ★</span>
-                                                   </div>
-                                               }
-                                           } @else {
-                                               <div class="mt-2 text-center text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 py-1 rounded">
-                                                   En attente de prise en charge par l'atelier...
-                                               </div>
-                                           }
-                                        } @else if (req.status !== 'CONVERTED') {
-                                           <button (click)="$event.stopPropagation(); viewQuoteDetails(req, quote)" class="w-full text-center text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline z-20 relative mt-2">Voir détails</button>
-                                        }
+                          <div (click)="viewRequestInfo(req)" class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] mb-4 overflow-hidden transition-all active:bg-slate-50 dark:active:bg-slate-800 cursor-pointer">
+                             <div class="p-4">
+                                 <!-- Header (Status Dot & Ref) -->
+                                 <div class="flex justify-between items-center mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full"
+                                              [class.bg-blue-500]="req.status === 'NEW' || req.status === 'DISPATCHED'"
+                                              [class.bg-amber-500]="req.status === 'QUOTE_SUBMITTED'"
+                                              [class.bg-emerald-500]="req.status === 'CONVERTED' || req.status === 'COMPLETED'"></span>
+                                        <span class="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                                            {{ translateStatus(req.status) }}
+                                        </span>
+                                    </div>
+                                    <span class="text-[11px] font-mono text-slate-400">N˚UR: {{ getRef(req.id) }}</span>
+                                 </div>
+
+                                 <!-- Title -->
+                                 <h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight mb-2">{{ req.vehicleBrand }} {{ req.vehicleModel }}</h3>
+                                 
+                                 <div class="flex flex-wrap gap-1.5 mb-3">
+                                     @if (hasTag(req, 'drivable')) { <span class="px-1.5 py-0.5 border border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400 rounded text-[10px] font-medium">Roulant</span> }
+                                     @if (hasTag(req, 'not_drivable')) { <span class="px-1.5 py-0.5 border border-red-200 bg-red-50 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400 rounded text-[10px] font-medium">En panne</span> }
+                                     @if (hasTag(req, 'technician')) { <span class="px-1.5 py-0.5 border border-slate-200 bg-slate-50 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300 rounded text-[10px] font-medium">Atelier</span> }
+                                     @if (hasTag(req, 'towing')) { <span class="px-1.5 py-0.5 border border-slate-200 bg-slate-50 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300 rounded text-[10px] font-medium">Remorquage</span> }
+                                     @if (req.isDirectRequest) { <span class="px-1.5 py-0.5 border border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400 rounded text-[10px] font-medium">Garage: {{ getGarageName(req.directTenantId!) }}</span> }
+                                 </div>
+
+                                 <!-- Description -->
+                                 @if(getCleanDescription(req.adminDescription)) {
+                                     <div class="pl-2 border-l-[3px] border-indigo-400 dark:border-indigo-500 mb-2">
+                                         <p class="text-[13px] text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                                            <span class="font-semibold text-slate-800 dark:text-slate-200">Diag:</span> {{ getCleanDescription(req.adminDescription) }}
+                                         </p>
                                      </div>
-                                  }
-                               }
-                            } @else if (req.status === 'QUOTE_SUBMITTED') {
-                               <div class="text-center p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-lg">
-                                  <span class="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center justify-center gap-1">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                     Analyse en cours par nos experts...
-                                  </span>
-                               </div>
-                            }
-                            </div>
-                               <div class="text-slate-300 dark:text-slate-600 shrink-0 ml-1">
-                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
-                               </div>
-                            </div>
-                         </div>
+                                 } @else {
+                                     <p class="text-[13px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2">{{ getCleanDescription(req.description) }}</p>
+                                 }
+                             </div>
+
+                             <!-- Quotes Section -->
+                             @if (req.status === 'COMPLETED' || req.status === 'CONVERTED') {
+                                 @if (req.proposedQuotes && req.proposedQuotes.length > 0) {
+                                     <div class="bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 px-4 py-3">
+                                         @let visibleQuotes = getVisibleQuotes(req);
+                                         @if (visibleQuotes.length > 0) {
+                                             <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Offres ({{ visibleQuotes.length }})</div>
+                                             <div class="space-y-2">
+                                                 @for (quoteId of visibleQuotes; track quoteId) {
+                                                     @let quote = getQuote(quoteId);
+                                                     @let tenant = getTenantByQuoteId(quoteId);
+                                                     @if (quote) {
+                                                         <div class="flex items-center justify-between p-2.5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-lg"
+                                                              [class.ring-1]="req.acceptedQuoteId === quote.id" [class.ring-emerald-500]="req.acceptedQuoteId === quote.id" [class.border-emerald-500]="req.acceptedQuoteId === quote.id">
+                                                             <div class="flex-1 min-w-0 pr-3">
+                                                                 <div class="font-medium text-sm text-slate-900 dark:text-white truncate">{{ tenant?.name }}</div>
+                                                                 <div class="flex items-center gap-2 mt-0.5">
+                                                                     <div class="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[13px]">{{ quote.totalTTC | number }} F</div>
+                                                                     @if(tenant?.rating) {
+                                                                         <div class="text-[10px] text-slate-400">★ {{ tenant!.rating }}</div>
+                                                                     }
+                                                                 </div>
+                                                             </div>
+                                                             
+                                                             @if (req.status === 'CONVERTED' && req.acceptedQuoteId === quote.id) {
+                                                                 <div class="flex flex-col items-end">
+                                                                     <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded flex items-center gap-1 mb-1">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                                                        Accepté
+                                                                     </span>
+                                                                     @let repairStatus = req.repairStatus || getRepairStatus(req.repairOrderId);
+                                                                     @if(repairStatus) {
+                                                                         <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400">{{ repairStatus }}</span>
+                                                                         @if(repairStatus === 'Clôturé' && !req.clientRating) {
+                                                                             <button (click)="$event.stopPropagation(); openRateModal(req)" class="text-[10px] font-bold text-indigo-600 mt-1 hover:underline">Donner un avis</button>
+                                                                         }
+                                                                     }
+                                                                 </div>
+                                                             } @else if (req.status !== 'CONVERTED') {
+                                                                 <button (click)="$event.stopPropagation(); viewQuoteDetails(req, quote)" class="shrink-0 h-7 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-[11px] font-semibold rounded transition-colors">
+                                                                     Voir
+                                                                 </button>
+                                                             }
+                                                         </div>
+                                                     }
+                                                 }
+                                             </div>
+                                         } @else {
+                                             <div class="py-3 px-2 text-center text-[13px] text-slate-400 italic">Devis en cours de préparation...</div>
+                                         }
+                                     </div>
+                                 } @else if (req.garageQuoteId) {
+                                     <!-- Legacy Single Quote -->
+                                     @let quote = getQuote(req.garageQuoteId);
+                                     @if (quote) {
+                                         <div class="bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 px-4 py-3">
+                                             <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Offre unique</div>
+                                             <div class="flex items-center justify-between p-2.5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-lg">
+                                                 <div class="flex-1 min-w-0 pr-3">
+                                                     <div class="font-medium text-sm text-slate-900 dark:text-white truncate">{{ getTenantByQuoteId(req.garageQuoteId!)?.name || 'Garage' }}</div>
+                                                     <div class="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[13px] mt-0.5">{{ quote.totalTTC | number }} F</div>
+                                                 </div>
+                                                 @if (req.status === 'CONVERTED' && req.acceptedQuoteId === quote.id) {
+                                                     <div class="flex flex-col items-end">
+                                                         <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Accepté</span>
+                                                         @let repairStatus = getRepairStatus(req.repairOrderId);
+                                                         @if (repairStatus) {
+                                                             <span class="text-[10px] text-slate-500 mt-1">{{ repairStatus }}</span>
+                                                         }
+                                                     </div>
+                                                 } @else if (req.status !== 'CONVERTED') {
+                                                     <button (click)="$event.stopPropagation(); viewQuoteDetails(req, quote)" class="shrink-0 h-7 px-3 bg-slate-100 text-slate-700 text-[11px] font-semibold rounded">Voir</button>
+                                                 }
+                                             </div>
+                                         </div>
+                                     }
+                                 }
+                             } @else if (req.status === 'QUOTE_SUBMITTED') {
+                                 <div class="bg-amber-50/30 dark:bg-amber-900/10 border-t border-amber-50 dark:border-amber-900/30 px-4 py-3">
+                                     <div class="flex items-center justify-center gap-2 text-[12px] font-medium text-amber-700 dark:text-amber-400">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                         Diagnostic mécanique en cours...
+                                     </div>
+                                 </div>
+                             }
+                          </div>
                       }
-                      @if (filteredRequests().length === 0) { <div class="text-center py-12 text-slate-400 text-sm">Aucune demande trouvée.</div> }
+                      
+                      @if (filteredRequests().length === 0) { 
+                          <div class="text-center py-16 px-4 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center">
+                              <div class="w-24 h-24 mb-6 relative">
+                                  <div class="absolute inset-0 bg-indigo-100 dark:bg-indigo-900/30 rounded-full blur-xl animate-pulse"></div>
+                                  <div class="relative bg-white dark:bg-slate-800 w-full h-full rounded-full border border-slate-100 dark:border-slate-700 shadow-md flex items-center justify-center">
+                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-300 dark:text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                  </div>
+                              </div>
+                              <h4 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Aucune demande</h4>
+                              <p class="text-sm text-slate-500 dark:text-slate-400 max-w-[250px] mx-auto leading-relaxed">Vous n'avez pas encore fait de demande d'intervention, ou aucune ne correspond à vos filtres.</p>
+                          </div> 
+                      }
                    </div>
                    } @else {
                       <div class="space-y-4">
                          @if (myInvoices().length === 0) {
-                            <div class="text-center p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-                               <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                  </svg>
+                            <div class="text-center py-16 px-4 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center">
+                               <div class="w-24 h-24 mb-6 relative">
+                                  <div class="absolute inset-0 bg-indigo-100 dark:bg-indigo-900/30 rounded-full blur-xl animate-pulse"></div>
+                                  <div class="relative bg-white dark:bg-slate-800 w-full h-full rounded-full border border-slate-100 dark:border-slate-700 shadow-md flex items-center justify-center">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-300 dark:text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                  </div>
                                </div>
-                               <h4 class="font-bold text-slate-900 dark:text-white mb-2">Aucune facture</h4>
-                               <p class="text-sm text-slate-500 dark:text-slate-400">Vos factures traitées par nos partenaires apparaîtront ici.</p>
+                               <h4 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Aucune facture</h4>
+                               <p class="text-sm text-slate-500 dark:text-slate-400 max-w-[250px] mx-auto leading-relaxed">Vos factures traitées par nos partenaires apparaîtront ici.</p>
                             </div>
                          } @else {
                             @for (invoice of myInvoices(); track invoice.id) {
-                               <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col gap-3">
-                                  <div class="flex justify-between items-start">
+                               <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3 relative overflow-hidden">
+                                  <!-- Decor gradient -->
+                                  <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 dark:bg-indigo-900/10 rounded-bl-full -z-0 opacity-50"></div>
+                                  
+                                  <div class="flex justify-between items-start z-10">
                                      <div>
                                         <div class="flex items-center gap-2 mb-1">
-                                           <span class="font-bold text-slate-900 dark:text-white">{{ invoice.number }}</span>
-                                           <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase"
+                                           <span class="font-black text-slate-900 dark:text-white text-base">{{ invoice.number }}</span>
+                                           <span class="text-[10px] font-bold px-2.5 py-1 rounded-md uppercase"
                                               [class.bg-emerald-100]="invoice.status === 'PAYE'" [class.text-emerald-700]="invoice.status === 'PAYE'" [class.dark:bg-emerald-900/30]="invoice.status === 'PAYE'" [class.dark:text-emerald-400]="invoice.status === 'PAYE'"
                                               [class.bg-amber-100]="invoice.status === 'ENVOYE' || invoice.status === 'PARTIEL'" [class.text-amber-700]="invoice.status === 'ENVOYE' || invoice.status === 'PARTIEL'" [class.dark:bg-amber-900/30]="invoice.status === 'ENVOYE' || invoice.status === 'PARTIEL'" [class.dark:text-amber-400]="invoice.status === 'ENVOYE' || invoice.status === 'PARTIEL'">
                                               {{ invoice.status === 'ENVOYE' ? 'À RÉGLER' : (invoice.status === 'PAYE' ? 'PAYÉE' : invoice.status) }}
                                            </span>
                                         </div>
-                                        <div class="text-xs text-slate-500 font-bold mb-0.5">{{ getGarageName(invoice.tenantId) }}</div>
+                                        <div class="text-sm text-slate-600 dark:text-slate-300 font-bold mb-1">{{ getGarageName(invoice.tenantId) }}</div>
                                         @if (invoice.repairId) {
-                                           <div class="text-[10px] text-slate-400">Réf. Atelier : <span class="font-mono">OR #{{ invoice.repairId.substring(0,6) }}</span></div>
+                                           <div class="text-[11px] text-slate-400 flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> OR #{{ invoice.repairId.substring(0,6) }}</div>
                                         }
                                      </div>
-                                     <div class="text-right">
-                                        <div class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ invoice.totalTTC | number }} F</div>
-                                        <div class="text-[10px] text-slate-400">{{ invoice.date | date:'dd/MM/yyyy' }}</div>
+                                     <div class="text-right flex flex-col items-end">
+                                        <div class="font-mono font-black text-indigo-600 dark:text-indigo-400 text-lg leading-none mb-1">{{ invoice.totalTTC | number }} F</div>
+                                        <div class="text-[10px] text-slate-400 font-medium">{{ invoice.date | date:'dd/MM/yyyy' }}</div>
                                      </div>
                                   </div>
+                                  
                                   @if (invoice.vehicleDescription) {
-                                     <div class="text-[11px] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800 mt-1">
-                                        <span class="font-bold">Véhicule :</span> {{ invoice.vehicleDescription }}
+                                     <div class="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 px-3 py-2.5 rounded-xl border border-slate-100 dark:border-slate-800 mt-2 z-10">
+                                        <span class="font-bold text-slate-700 dark:text-slate-300">Véhicule :</span> {{ invoice.vehicleDescription }}
                                      </div>
                                   }
-                                  <div class="flex gap-2 mt-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                                     <button (click)="viewInvoice(invoice)" class="flex-1 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 py-2 rounded-xl text-xs font-bold transition-colors">
+                                  
+                                  <div class="flex gap-3 mt-3 pt-4 border-t border-slate-100 dark:border-slate-800/80 z-10">
+                                     <button (click)="viewInvoice(invoice)" class="flex-1 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98]">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                         Consulter
                                      </button>
                                      @if (invoice.status !== 'PAYE') {
-                                        <button (click)="payInvoice(invoice)" class="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition-colors shadow-sm">
+                                        <button (click)="payInvoice(invoice)" class="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                                            Payer en ligne
                                         </button>
@@ -1272,7 +1249,7 @@ interface WizardNode {
                       <div>
                          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Détails de la demande</h3>
                          <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">Réf: {{ getRef(reqInfo.id) }}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">N˚UR: {{ getRef(reqInfo.id) }}</span>
                             <span class="text-xs text-slate-500 font-medium">• {{ reqInfo.date | date:'dd/MM/yyyy HH:mm' }}</span>
                          </div>
                       </div>
