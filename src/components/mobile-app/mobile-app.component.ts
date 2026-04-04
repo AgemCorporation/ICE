@@ -2438,7 +2438,10 @@ export class MobileAppComponent {
       // Restore mobile user session from localStorage
       const savedUser = localStorage.getItem('mobileUserName');
       const savedPhone = localStorage.getItem('mobileUserPhone');
-      if (savedUser && savedPhone) {
+      const savedToken = localStorage.getItem('auth_token');
+
+      // Only restore session if we have both user data AND a valid auth token
+      if (savedUser && savedPhone && savedToken) {
          this.currentUser.set(savedUser);
          this.currentPhone.set(savedPhone);
          this.activeTab.set('home');
@@ -2448,6 +2451,12 @@ export class MobileAppComponent {
          this.restorePushNotifications();
          // Request location immediately on session restore
          setTimeout(() => this.requestLocation(), 500);
+      } else if (savedUser || savedPhone) {
+         // Stale session data without token (e.g. after reinstall) — clear everything
+         localStorage.removeItem('mobileUserName');
+         localStorage.removeItem('mobileUserPhone');
+         localStorage.removeItem('mobile_push_notifications');
+         localStorage.removeItem('mobile_read_notification_ids');
       }
 
       // Auto-restore currentClientData from clients() after API data loads
