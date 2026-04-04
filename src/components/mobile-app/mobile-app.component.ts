@@ -13,6 +13,7 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { Browser } from '@capacitor/browser';
 // Camera dynamically imported
 
 interface WizardNode {
@@ -1633,7 +1634,7 @@ interface WizardNode {
           <!-- SETTINGS MODAL -->
           @if (showSettingsModal()) {
              <div class="absolute inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col animate-slide-in">
-                <div class="p-4 border-b flex justify-between items-center bg-indigo-600 text-white shadow-md shrink-0">
+                <div class="px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] border-b flex justify-between items-center bg-indigo-600 text-white shadow-md shrink-0">
                    <h2 class="font-bold text-lg">Paramètres</h2>
                    <button (click)="closeSettings()" class="text-white/80 hover:text-white">✕</button>
                 </div>
@@ -1828,6 +1829,21 @@ interface WizardNode {
                     </div>
                  </div>
               </div>
+           }
+
+           <!-- CUSTOM FLOATING CHAT BUBBLE (Native Browser) -->
+           @if (currentUser() && activeTab() === 'profile') {
+              <button (click)="openLiveChat()" 
+                      class="fixed bottom-24 right-5 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center animate-bounce-subtle z-[100] transition-transform active:scale-90 border-2 border-white dark:border-slate-800 focus:outline-none">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                 </svg>
+                 <!-- Tooltip hint (pulse dot) -->
+                 <span class="absolute -top-1 -right-1 flex h-4 w-4">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
+                 </span>
+              </button>
            }
 
       <!-- NEW INVOICE PREVIEW MODAL -->
@@ -2342,6 +2358,13 @@ export class MobileAppComponent {
    showInvoicesModal = signal(false);
    showSettingsModal = signal(false);
 
+   async openLiveChat() {
+      await Browser.open({ 
+         url: 'https://tawk.to/chat/69bfe4ba1f2eee1c3a8ffa1f/1jkapau46',
+         windowName: '_blank'
+      });
+   }
+
    // Requests Tab View Toggle
    requestsView = signal<'demandes' | 'factures'>('demandes');
 
@@ -2468,64 +2491,6 @@ export class MobileAppComponent {
             });
          }
       }, 15000);
-
-      // Tawk.to Mobile Integration & Dynamic Injection
-      let mobileTawkInjected = false;
-      effect(() => {
-         const w = window as any;
-         const tab = this.activeTab();
-         const user = this.currentUser();
-         const phone = this.currentPhone();
-
-         const realEmail = this.currentClientData()?.email || this.profileForm?.value?.email;
-         const finalEmail = realEmail && realEmail.trim() !== '' ? realEmail : `${phone?.replace(/\+/g, '')}@mobile.app`;
-         const fullName = `${user} (App Mobile)`;
-
-         // 1. Inject Automobiliste script dynamically if user requires it (defer to profile tab to avoid blocking Location prompt at app startup)
-         if (user && tab === 'profile' && !mobileTawkInjected && Capacitor.isNativePlatform()) {
-            mobileTawkInjected = true;
-
-            w.Tawk_API = w.Tawk_API || {};
-            w.Tawk_API.visitor = { name: fullName, email: finalEmail };
-            w.Tawk_API.onLoad = () => {
-               w.Tawk_API.setAttributes({ name: fullName, email: finalEmail }, function (e: any) { });
-            };
-
-            const s1 = document.createElement("script");
-            const s0 = document.getElementsByTagName("script")[0];
-            s1.async = true;
-            s1.src = 'https://embed.tawk.to/69bfe4ba1f2eee1c3a8ffa1f/1jkapau46';
-            s1.charset = 'UTF-8';
-            s1.setAttribute('crossorigin', '*');
-            if (s0 && s0.parentNode) s0.parentNode.insertBefore(s1, s0);
-            else document.head.appendChild(s1);
-         }
-
-         const syncAndToggleTawk = () => {
-            if (!w.Tawk_API) return;
-
-            // Manage Visibility & Size
-            if (user && tab === 'profile') {
-               if (typeof w.Tawk_API.showWidget === 'function') w.Tawk_API.showWidget();
-               if (typeof w.Tawk_API.setAttributes === 'function') w.Tawk_API.setAttributes({ name: fullName, email: finalEmail }, function (e: any) { });
-
-               setTimeout(() => {
-                  const tawkIframe = document.querySelector('iframe[title="chat widget"]') as HTMLElement;
-                  if (tawkIframe) {
-                     tawkIframe.style.transform = 'scale(0.85)';
-                     tawkIframe.style.transformOrigin = 'bottom right';
-                     tawkIframe.style.marginBottom = '60px'; // Prevent hiding behind tab bar when minimized
-                  }
-               }, 500);
-            } else {
-               if (typeof w.Tawk_API.hideWidget === 'function') w.Tawk_API.hideWidget();
-            }
-         };
-
-         syncAndToggleTawk();
-         setTimeout(syncAndToggleTawk, 2000);
-         setTimeout(syncAndToggleTawk, 4000);
-      });
 
       // Leaflet Map Initialization Hook
       effect(() => {

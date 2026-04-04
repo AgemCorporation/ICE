@@ -2100,21 +2100,23 @@ export class DataService {
 
    // --- MOBILE VEHICLES MANAGEMENT ---
    addMobileVehicle(v: MotoristVehicle) {
+      // Optimistic update: add immediately to signal
+      this.mobileVehicles.update(list => [...list, v]);
       this.http.post<MotoristVehicle>(`${this.apiUrl}/motorist-vehicle`, v).subscribe({
-         next: (data) => this.mobileVehicles.update(list => [...list, data]),
+         next: (data) => this.mobileVehicles.update(list => list.map(item => item.id === v.id ? data : item)),
          error: (err) => {
             console.error('API Error saving mobile vehicle', err);
-            this.mobileVehicles.update(list => [...list, v]); // Optimistic fallback
          }
       });
    }
 
    updateMobileVehicle(v: MotoristVehicle) {
+      // Optimistic update: replace immediately in signal
+      this.mobileVehicles.update(list => list.map(item => item.id === v.id ? v : item));
       this.http.patch<MotoristVehicle>(`${this.apiUrl}/motorist-vehicle/${v.id}`, v).subscribe({
          next: (data) => this.mobileVehicles.update(list => list.map(item => item.id === data.id ? data : item)),
          error: (err) => {
             console.error('API Error updating mobile vehicle', err);
-            this.mobileVehicles.update(list => list.map(item => item.id === v.id ? v : item)); // Optimistic fallback
          }
       });
    }
