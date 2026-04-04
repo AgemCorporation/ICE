@@ -659,10 +659,11 @@ import { ActivatedRoute, Router } from '@angular/router';
                       <table class="w-full text-left text-sm whitespace-nowrap">
                          <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800">
                            <tr>
-                              <th class="p-4">Date</th>
-                              <th class="p-4">Lié À</th>
-                              <th class="p-4">Motif</th>
-                              <th class="p-4 text-right">Statut</th>
+                              <th class="p-4 w-1/5 min-w-[150px]">Date & Temps</th>
+                              <th class="p-4 w-1/6 min-w-[120px]">Liaison</th>
+                              <th class="p-4 w-auto min-w-[200px]">Motif & Sujet</th>
+                              <th class="p-4 w-32 text-right">Statut</th>
+                              <th class="p-4 w-12"></th>
                            </tr>
                          </thead>
                          <tbody class="divide-y border-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
@@ -670,31 +671,43 @@ import { ActivatedRoute, Router } from '@angular/router';
                                <tr (click)="openTicketDetails(ticket)" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
                                   <td class="p-4">
                                      <div class="font-medium text-slate-900 dark:text-white">{{ ticket.date | date:'dd/MM/yyyy HH:mm' }}</div>
-                                     <div class="text-xs text-slate-500">{{ ticket.durationSecs }} secs</div>
+                                     <div class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        {{ ticket.durationSecs }} secs
+                                     </div>
                                   </td>
                                   <td class="p-4">
                                      @if (ticket.quoteRequestId) {
-                                        <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide">Dossier UR</span>
+                                        <span class="inline-flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-2.5 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider ring-1 ring-inset ring-indigo-200 dark:ring-indigo-800/50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" /></svg>
+                                            n˚ur
+                                        </span>
                                      } @else if (ticket.clientId) {
-                                        <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide">Client</span>
+                                        <span class="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider ring-1 ring-inset ring-slate-200 dark:ring-slate-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                            Client
+                                        </span>
                                      } @else {
                                         <span class="text-slate-400 dark:text-slate-500 text-[10px] italic">Orphelin</span>
                                      }
                                   </td>
-                                  <td class="p-4">
-                                     <div class="font-medium max-w-[200px] truncate text-slate-900 dark:text-white">{{ ticket.subject }}</div>
-                                     <div class="text-xs text-slate-500">{{ ticket.type }}</div>
+                                  <td class="p-4 max-w-[300px]">
+                                     <div class="font-bold text-slate-900 dark:text-white truncate">{{ ticket.subject }}</div>
+                                     <div class="text-xs text-slate-500 truncate mt-0.5">{{ ticket.type }}</div>
                                   </td>
                                   <td class="p-4 text-right">
                                      <span class="px-2.5 py-1 rounded-full text-xs font-bold"
                                            [class.bg-slate-100]="ticket.status === 'Ouvert'" [class.text-slate-600]="ticket.status === 'Ouvert'"
                                            [class.dark:bg-slate-800]="ticket.status === 'Ouvert'" [class.dark:text-slate-400]="ticket.status === 'Ouvert'"
-                                           [class.bg-amber-100]="ticket.status === 'A rappeler'" [class.text-amber-700]="ticket.status === 'A rappeler'"
-                                           [class.dark:bg-amber-900/30]="ticket.status === 'A rappeler'" [class.dark:text-amber-400]="ticket.status === 'A rappeler'"
+                                           [class.bg-amber-100]="ticket.status === 'En attente client' || ticket.status === 'A rappeler'" [class.text-amber-700]="ticket.status === 'En attente client' || ticket.status === 'A rappeler'"
+                                           [class.dark:bg-amber-900/30]="ticket.status === 'En attente client' || ticket.status === 'A rappeler'" [class.dark:text-amber-400]="ticket.status === 'En attente client' || ticket.status === 'A rappeler'"
                                            [class.bg-emerald-100]="ticket.status === 'Résolu'" [class.text-emerald-700]="ticket.status === 'Résolu'"
                                            [class.dark:bg-emerald-900/30]="ticket.status === 'Résolu'" [class.dark:text-emerald-400]="ticket.status === 'Résolu'">
                                            {{ ticket.status }}
                                      </span>
+                                  </td>
+                                  <td class="p-4 text-right">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-slate-400 group-hover:text-indigo-600 transition-colors ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                   </td>
                                </tr>
                             }
