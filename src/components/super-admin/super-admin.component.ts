@@ -2540,9 +2540,7 @@ export class SuperAdminComponent {
            next: (res) => {
                this.isAnalyzing.set(false);
                const currentNotes = this.ticketForm.get('notes')?.value || '';
-               const suffix = currentNotes ? '
-
-' : '';
+               const suffix = currentNotes ? '\\n\\n' : '';
                this.ticketForm.patchValue({ notes: currentNotes + suffix + res.summary });
                this.toastService.show('✨ Résumé IA généré avec succès', 'success');
            },
