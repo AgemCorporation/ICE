@@ -2325,7 +2325,7 @@ export class SuperAdminComponent {
    callCenterFilterAgent = signal('ALL');
    callCenterFilterType = signal('ALL');
    baseCallCenterTickets = computed(() => {
-       let tickets = this.baseCallCenterTickets();
+       let tickets = this.dataService.callCenterTickets();
        const user = this.dataService.currentUser();
        if (user && user.role !== 'Root') {
            tickets = tickets.filter(t => t.createdBy === user.id || t.assignedTo === user.id);
