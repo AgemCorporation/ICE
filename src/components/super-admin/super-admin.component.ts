@@ -2324,9 +2324,17 @@ export class SuperAdminComponent {
    callCenterFilterStatus = signal('ALL');
    callCenterFilterAgent = signal('ALL');
    callCenterFilterType = signal('ALL');
+   baseCallCenterTickets = computed(() => {
+       let tickets = this.baseCallCenterTickets();
+       const user = this.dataService.currentUser();
+       if (user && user.role !== 'Root') {
+           tickets = tickets.filter(t => t.createdBy === user.id || t.assignedTo === user.id);
+       }
+       return tickets;
+   });
 
    filteredCallCenterTickets = computed(() => {
-       let tickets = this.dataService.callCenterTickets();
+       let tickets = this.baseCallCenterTickets();
        const term = this.callCenterFilterTerm().toLowerCase().trim();
        const status = this.callCenterFilterStatus();
               const type = this.callCenterFilterType();
@@ -2355,7 +2363,7 @@ export class SuperAdminComponent {
    });
 
    callCenterKPIs = computed(() => {
-      const tickets = this.dataService.callCenterTickets();
+      const tickets = this.baseCallCenterTickets();
       const total = tickets.length;
       const opened = tickets.filter(t => t.status === 'Ouvert' || t.status === 'A rappeler' || t.status === 'En attente client').length;
       const resolved = tickets.filter(t => t.status === 'Résolu').length;
