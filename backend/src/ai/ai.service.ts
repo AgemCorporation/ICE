@@ -10,8 +10,8 @@ export class AiService {
     const apiKey = process.env.GEMINI_API_KEY;
     if (apiKey) {
       this.genAI = new GoogleGenerativeAI(apiKey);
-      // Use the modern 3.0-flash model
-      this.model = this.genAI.getGenerativeModel({ model: 'gemini-3.0-flash' });
+      // Use the modern 2.5-flash model
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     }
   }
 
