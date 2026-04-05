@@ -1007,7 +1007,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     <!-- QUOTE PREVIEW MODAL -->
     @if (showQuotePreviewModal() && selectedRequestForAction(); as req) {
        @let quote = getGarageQuote(selectedQuotePreviewId() || req.garageQuoteId || req.proposedQuotes?.[0]);
-       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+       <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
           <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
              <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-900 dark:text-white flex justify-between items-center bg-white dark:bg-slate-900 shrink-0">
                 <span>Examiner la proposition de {{ getTenantName(quote?.tenantId) }}</span>
@@ -1195,7 +1195,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     <!-- DISPATCH MODAL -->
     @if (showRequestModal() && selectedRequest(); as req) {
-       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+       <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
           <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
              <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-900 dark:text-white flex justify-between items-center bg-white dark:bg-slate-900 shrink-0 rounded-t-xl">
                 <span>Dispatcher la demande</span>
@@ -1272,7 +1272,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     <!-- REQUEST DETAIL MODAL -->
     @if (showRequestDetailModal() && selectedRequestDetail(); as req) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+        <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
           <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
              
              <!-- Header -->
@@ -1640,6 +1640,12 @@ import { ActivatedRoute, Router } from '@angular/router';
                                  <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
                                     <div><span class="font-bold border bg-slate-100 dark:bg-slate-800 px-1 rounded">{{ context.data.vehicleBrand }} {{ context.data.vehicleModel }}</span></div>
                                  </div>
+                                 <div class="mt-4">
+                                     <button (click)="openRequestDetails(context.data)" type="button" class="w-full justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 font-bold text-xs py-2 px-3 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800 flex items-center gap-2">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                         Consulter la Demande
+                                     </button>
+                                 </div>
                              } @else {
                                  <div class="font-bold text-slate-900 dark:text-white">{{ context.data.firstName }} {{ context.data.lastName }}</div>
                                  <div class="text-slate-500 text-sm mb-3">{{ context.data.phone }}</div>
@@ -1782,7 +1788,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     <!-- TENANT MODAL -->
     @if (showTenantModal()) {
-       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+       <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
           <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
              <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-900 dark:text-white flex justify-between items-center bg-white dark:bg-slate-900 shrink-0 rounded-t-xl">
                 <span>{{ editingTenantId() ? 'Modifier Garage' : 'Nouveau Garage' }}</span>
