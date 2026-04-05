@@ -1568,7 +1568,7 @@ import * as XLSX from 'xlsx';
                                    }
                                </button>
                            </div>
-                           <textarea formControlName="notes" rows="4" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white" [placeholder]="isDictating() ? 'Écoute de l\'appel en cours... 🎙️' : 'Détails de l\'appel...'"></textarea>
+                           <textarea formControlName="notes" rows="4" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white" [placeholder]="isDictating() ? 'Ecoute au microphone en cours... 🎙️' : 'Details de la retranscription...'"></textarea>
                        </div>
                        
                        <div class="mt-6 border-t border-slate-200 dark:border-slate-800 pt-6">
