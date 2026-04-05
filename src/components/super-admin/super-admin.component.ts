@@ -5,6 +5,8 @@ import { DataService, Tenant, PlatformLead, QuoteRequest, Invoice, RepairStatus,
 import { ToastService } from '../../services/toast.service';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import * as XLSX from 'xlsx';
+
 
 @Component({
    selector: 'app-super-admin',
@@ -139,6 +141,12 @@ import { ActivatedRoute, Router } from '@angular/router';
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         <input type="text" [ngModel]="mobileUsersSearchTerm()" (ngModelChange)="mobileUsersSearchTerm.set($event)" placeholder="Rechercher par nom, téléphone, email..." class="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
                      </div>
+                     @if (dataService.currentUser()?.role === 'Root') {
+                        <button (click)="exportMobileUsers()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-all focus:ring-2 focus:ring-emerald-500/50 outline-none active:scale-95 shrink-0 w-full sm:w-auto justify-center">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                           Exporter Excel
+                        </button>
+                     }
                   </div>
                   
                   <div class="flex-1 overflow-y-auto">
@@ -2091,6 +2099,68 @@ export class SuperAdminComponent {
       this.showMotoristVehiclesModal.set(false);
       setTimeout(() => this.selectedMotorist.set(null), 300);
    }
+
+   exportMobileUsers() {
+      const users = this.mobileUsers();
+      const allVehicles = this.dataService.mobileVehicles();
+      const exportData: any[] = [];
+
+      users.forEach(user => {
+         const userVehicles = allVehicles.filter(v => v.ownerPhone === user.phone);
+         
+         if (userVehicles.length === 0) {
+            exportData.push({
+               'Prénom': user.firstName,
+               'Nom': user.lastName || '',
+               'Téléphone': user.phone,
+               'Email': user.email || '',
+               'Type': user.type || 'Particulier',
+               'Ville': user.address?.city || '',
+               'Commune': user.address?.commune || '',
+               'Marque': '',
+               'Modèle': '',
+               'Année': '',
+               'Immatriculation': '',
+               'VIN': '',
+               'Kilométrage': '',
+               'Carburant': '',
+               'Total Devis': user.totalQuotes,
+               'Devis Convertis': user.convertedQuotes
+            });
+         } else {
+            userVehicles.forEach(v => {
+               exportData.push({
+                  'Prénom': user.firstName,
+                  'Nom': user.lastName || '',
+                  'Téléphone': user.phone,
+                  'Email': user.email || '',
+                  'Type': user.type || 'Particulier',
+                  'Ville': user.address?.city || '',
+                  'Commune': user.address?.commune || '',
+                  'Marque': v.brand,
+                  'Modèle': v.model,
+                  'Année': v.year,
+                  'Immatriculation': v.plate,
+                  'VIN': v.vin,
+                  'Kilométrage': v.mileage,
+                  'Carburant': v.fuel,
+                  'Total Devis': user.totalQuotes,
+                  'Devis Convertis': user.convertedQuotes
+               });
+            });
+         }
+      });
+
+      const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(exportData);
+      const wb: XLSX.WorkBook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Utilisateurs MonAuto');
+      
+      const fileName = `Export_MonAuto_${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+      
+      this.toastService.show('Export Excel réussi.', 'success');
+   }
+
 
    // Moderation Logic
    moderationFilter = signal<'MODERATE' | 'VALIDATE' | 'TRACKING' | 'REJECTED' | 'HISTORY' | 'DIRECT'>('MODERATE');
