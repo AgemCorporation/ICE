@@ -2209,7 +2209,8 @@ export class SuperAdminComponent {
          status: ['Ouvert', Validators.required],
          durationSecs: [0],
          quoteRequestId: [null],
-         clientId: [null]
+         clientId: [null],
+         assignedTo: ['']
       });
 
       // Sync Route Params to Tab
