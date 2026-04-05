@@ -29,6 +29,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { EventsModule } from './events/events.module';
 import { PaymentsModule } from './payments/payments.module';
 import { CallCenterTicketModule } from './call-center-ticket/call-center-ticket.module';
+import { AiModule } from './ai/ai.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -63,7 +64,8 @@ import { join } from 'path';
     NotificationsModule, 
     EventsModule, 
     PaymentsModule,
-    CallCenterTicketModule
+    CallCenterTicketModule,
+    AiModule
   ],
   controllers: [AppController],
   providers: [

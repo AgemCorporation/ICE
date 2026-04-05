@@ -2450,4 +2450,9 @@ export class DataService {
       });
    }
 
+   // --- AI INTEGRATION ---
+   summarizeCall(transcription: string) {
+      return this.http.post<{summary: string}>(`${this.apiUrl}/ai/summarize`, { text: transcription });
+   }
+
 }

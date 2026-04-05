@@ -1553,8 +1553,22 @@ import * as XLSX from 'xlsx';
                        </div>
 
                        <div>
-                           <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Notes & Résumé</label>
-                           <textarea formControlName="notes" rows="4" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white"></textarea>
+                           <div class="flex items-center justify-between mb-1">
+                               <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Notes & Résumé</label>
+                               <button type="button" (click)="toggleDictation()" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-colors border" [class.bg-red-50]="isDictating()" [class.text-red-600]="isDictating()" [class.border-red-200]="isDictating()" [class.dark:bg-red-900/30]="isDictating()" [class.dark:text-red-400]="isDictating()" [class.dark:border-red-800/50]="isDictating()" [class.bg-slate-50]="!isDictating()" [class.text-slate-600]="!isDictating()" [class.border-slate-200]="!isDictating()" [class.dark:bg-slate-800]="!isDictating()" [class.dark:text-slate-400]="!isDictating()" [class.dark:border-slate-700]="!isDictating()" [disabled]="isAnalyzing()">
+                                   @if (isAnalyzing()) {
+                                       <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                       Analyse IA...
+                                   } @else if (isDictating()) {
+                                       <span class="relative flex h-2 w-2 mr-0.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span>
+                                       Stop & Résumer
+                                   } @else {
+                                       <svg xmlns="http://www.w3.org/2000/svg" class="size-3 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                                       Auto-Résumé IA
+                                   }
+                               </button>
+                           </div>
+                           <textarea formControlName="notes" rows="4" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white" [placeholder]="isDictating() ? 'Écoute de l\'appel en cours... 🎙️' : 'Détails de l\'appel...'"></textarea>
                        </div>
                        
                        <div class="mt-6 border-t border-slate-200 dark:border-slate-800 pt-6">
@@ -2396,6 +2410,11 @@ export class SuperAdminComponent {
    newActionText = signal('');
    private timerInterval: any;
 
+   isDictating = signal(false);
+   dictationText = signal('');
+   isAnalyzing = signal(false);
+   private recognition: any;
+
    callCenterFilterTerm = signal('');
    callCenterFilterStatus = signal('ALL');
    callCenterFilterAgent = signal('ALL');
@@ -2446,7 +2465,94 @@ export class SuperAdminComponent {
       const avgWait = tickets.length > 0 ? Math.round(tickets.reduce((a,b) => a + (b.durationSecs||0), 0) / tickets.length) : 0;
       return { total, opened, resolved, avgWait };
    });
-   
+
+   toggleDictation() {
+       if (this.isDictating()) {
+           this.stopDictation();
+       } else {
+           this.startDictation();
+       }
+   }
+
+   startDictation() {
+       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+       if (!SpeechRecognition) {
+           this.toastService.show('Reconnaissance vocale non supportée sur ce navigateur.', 'error');
+           return;
+       }
+       
+       this.recognition = new SpeechRecognition();
+       this.recognition.lang = 'fr-FR';
+       this.recognition.continuous = true;
+       this.recognition.interimResults = true;
+       this.dictationText.set('');
+
+       this.recognition.onresult = (event: any) => {
+           let finalTranscript = '';
+           for (let i = event.resultIndex; i < event.results.length; ++i) {
+               if (event.results[i].isFinal) {
+                   finalTranscript += event.results[i][0].transcript + ' ';
+               }
+           }
+           if (finalTranscript) {
+               this.dictationText.update(text => text + finalTranscript);
+           }
+       };
+
+       this.recognition.onerror = (event: any) => {
+           console.error('Speech recognition error', event.error);
+           if (event.error !== 'no-speech') {
+              this.toastService.show('Erreur microphone: ' + event.error, 'error');
+              this.isDictating.set(false);
+           }
+       };
+
+       this.recognition.onend = () => {
+           if (this.isDictating()) {
+               this.recognition.start(); // Keep listening automatically
+           } else {
+               this.processDictationWithGemini();
+           }
+       };
+
+       this.isDictating.set(true);
+       this.recognition.start();
+       this.toastService.show('🎙️ Écoute de l\'appel en cours...', 'info');
+   }
+
+   stopDictation() {
+       this.isDictating.set(false);
+       if (this.recognition) {
+           this.recognition.stop();
+       }
+       this.toastService.show('⏹️ Fin de l\'écoute, analyse IA en cours...', 'info');
+   }
+
+   processDictationWithGemini() {
+       const text = this.dictationText().trim();
+       if (!text) {
+           this.toastService.show('Aucune voix détectée pour le résumé.', 'info');
+           return;
+       }
+       
+       this.isAnalyzing.set(true);
+       this.dataService.summarizeCall(text).subscribe({
+           next: (res) => {
+               this.isAnalyzing.set(false);
+               const currentNotes = this.ticketForm.get('notes')?.value || '';
+               const suffix = currentNotes ? '
+
+' : '';
+               this.ticketForm.patchValue({ notes: currentNotes + suffix + res.summary });
+               this.toastService.show('✨ Résumé IA généré avec succès', 'success');
+           },
+           error: (err) => {
+               this.isAnalyzing.set(false);
+               this.toastService.show('Erreur lors de la génération du résumé', 'error');
+           }
+       });
+   }
+
    openNewTicketModal() {
       this.currentEditingTicketId.set(null);
       this.ticketForm.reset({ type: 'Appel Entrant', status: 'Ouvert', durationSecs: 0 });
