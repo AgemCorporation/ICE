@@ -1912,8 +1912,8 @@ export class DataService {
       this.syncQuoteRequestDB(requestId);
    }
 
-   initQuotePayment(requestId: string, quoteId: string) {
-      return this.http.post<{paymentUrl: string, transactionId: string}>(`${this.apiUrl}/payments/init-fee`, { quoteRequestId: requestId, quoteId: quoteId });
+   initFeePayment(requestId: string) {
+      return this.http.post<{paymentUrl: string, transactionId: string}>(`${this.apiUrl}/payments/init-fee`, { quoteRequestId: requestId });
    }
 
    clientAcceptQuote(requestId: string, quoteId: string): string | null {

@@ -233,6 +233,7 @@ model QuoteRequest {
   unlockedForModifications  Json?
   unlockedTenantIds         String[] @default([])
   unreadMessageTenantIds    String[] @default([])
+  hasPaidFees               Boolean  @default(false)
   hasUnreadMessagesForAdmin Boolean  @default(false)
 
   // System

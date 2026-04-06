@@ -84,6 +84,11 @@ export class ClientService {
            delete (updateData as any).street;
            delete (updateData as any).city;
         }
+        
+        // Prevent accidental downgrade from Entreprise to Particulier (often caused by incomplete front-end dummy updates)
+        if (existingClient.type === 'Entreprise' && updateData.type === 'Particulier') {
+           delete (updateData as any).type;
+        }
 
         client = await this.prisma.client.update({
           where: { id: existingClient.id },
@@ -115,6 +120,13 @@ export class ClientService {
 
   async update(id: string, data: any) {
     const prismaData = this.mapToPrisma(data);
+    
+    // Prevent accidental downgrade from Entreprise to Particulier
+    const existing = await this.prisma.client.findUnique({ where: { id } });
+    if (existing && existing.type === 'Entreprise' && prismaData.type === 'Particulier') {
+       delete (prismaData as any).type;
+    }
+    
     const client = await this.prisma.client.update({
       where: { id },
       data: prismaData,

@@ -810,7 +810,18 @@ interface WizardNode {
                              <!-- Quotes Section -->
                              @if (req.status === 'COMPLETED' || req.status === 'CONVERTED') {
                                  @if (req.proposedQuotes && req.proposedQuotes.length > 0) {
-                                     <div class="bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 px-4 py-3">
+                                     @if (!req.hasPaidFees) {
+                                         <div class="bg-indigo-50/50 dark:bg-indigo-900/30 border-t border-indigo-100 dark:border-indigo-800/50 px-4 py-5 text-center">
+                                             <div class="text-[13px] font-medium text-indigo-900 dark:text-indigo-200 mb-3">
+                                                 {{ req.proposedQuotes.length }} devis reçus. Payez les frais de gestion pour les consulter et finaliser votre demande.
+                                             </div>
+                                             <button (click)="payFeesForRequest(req)" class="w-full flex items-center justify-center h-10 bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-semibold rounded-xl shadow-sm shadow-indigo-600/20 transition-all">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                 Débloquer la consultation ({{ currentClientData()?.type === 'Entreprise' ? '2.500' : '2.000' }} FCFA)
+                                             </button>
+                                         </div>
+                                     } @else {
+                                         <div class="bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 px-4 py-3">
                                          @let visibleQuotes = getVisibleQuotes(req);
                                          @if (visibleQuotes.length > 0) {
                                              <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Offres ({{ visibleQuotes.length }})</div>
@@ -858,6 +869,7 @@ interface WizardNode {
                                              <div class="py-3 px-2 text-center text-[13px] text-slate-400 italic">Devis en cours de préparation...</div>
                                          }
                                      </div>
+                                 }
                                  } @else if (req.garageQuoteId) {
                                      <!-- Legacy Single Quote -->
                                      @let quote = getQuote(req.garageQuoteId);
@@ -2449,17 +2461,21 @@ export class MobileAppComponent {
       }
 
       // Auto-restore currentClientData from clients() after API data loads
+      // IMPORTANT: Always refresh (not just when null) so that loadApiData() updates are reflected
       effect(() => {
          const phone = this.currentPhone();
          const clients = this.dataService.clients();
-         if (phone && clients.length > 0 && !this.currentClientData()) {
+         if (phone && clients.length > 0) {
             const match = clients.find(c => c.phone === phone);
             if (match) {
                this.currentClientData.set(match);
-               // Also patch profile form with latest server data
-               const fullName = match.firstName + (match.lastName ? ' ' + match.lastName : '');
+               // Also patch profile form with latest server data (including type!)
+               const isEntreprise = match.type === 'Entreprise';
+               const displayName = isEntreprise ? (match.companyName || match.firstName) : match.firstName + (match.lastName ? ' ' + match.lastName : '');
                this.profileForm.patchValue({
-                  name: fullName,
+                  type: match.type || 'Particulier',
+                  name: displayName,
+                  fleetSize: match.fleetSize || null,
                   phone: match.phone,
                   email: match.email,
                   city: match.address?.city || '',
@@ -3012,9 +3028,12 @@ export class MobileAppComponent {
       this.currentClientData.set(client);
       this.activeTab.set('home');
 
-      // Force update the profile form with actual server data
+      // Force update the profile form with actual server data (including type!)
+      const isEntreprise = client.type === 'Entreprise';
       this.profileForm.patchValue({
-         name: fullName,
+         type: client.type || 'Particulier',
+         name: isEntreprise ? (client.companyName || fullName) : fullName,
+         fleetSize: client.fleetSize || null,
          phone: client.phone,
          email: client.email,
          city: client.address?.city || '',
@@ -3371,29 +3390,33 @@ export class MobileAppComponent {
       const d = this.quoteToConfirm();
       if (d) {
          this.showConfirmQuoteModal.set(false);
-         this.toastService.show('Initialisation du paiement des frais de gestion...', 'info');
+         this.toastService.show('Validation en cours...', 'info');
 
-         this.dataService.initQuotePayment(d.req.id, d.quote.id).subscribe({
-            next: async (res) => {
-               if (Capacitor.isNativePlatform()) {
-                  const { Browser } = await import('@capacitor/browser');
-                  await Browser.open({ url: res.paymentUrl });
-                  await Browser.addListener('browserFinished', () => {
-                     // When user closes the browser, check the backend for new status
-                     this.dataService.loadApiData();
-                     this.closeQuoteDetails();
-                  });
-               } else {
-                  window.open(res.paymentUrl, '_blank');
-                  this.closeQuoteDetails();
-               }
-            },
-            error: (e) => {
-               this.toastService.show(e?.error?.message || 'Erreur lors de l\'initialisation du paiement.', 'error');
-               this.closeQuoteDetails();
-            }
-         });
+         this.dataService.clientAcceptQuote(d.req.id, d.quote.id);
+         this.toastService.show('Devis accepté !', 'success');
+         this.closeQuoteDetails();
       }
+   }
+
+   payFeesForRequest(req: any) {
+      this.toastService.show('Initialisation du paiement...', 'info');
+
+      this.dataService.initFeePayment(req.id).subscribe({
+         next: async (res) => {
+            if (Capacitor.isNativePlatform()) {
+               const { Browser } = await import('@capacitor/browser');
+               await Browser.open({ url: res.paymentUrl });
+               await Browser.addListener('browserFinished', () => {
+                  this.dataService.loadApiData();
+               });
+            } else {
+               window.open(res.paymentUrl, '_blank');
+            }
+         },
+         error: (e) => {
+            this.toastService.show(e?.error?.message || 'Erreur lors de l\'initialisation du paiement.', 'error');
+         }
+      });
    }
    openGarageProfile(g: any) { this.selectedGarageProfile.set(g); }
    closeGarageProfile() { this.selectedGarageProfile.set(null); }

@@ -9,12 +9,10 @@ export class PaymentsService {
   async initFeePayment(quoteRequestId: string) {
     const apiKey = process.env.CINETPAY_API_KEY;
     const siteId = process.env.CINETPAY_SITE_ID;
-    const feeAmount = process.env.CINETPAY_FEE_AMOUNT ? parseInt(process.env.CINETPAY_FEE_AMOUNT) : 2000;
 
     if (!apiKey || !siteId) {
       throw new HttpException("Configuration CinetPay manquante dans l'environnement", HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
     const quote = await this.prisma.quoteRequest.findUnique({
       where: { id: quoteRequestId }
     });
@@ -22,9 +20,23 @@ export class PaymentsService {
     if (!quote) {
       throw new HttpException('Devis introuvable', HttpStatus.NOT_FOUND);
     }
+    
+    // Dynamic Fee Amount Based on Client Type
+    const feeParticulier = process.env.CINETPAY_FEE_AMOUNT_PARTICULIER ? parseInt(process.env.CINETPAY_FEE_AMOUNT_PARTICULIER) : 2000;
+    const feeEntreprise = process.env.CINETPAY_FEE_AMOUNT_ENTREPRISE ? parseInt(process.env.CINETPAY_FEE_AMOUNT_ENTREPRISE) : 2500;
 
-    if (quote.status === 'ACCEPTED') {
-      throw new HttpException('Ce devis est déjà accepté et payé.', HttpStatus.BAD_REQUEST);
+    let feeAmount = feeParticulier;
+
+    const client = await this.prisma.client.findFirst({
+      where: { phone: quote.motoristPhone }
+    });
+    
+    if (client && client.type === 'Entreprise') {
+      feeAmount = feeEntreprise;
+    }
+
+    if ((quote as any).hasPaidFees) {
+      throw new HttpException('Les frais de gestion pour cette demande ont déjà été payés.', HttpStatus.BAD_REQUEST);
     }
 
     const transactionId = `TX_${quoteRequestId.substring(0, 8)}_${Date.now()}`;
@@ -131,10 +143,10 @@ export class PaymentsService {
           
           await prisma.quoteRequest.update({
             where: { id: tx.quoteRequestId },
-            data: { status: 'ACCEPTED' }
+            data: { hasPaidFees: true }
           });
         });
-        this.logger.log(`Transaction ${transaction_id} validée et devis mis à jour.`);
+        this.logger.log(`Transaction ${transaction_id} validée et devis débloqués.`);
       } else {
         // Did not succeed
         await this.prisma.paymentTransaction.update({
