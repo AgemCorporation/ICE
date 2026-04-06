@@ -75,9 +75,13 @@ export class VehicleService {
     }
   }
 
-  async findAll(tenantId?: string) {
+  async findAll(tenantId?: string, ownerId?: string) {
+    const where: any = {};
+    if (tenantId) where.tenantId = tenantId;
+    if (ownerId) where.ownerId = ownerId;
+    
     const vehicles = await this.prisma.vehicle.findMany({
-      where: tenantId ? { tenantId } : undefined,
+      where,
     });
     return vehicles.map(v => this.mapToFront(v));
   }

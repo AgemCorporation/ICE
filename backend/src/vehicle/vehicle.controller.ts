@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { VehicleService } from './vehicle.service';
 import { Prisma } from '@prisma/client';
 
@@ -12,8 +12,15 @@ export class VehicleController {
   }
 
   @Get()
-  findAll() {
-    return this.vehicleService.findAll();
+  findAll(@Req() req: any) {
+    const { sub, role, tenantId, type } = req.user || {};
+    
+    if (type === 'client') {
+      return this.vehicleService.findAll(undefined, sub);
+    }
+    
+    const filterTenantId = (role === 'Root' || role === 'SuperAdmin') ? undefined : tenantId;
+    return this.vehicleService.findAll(filterTenantId);
   }
 
   @Get(':id')

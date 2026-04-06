@@ -30,8 +30,28 @@ export class QuoteRequestService {
         return result;
     }
 
-    async findAll() {
+    async findAll(filter?: { clientId?: string, tenantId?: string }) {
+        const where: any = {};
+        
+        if (filter?.clientId) {
+            // Find the client's phone number to filter requests
+            const client = await this.prisma.client.findUnique({ where: { id: filter.clientId } });
+            if (client) {
+                where.motoristPhone = client.phone;
+            } else {
+                // If client not found, return empty list for security
+                return [];
+            }
+        }
+
+        if (filter?.tenantId) {
+            // If a tenant is viewing, they only see requests they are assigned to
+            // Note: assignedTenantIds is a String[] in QuoteRequest model
+            where.assignedTenantIds = { has: filter.tenantId };
+        }
+
         return this.prisma.quoteRequest.findMany({
+            where,
             orderBy: { date: 'desc' }
         });
     }

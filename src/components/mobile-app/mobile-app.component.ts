@@ -2113,7 +2113,7 @@ export class MobileAppComponent {
 
       // 1. Pending Quotes (Devis reçus mais pas encore acceptés)
       const pendingQuotes = this.dataService.quoteRequests().filter(req => 
-         req.status === 'QUOTE_SUBMITTED'
+         req.status === 'QUOTE_SUBMITTED' && req.motoristPhone === phone
       );
       pendingQuotes.forEach(q => {
          const id = `quote-${q.id}`;
@@ -2148,7 +2148,7 @@ export class MobileAppComponent {
       // 3. Completed Repairs (Véhicules prêts)
       const completedRepairs = this.dataService.quoteRequests().filter(req => {
           const status = req.repairStatus || this.getRepairStatus(req.repairOrderId);
-          return status === 'Terminé' && req.status !== 'COMPLETED';
+          return status === 'Terminé' && req.status !== 'COMPLETED' && req.motoristPhone === phone;
       });
       completedRepairs.forEach(req => {
          const id = `repair-${req.id}`;
