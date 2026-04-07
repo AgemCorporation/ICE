@@ -2475,7 +2475,7 @@ export class MobileAppComponent {
                this.profileForm.patchValue({
                   type: match.type || 'Particulier',
                   name: displayName,
-                  fleetSize: match.fleetSize || null,
+                  fleetSize: match.fleetSize != null && match.fleetSize > 0 ? match.fleetSize : null,
                   phone: match.phone,
                   email: match.email,
                   city: match.address?.city || '',
@@ -3033,7 +3033,7 @@ export class MobileAppComponent {
       this.profileForm.patchValue({
          type: client.type || 'Particulier',
          name: isEntreprise ? (client.companyName || fullName) : fullName,
-         fleetSize: client.fleetSize || null,
+         fleetSize: client.fleetSize != null && client.fleetSize > 0 ? client.fleetSize : null,
          phone: client.phone,
          email: client.email,
          city: client.address?.city || '',
@@ -3961,8 +3961,8 @@ export class MobileAppComponent {
          if (source) {
             this.profileForm.patchValue({
                type: source.type || 'Particulier',
-               name: source.type === 'Entreprise' ? source.companyName : source.firstName + (source.lastName ? ' ' + source.lastName : ''),
-               fleetSize: source.fleetSize || null,
+               name: source.type === 'Entreprise' ? (source.companyName || source.firstName || '') : (source.firstName + (source.lastName ? ' ' + source.lastName : '')),
+               fleetSize: source.fleetSize != null && source.fleetSize > 0 ? source.fleetSize : null,
                phone: source.phone,
                email: source.email || '',
                city: source.address?.city || '',
