@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { QuoteRequestService } from './quote-request.service';
 import { Public } from '../auth/public.decorator';
 
@@ -12,20 +12,13 @@ export class QuoteRequestController {
         return this.quoteRequestService.create(createQuoteRequestDto);
     }
 
+    @Public()
     @Get()
-    findAll(@Req() req: any) {
-        const { sub, role, tenantId, type } = req.user || {};
-        const filter: any = {};
-        
-        if (type === 'client') {
-            filter.clientId = sub;
-        } else if (role !== 'Root' && role !== 'SuperAdmin') {
-            filter.tenantId = tenantId;
-        }
-        
-        return this.quoteRequestService.findAll(filter);
+    findAll() {
+        return this.quoteRequestService.findAll();
     }
 
+    @Public()
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.quoteRequestService.findOne(id);

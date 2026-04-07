@@ -40,13 +40,9 @@ export class InvoiceService {
     return result;
   }
 
-  async findAll(tenantId?: string, clientId?: string) {
-    const where: any = {};
-    if (tenantId) where.tenantId = tenantId;
-    if (clientId) where.clientId = clientId;
-
+  async findAll(tenantId?: string) {
     return this.prisma.invoice.findMany({
-      where,
+      where: tenantId ? { tenantId } : undefined,
       orderBy: { date: 'desc' },
       include: { items: true }
     });

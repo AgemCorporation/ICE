@@ -7,12 +7,7 @@ export class RepairController {
 
   @Get()
   findAll(@Req() req: any) {
-    const { sub, role, tenantId, type } = req.user || {};
-    
-    if (type === 'client') {
-      return this.service.findAll(undefined, sub);
-    }
-    
+    const { role, tenantId } = req.user || {};
     const filterTenantId = (role === 'Root' || role === 'SuperAdmin') ? undefined : tenantId;
     return this.service.findAll(filterTenantId);
   }

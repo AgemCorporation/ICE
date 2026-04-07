@@ -11,13 +11,9 @@ export class RepairService {
     private eventsGateway: EventsGateway
   ) {}
 
-  async findAll(tenantId?: string, clientId?: string) {
-    const where: any = {};
-    if (tenantId) where.tenantId = tenantId;
-    if (clientId) where.clientId = clientId;
-
+  async findAll(tenantId?: string) {
     return this.prisma.repairOrder.findMany({
-      where,
+      where: tenantId ? { tenantId } : undefined,
     });
   }
 
