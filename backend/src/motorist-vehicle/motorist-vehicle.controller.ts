@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { MotoristVehicleService } from './motorist-vehicle.service';
 import { Public } from '../auth/public.decorator';
 
@@ -12,10 +12,9 @@ export class MotoristVehicleController {
     return this.motoristVehicleService.create(createMotoristVehicleDto);
   }
 
-  @Public()
   @Get()
-  findAll() {
-    return this.motoristVehicleService.findAll();
+  findAll(@Req() req: any) {
+    return this.motoristVehicleService.findAll(req.user);
   }
 
   @Public()

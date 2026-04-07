@@ -12,9 +12,7 @@ export class InvoiceController {
 
   @Get()
   findAll(@Req() req: any) {
-    const { role, tenantId } = req.user || {};
-    const filterTenantId = (role === 'Root' || role === 'SuperAdmin') ? undefined : tenantId;
-    return this.invoiceService.findAll(filterTenantId);
+    return this.invoiceService.findAll(req.user);
   }
 
   @Get(':id')

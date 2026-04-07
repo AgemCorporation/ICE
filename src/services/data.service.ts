@@ -906,6 +906,9 @@ export class DataService {
       const token = localStorage.getItem('auth_token');
       if (!token) return;
 
+      // Check if this is a mobile user session
+      const isMobileUser = !!localStorage.getItem('mobileUserPhone');
+
       // Fetch Invoices
       this.http.get<Invoice[]>(`${this.apiUrl}/invoice`).subscribe({
          next: (data) => {
@@ -918,11 +921,14 @@ export class DataService {
          next: (data) => { if (data) this._clients.set(data); },
          error: (err) => console.error('Erreur lors du chargement des clients API', err)
       });
-      // Fetch Vehicles
-      this.http.get<Vehicle[]>(`${this.apiUrl}/vehicle`).subscribe({
-         next: (data) => { if (data) this._vehicles.set(data); },
-         error: (err) => console.error('Erreur lors du chargement des véhicules API', err)
-      });
+      
+      if (!isMobileUser) {
+         // Fetch Vehicles (Internal Garage Only)
+         this.http.get<Vehicle[]>(`${this.apiUrl}/vehicle`).subscribe({
+            next: (data) => { if (data) this._vehicles.set(data); },
+            error: (err) => console.error('Erreur lors du chargement des véhicules API', err)
+         });
+      }
       // Fetch Tenants (also in loadPublicData, but refresh here for authenticated users)
       this.http.get<Tenant[]>(`${this.apiUrl}/tenant`).subscribe({
          next: (data) => {
@@ -956,77 +962,69 @@ export class DataService {
          },
          error: (err) => console.error('Erreur lors du chargement des quote-requests API', err)
       });
-      // Fetch SystemLogs
-      this.http.get<SystemLog[]>(`${this.apiUrl}/system-log`).subscribe({
-         next: (data) => {
-            if (data) this.systemLogs.set(data);
-         },
-         error: (err) => console.error('Erreur API SystemLog', err)
-      });
-      // Fetch MotoristVehicles
-      this.http.get<MotoristVehicle[]>(`${this.apiUrl}/motorist-vehicle`).subscribe({
-         next: (data) => {
-            if (data) this.mobileVehicles.set(data);
-         },
-         error: (err) => console.error('Erreur API MotoristVehicle', err)
-      });
-      // Fetch QRScans
-      this.http.get<QRScanLog[]>(`${this.apiUrl}/qrscanlog`).subscribe({
-         next: (data) => {
-            if (data) this.qrScans.set(data);
-         },
-         error: (err) => console.error('Erreur API QRScanLog', err)
-      });
-      // Fetch Repairs
-      this.http.get<RepairOrder[]>(`${this.apiUrl}/repair`).subscribe({
-         next: (data) => { if (data) this._repairs.set(data); },
-         error: (err) => console.error('Erreur API Repair', err)
-      });
-      // Fetch Parts
-      this.http.get<Part[]>(`${this.apiUrl}/part`).subscribe({
-         next: (data) => { if (data) this._parts.set(data); },
-         error: (err) => console.error('Erreur API Part', err)
-      });
-      // Fetch Suppliers
-      this.http.get<Supplier[]>(`${this.apiUrl}/supplier`).subscribe({
-         next: (data) => { if (data) this._suppliers.set(data); },
-         error: (err) => console.error('Erreur API Supplier', err)
-      });
-      // Fetch Warehouses
-      this.http.get<Warehouse[]>(`${this.apiUrl}/warehouse`).subscribe({
-         next: (data) => { if (data) this._warehouses.set(data); },
-         error: (err) => console.error('Erreur API Warehouse', err)
-      });
-      // Fetch LabourRates
-      this.http.get<LabourRate[]>(`${this.apiUrl}/labour-rate`).subscribe({
-         next: (data) => { if (data) this._labourRates.set(data); },
-         error: (err) => console.error('Erreur API LabourRate', err)
-      });
-      // Fetch ServicePackages
-      this.http.get<ServicePackage[]>(`${this.apiUrl}/service-package`).subscribe({
-         next: (data) => { if (data) this._packages.set(data); },
-         error: (err) => console.error('Erreur API ServicePackage', err)
-      });
-      // Fetch StockMovements
-      this.http.get<StockMovement[]>(`${this.apiUrl}/stock-movement`).subscribe({
-         next: (data) => { if (data) this._movements.set(data); },
-         error: (err) => console.error('Erreur API StockMovement', err)
-      });
-      // Fetch Leads
-      this.http.get<PlatformLead[]>(`${this.apiUrl}/lead`).subscribe({
-         next: (data) => { if (data) this.leads.set(data); },
-         error: (err) => console.error('Erreur API Lead', err)
-      });
-      // Fetch Roles
-      this.http.get<Role[]>(`${this.apiUrl}/garage-role`).subscribe({
-         next: (data) => { if (data && data.length > 0) this._roles.set(data); },
-         error: (err) => console.error('Erreur API Role', err)
-      });
-      // Fetch PlatformConfig
-      this.http.get<PlatformConfig>(`${this.apiUrl}/platform-config`).subscribe({
-         next: (data) => { if (data) this.platformConfig.set(data); },
-         error: (err) => console.error('Erreur API PlatformConfig', err)
-      });
+      if (!isMobileUser) {
+         // Fetch SystemLogs
+         this.http.get<SystemLog[]>(`${this.apiUrl}/system-log`).subscribe({
+            next: (data) => {
+               if (data) this.systemLogs.set(data);
+            },
+            error: (err) => console.error('Erreur API SystemLog', err)
+         });
+         
+         // Fetch QRScans
+         this.http.get<QRScanLog[]>(`${this.apiUrl}/qrscanlog`).subscribe({
+            next: (data) => {
+               if (data) this.qrScans.set(data);
+            },
+            error: (err) => console.error('Erreur API QRScanLog', err)
+         });
+         // Fetch Repairs
+         this.http.get<RepairOrder[]>(`${this.apiUrl}/repair`).subscribe({
+            next: (data) => { if (data) this._repairs.set(data); },
+            error: (err) => console.error('Erreur API Repair', err)
+         });
+         // Fetch Parts
+         this.http.get<Part[]>(`${this.apiUrl}/part`).subscribe({
+            next: (data) => { if (data) this._parts.set(data); },
+            error: (err) => console.error('Erreur API Part', err)
+         });
+         // Fetch Suppliers
+         this.http.get<Supplier[]>(`${this.apiUrl}/supplier`).subscribe({
+            next: (data) => { if (data) this._suppliers.set(data); },
+            error: (err) => console.error('Erreur API Supplier', err)
+         });
+         // Fetch Warehouses
+         this.http.get<Warehouse[]>(`${this.apiUrl}/warehouse`).subscribe({
+            next: (data) => { if (data) this._warehouses.set(data); },
+            error: (err) => console.error('Erreur API Warehouse', err)
+         });
+         // Fetch LabourRates
+         this.http.get<LabourRate[]>(`${this.apiUrl}/labour-rate`).subscribe({
+            next: (data) => { if (data) this._labourRates.set(data); },
+            error: (err) => console.error('Erreur API LabourRate', err)
+         });
+         // Fetch ServicePackages
+         this.http.get<ServicePackage[]>(`${this.apiUrl}/service-package`).subscribe({
+            next: (data) => { if (data) this._packages.set(data); },
+            error: (err) => console.error('Erreur API ServicePackage', err)
+         });
+         // Fetch StockMovements
+         this.http.get<StockMovement[]>(`${this.apiUrl}/stock-movement`).subscribe({
+            next: (data) => { if (data) this._movements.set(data); },
+            error: (err) => console.error('Erreur API StockMovement', err)
+         });
+         // Fetch Leads
+         this.http.get<PlatformLead[]>(`${this.apiUrl}/lead`).subscribe({
+            next: (data) => { if (data) this.leads.set(data); },
+            error: (err) => console.error('Erreur API Lead', err)
+         });
+         // Fetch Roles
+         this.http.get<Role[]>(`${this.apiUrl}/garage-role`).subscribe({
+            next: (data) => { if (data && data.length > 0) this._roles.set(data); },
+            error: (err) => console.error('Erreur API Role', err)
+         });
+      }
+
       // Fetch Global Announcement
       this.http.get<GlobalAnnouncement>(`${this.apiUrl}/platform-config/announcement`).subscribe({
          next: (data) => { if (data) this.globalAnnouncement.set(data); },

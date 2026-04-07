@@ -40,7 +40,17 @@ export class InvoiceService {
     return result;
   }
 
-  async findAll(tenantId?: string) {
+  async findAll(user: any) {
+    if (!user) return [];
+    if (user.type === 'client') {
+        return this.prisma.invoice.findMany({
+            where: { clientId: user.sub },
+            orderBy: { date: 'desc' },
+            include: { items: true }
+        });
+    }
+    const isGlobalAdmin = (user.role === 'Root' || user.role === 'SuperAdmin');
+    const tenantId = isGlobalAdmin ? undefined : user.tenantId;
     return this.prisma.invoice.findMany({
       where: tenantId ? { tenantId } : undefined,
       orderBy: { date: 'desc' },

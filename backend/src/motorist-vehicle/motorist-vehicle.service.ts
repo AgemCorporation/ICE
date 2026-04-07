@@ -17,7 +17,16 @@ export class MotoristVehicleService {
     return this.prisma.motoristVehicle.create({ data });
   }
 
-  async findAll() {
+  async findAll(user: any) {
+    if (!user) return [];
+    if (user.type === 'client') {
+        const client = await this.prisma.client.findUnique({ where: { id: user.sub } });
+        if (!client) return [];
+        return this.prisma.motoristVehicle.findMany({
+            where: { ownerPhone: client.phone },
+            orderBy: { createdAt: 'desc' }
+        });
+    }
     return this.prisma.motoristVehicle.findMany({
       orderBy: { createdAt: 'desc' },
     });

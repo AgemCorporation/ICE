@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { QuoteRequestService } from './quote-request.service';
 import { Public } from '../auth/public.decorator';
 
@@ -12,10 +12,9 @@ export class QuoteRequestController {
         return this.quoteRequestService.create(createQuoteRequestDto);
     }
 
-    @Public()
     @Get()
-    findAll() {
-        return this.quoteRequestService.findAll();
+    findAll(@Req() req: any) {
+        return this.quoteRequestService.findAll(req.user);
     }
 
     @Public()

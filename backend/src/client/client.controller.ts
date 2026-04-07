@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { ClientService } from './client.service';
 import { Prisma } from '@prisma/client';
 import { Public } from '../auth/public.decorator';
@@ -13,8 +13,14 @@ export class ClientController {
   }
 
   @Get()
-  findAll() {
-    return this.clientService.findAll();
+  async findAll(@Req() req: any) {
+    const user = req?.user;
+    if (user?.type === 'client') {
+       const me = await this.clientService.findOne(user.sub);
+       return me ? [me] : [];
+    }
+    const tenantId = (user?.role === 'Root' || user?.role === 'SuperAdmin') ? undefined : user?.tenantId;
+    return this.clientService.findAll(tenantId);
   }
 
   @Get(':id')

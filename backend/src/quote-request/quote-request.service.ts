@@ -30,10 +30,27 @@ export class QuoteRequestService {
         return result;
     }
 
-    async findAll() {
-        return this.prisma.quoteRequest.findMany({
-            orderBy: { date: 'desc' }
-        });
+    async findAll(user: any) {
+        if (!user) return [];
+        if (user.type === 'client') {
+            const client = await this.prisma.client.findUnique({ where: { id: user.sub } });
+            if (!client) return [];
+            return this.prisma.quoteRequest.findMany({
+                where: { motoristPhone: client.phone },
+                orderBy: { date: 'desc' }
+            });
+        }
+        if (user.role === 'SuperAdmin' || user.role === 'Root') {
+            return this.prisma.quoteRequest.findMany({
+                orderBy: { date: 'desc' }
+            });
+        }
+        if (user.type === 'staff') {
+            return this.prisma.quoteRequest.findMany({
+                orderBy: { date: 'desc' }
+            });
+        }
+        return [];
     }
 
     async findOne(id: string) {
