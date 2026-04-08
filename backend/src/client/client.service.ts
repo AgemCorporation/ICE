@@ -292,5 +292,23 @@ export class ClientService {
 
     return this.mapToFront(updated);
   }
+
+  // ---- TEMPORARY: diagnostic method (remove after debugging) ----
+  async testEmailDiagnostic(to: string) {
+    const config = {
+      SMTP_HOST: process.env.SMTP_HOST || 'NOT SET',
+      SMTP_PORT: process.env.SMTP_PORT || 'NOT SET',
+      SMTP_USER: process.env.SMTP_USER || 'NOT SET',
+      SMTP_PASS: process.env.SMTP_PASS ? '***' + process.env.SMTP_PASS.slice(-6) : 'NOT SET',
+      SMTP_FROM_EMAIL: process.env.SMTP_FROM_EMAIL || 'NOT SET',
+    };
+
+    try {
+      const result = await this.mailService.sendWelcomeEmail(to, 'TestDiag');
+      return { success: true, emailSent: result, config, to };
+    } catch (error: any) {
+      return { success: false, error: error.message, config, to };
+    }
+  }
 }
 

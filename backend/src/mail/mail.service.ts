@@ -1,46 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
-  private transporter: nodemailer.Transporter | null = null;
+  private apiToken: string | null = null;
   private fromEmail: string;
   private fromName: string;
 
   constructor() {
-    this.fromEmail = process.env.SMTP_FROM_EMAIL || 'no-reply@agemcorporation.com';
+    this.apiToken = process.env.MAILTRAP_API_TOKEN || null;
+    this.fromEmail = process.env.SMTP_FROM_EMAIL || 'no-reply@mecatechconcept.com';
     this.fromName = process.env.SMTP_FROM_NAME || 'ICE by Mécatech';
-    this.initTransporter();
-  }
 
-  private initTransporter() {
-    const host = process.env.SMTP_HOST;
-    const port = parseInt(process.env.SMTP_PORT || '587', 10);
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-
-    if (!host || !user || !pass) {
-      this.logger.warn(
-        'SMTP not configured (SMTP_HOST, SMTP_USER, SMTP_PASS). Emails will be logged only.',
-      );
-      return;
+    if (!this.apiToken) {
+      this.logger.warn('MAILTRAP_API_TOKEN not set. Emails will be logged but not sent.');
+    } else {
+      this.logger.log('Mailtrap HTTP API mail service ready ✉️');
     }
-
-    this.transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-    });
-
-    this.transporter.verify((err) => {
-      if (err) {
-        this.logger.error('SMTP connection failed:', err.message);
-      } else {
-        this.logger.log(`SMTP ready ✉️  (${host}:${port})`);
-      }
-    });
   }
 
   /**
@@ -49,27 +25,47 @@ export class MailService {
   async sendWelcomeEmail(to: string, firstName: string): Promise<boolean> {
     const subject = `Bienvenue sur ICE, ${firstName} ! 🚗`;
     const html = this.buildWelcomeHtml(firstName);
-    return this.sendEmail(to, subject, html);
+    return this.sendEmail(to, subject, html, 'welcome');
   }
 
   /**
-   * Generic email send.
+   * Generic email send via Mailtrap HTTP API (bypasses SMTP port blocks on Render).
    */
-  async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-    if (!this.transporter) {
+  async sendEmail(to: string, subject: string, html: string, category?: string): Promise<boolean> {
+    if (!this.apiToken) {
       this.logger.warn(`[MOCK] To: ${to} | Subject: ${subject}`);
       return true;
     }
 
+    const payload: any = {
+      from: { email: this.fromEmail, name: this.fromName },
+      to: [{ email: to }],
+      subject,
+      html,
+    };
+    if (category) {
+      payload.category = category;
+    }
+
     try {
-      const info = await this.transporter.sendMail({
-        from: `"${this.fromName}" <${this.fromEmail}>`,
-        to,
-        subject,
-        html,
+      const response = await fetch('https://send.api.mailtrap.io/api/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Token': this.apiToken,
+        },
+        body: JSON.stringify(payload),
       });
-      this.logger.log(`Email sent to ${to} — messageId: ${info.messageId}`);
-      return true;
+
+      const body = await response.text();
+
+      if (response.ok) {
+        this.logger.log(`Email sent to ${to} — response: ${body}`);
+        return true;
+      } else {
+        this.logger.error(`Mailtrap API error (${response.status}) for ${to}: ${body}`);
+        return false;
+      }
     } catch (error: any) {
       this.logger.error(`Failed to send email to ${to}: ${error.message}`);
       return false;
