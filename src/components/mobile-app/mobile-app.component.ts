@@ -104,8 +104,28 @@ interface WizardNode {
                             }
                             <!-- Numéro de téléphone -->
                             <div class="relative group animate-slide-in">
-                               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg></div>
-                               <input formControlName="phone" type="tel" placeholder="Numéro de téléphone" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
+
+                               <div class="flex items-stretch w-full bg-white/10 border border-indigo-400/30 rounded-xl focus-within:bg-white/20 focus-within:border-white/50 transition-all overflow-hidden">
+                                   <!-- Country Code Select -->
+                                   <div class="relative w-[110px] shrink-0 border-r border-indigo-400/30">
+                                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                      </div>
+                                      <select formControlName="countryCode" class="w-full h-full bg-transparent pl-9 pr-2 py-3.5 text-white focus:outline-none transition-all text-xs appearance-none cursor-pointer">
+                                         <option value="+225" class="bg-indigo-800 text-white">🇨🇮 +225</option>
+                                         <option value="+33" class="bg-indigo-800 text-white">🇫🇷 +33</option>
+                                         <option value="+221" class="bg-indigo-800 text-white">🇸🇳 +221</option>
+                                         <option value="+223" class="bg-indigo-800 text-white">🇲🇱 +223</option>
+                                         <option value="+226" class="bg-indigo-800 text-white">🇧🇫 +226</option>
+                                         <option value="+228" class="bg-indigo-800 text-white">🇹🇬 +228</option>
+                                         <option value="+229" class="bg-indigo-800 text-white">🇧🇯 +229</option>
+                                         <option value="+212" class="bg-indigo-800 text-white">🇲🇦 +212</option>
+                                         <option value="+216" class="bg-indigo-800 text-white">🇹🇳 +216</option>
+                                      </select>
+                                   </div>
+                                   <!-- Phone Input -->
+                                   <input formControlName="phone" type="tel" placeholder="Numéro" class="flex-1 w-full bg-transparent pl-3 pr-4 py-3.5 text-white placeholder-indigo-300 focus:outline-none transition-all text-sm">
+                                </div>
                             </div>
                             <!-- Ville -->
                             <div class="relative group animate-slide-in">
@@ -2379,7 +2399,12 @@ export class MobileAppComponent {
       }
       this.isDecodingVin.set(true);
       try {
-         const response = await fetch(`${this.dataService.apiUrl}/vehicle/decode-vin/${vin.trim()}`);
+         const token = localStorage.getItem('auth_token');
+         const response = await fetch(`${this.dataService.apiUrl}/vehicle/decode-vin/${vin.trim()}`, {
+            headers: {
+               'Authorization': `Bearer ${token}`
+            }
+         });
          const data = await response.json();
          
          if (data && !data.errorType && !data.error) {
@@ -2409,7 +2434,17 @@ export class MobileAppComponent {
             this.vehicleForm.patchValue(updates);
             this.toastService.show('Informations du véhicule récupérées !', 'success');
          } else {
-            this.toastService.show(data.message || (data.error && data.error.error) || 'Aucun résultat trouvé pour ce VIN', 'error');
+            let errorMsg = data.message || (data.error && data.error.error) || 'Aucun résultat trouvé pour ce VIN';
+            if (typeof errorMsg === 'string') {
+               if (errorMsg.toLowerCase().includes('information not found')) {
+                  errorMsg = 'Aucune information trouvée pour ce véhicule (VIN non référencé).';
+               } else if (errorMsg.toLowerCase().includes('17 characters')) {
+                  errorMsg = 'Le VIN doit comporter exactement 17 caractères.';
+               } else if (errorMsg.toLowerCase().includes('authentication')) {
+                  errorMsg = 'Erreur serveur (Clé API de décodage expirée ou invalide).';
+               }
+            }
+            this.toastService.show(errorMsg, 'error');
          }
       } catch (err) {
          this.toastService.show('API de décodage hors ligne ou inaccessible', 'error');
@@ -2649,6 +2684,7 @@ export class MobileAppComponent {
          type: ['Particulier'],
          name: [''],
          email: ['', [Validators.required, Validators.email]],
+         countryCode: ['+225'],
          phone: [''],
          city: [''],
          address: [''],
@@ -3320,11 +3356,14 @@ export class MobileAppComponent {
          const nameParts = val.name.trim().split(' ');
          const firstName = nameParts[0];
          const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+         
+         const rawPhone = (val.phone || '').trim().replace(/\s/g, '');
+         const formattedPhone = (rawPhone && !rawPhone.startsWith('+')) ? `${val.countryCode}${rawPhone}` : rawPhone;
 
          const newClientData = {
             firstName: firstName,
             lastName: lastName,
-            phone: val.phone,
+            phone: formattedPhone,
             email: normalizedEmail,
             password: val.password,
             type: val.type || 'Particulier',

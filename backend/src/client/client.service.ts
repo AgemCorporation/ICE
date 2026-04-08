@@ -1,13 +1,17 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class ClientService {
+  private readonly logger = new Logger(ClientService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) { }
 
   private mapToPrisma(client: any): Prisma.ClientCreateInput {
@@ -159,6 +163,14 @@ export class ClientService {
     // Generate JWT token for the new client
     const payload = { sub: client.id, type: 'client' };
     const token = await this.jwtService.signAsync(payload);
+
+    // Send welcome email (fire-and-forget — don't block registration)
+    const realEmail = client.email && !client.email.includes('@ice.local') ? client.email : null;
+    if (realEmail) {
+      this.mailService.sendWelcomeEmail(realEmail, client.firstName || 'Cher client').catch((err) => {
+        this.logger.error(`Welcome email failed for ${realEmail}: ${err.message}`);
+      });
+    }
 
     return { user: this.mapToFront(client), token };
   }

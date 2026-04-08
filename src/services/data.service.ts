@@ -962,6 +962,14 @@ export class DataService {
          },
          error: (err) => console.error('Erreur lors du chargement des quote-requests API', err)
       });
+
+      // Fetch Mobile Vehicles
+      this.http.get<MotoristVehicle[]>(`${this.apiUrl}/motorist-vehicle`).subscribe({
+         next: (data) => {
+            if (data) this.mobileVehicles.set(data);
+         },
+         error: (err) => console.error('Erreur API MotoristVehicle', err)
+      });
       if (!isMobileUser) {
          // Fetch SystemLogs
          this.http.get<SystemLog[]>(`${this.apiUrl}/system-log`).subscribe({
