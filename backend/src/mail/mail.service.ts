@@ -23,7 +23,7 @@ export class MailService {
    * Send a welcome email to a newly registered mobile user.
    */
   async sendWelcomeEmail(to: string, firstName: string): Promise<boolean> {
-    const subject = `Bienvenue sur ICE, ${firstName} ! 🚗`;
+    const subject = `Bienvenue sur MonAuto, ${firstName} ! 🚗`;
     const html = this.buildWelcomeHtml(firstName);
     return this.sendEmail(to, subject, html, 'welcome');
   }
@@ -83,7 +83,7 @@ export class MailService {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bienvenue sur ICE</title>
+  <title>Bienvenue sur MonAuto</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f0f2f5;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f0f2f5;padding:40px 0;">
@@ -96,10 +96,10 @@ export class MailService {
             <td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#6366f1 100%);padding:40px 40px 30px;text-align:center;">
               <div style="font-size:36px;margin-bottom:12px;">🚗</div>
               <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">
-                Bienvenue sur ICE
+                Bienvenue sur MonAuto
               </h1>
               <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;font-weight:400;">
-                Intelligent Customer Experience by Mécatech
+                Votre compagnon automobile intelligent
               </p>
             </td>
           </tr>
@@ -111,7 +111,7 @@ export class MailService {
                 Bonjour <strong>${firstName}</strong>,
               </p>
               <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.7;">
-                Nous sommes ravis de vous accueillir sur la plateforme <strong>ICE</strong> ! Votre compte a été créé avec succès et vous pouvez dès maintenant profiter de tous nos services.
+                Nous sommes ravis de vous accueillir sur <strong>MonAuto</strong> ! Votre compte a été créé avec succès et vous pouvez dès maintenant profiter de tous nos services.
               </p>
 
               <!-- Feature cards -->
@@ -169,17 +169,7 @@ export class MailService {
                 Si vous avez des questions, n'hésitez pas à nous contacter. Notre équipe est à votre disposition pour vous accompagner.
               </p>
 
-              <!-- CTA Button -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                <tr>
-                  <td align="center" style="padding:8px 0 24px;">
-                    <a href="https://ice-mecatech.onrender.com/#/mobile"
-                       style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;text-decoration:none;border-radius:10px;font-size:15px;font-weight:600;letter-spacing:0.3px;">
-                      Accéder à mon espace
-                    </a>
-                  </td>
-                </tr>
-              </table>
+
             </td>
           </tr>
 
@@ -187,7 +177,7 @@ export class MailService {
           <tr>
             <td style="padding:24px 40px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
               <p style="margin:0 0 8px;color:#94a3b8;font-size:12px;">
-                © ${year} ICE by Mécatech — Tous droits réservés
+                © ${year} MonAuto — Tous droits réservés
               </p>
               <p style="margin:0;color:#94a3b8;font-size:11px;">
                 Cet email a été envoyé automatiquement suite à la création de votre compte.
