@@ -11,6 +11,20 @@ export class VehicleController {
     return this.vehicleService.create(createVehicleDto);
   }
 
+  @Get('decode-vin/:vin')
+  async decodeVin(@Param('vin') vin: string) {
+    try {
+      const response = await fetch(`https://auto.dev/api/vin/${vin.trim()}`, {
+        headers: {
+          'Authorization': 'Bearer sk_ad_pau1ko0A9z55cxBFx7vZAmRK'
+        }
+      });
+      return await response.json();
+    } catch (e: any) {
+      return { errorType: 'Internal Proxy Error', message: e.message || 'Erreur interne' };
+    }
+  }
+
   @Get()
   findAll() {
     return this.vehicleService.findAll();

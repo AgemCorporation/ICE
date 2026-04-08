@@ -1459,7 +1459,16 @@ interface WizardNode {
                          </div>
                          <div>
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">N° de Châssis (VIN)</label>
-                            <input formControlName="vin" placeholder="17 caractères" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-mono uppercase">
+                            <div class="relative">
+                               <input formControlName="vin" placeholder="17 caractères" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-mono uppercase">
+                               <button type="button" (click)="decodeVin()" [disabled]="isDecodingVin() || !vehicleForm.get('vin')?.value" class="absolute right-2 top-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 p-1.5 rounded-lg hover:bg-indigo-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Décoder le VIN">
+                                  @if(isDecodingVin()) {
+                                     <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                  } @else {
+                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                  }
+                               </button>
+                            </div>
                             @if(vehicleForm.get('vin')?.invalid && vehicleForm.get('vin')?.touched) { <span class="text-red-500 text-xs mt-1 block">Requis</span> }
                          </div>
                       </div>
@@ -2358,6 +2367,57 @@ export class MobileAppComponent {
    showProfileInfoModal = signal(false);
    showInvoicesModal = signal(false);
    showSettingsModal = signal(false);
+
+   // VIN Decoder
+   isDecodingVin = signal(false);
+
+   async decodeVin() {
+      const vin = this.vehicleForm.get('vin')?.value;
+      if (!vin || vin.trim().length < 10) {
+         this.toastService.show('Veuillez entrer un VIN valide', 'error');
+         return;
+      }
+      this.isDecodingVin.set(true);
+      try {
+         const response = await fetch(`${this.dataService.apiUrl}/vehicle/decode-vin/${vin.trim()}`);
+         const data = await response.json();
+         
+         if (data && !data.errorType && !data.error) {
+            const updates: any = {};
+            
+            if (data.make && data.make.name) updates.brand = data.make.name;
+            else if (typeof data.make === 'string') updates.brand = data.make;
+
+            if (data.model && data.model.name) updates.model = data.model.name;
+            else if (typeof data.model === 'string') updates.model = data.model;
+
+            if (data.years && data.years.length > 0 && data.years[0].year) updates.year = data.years[0].year;
+            else if (data.year) updates.year = parseInt(data.year);
+            
+            // Fuel type mapping
+            let fuelStr = '';
+            if (data.engine && data.engine.type) fuelStr = data.engine.type.toLowerCase();
+            else if (data.engine && data.engine.fuelType) fuelStr = data.engine.fuelType.toLowerCase();
+
+            if (fuelStr) {
+                if (fuelStr.includes('gas') || fuelStr.includes('essence')) updates.fuel = 'Essence';
+                else if (fuelStr.includes('diesel') || fuelStr.includes('gazole')) updates.fuel = 'Diesel';
+                else if (fuelStr.includes('electric') || fuelStr.includes('électrique')) updates.fuel = 'Électrique';
+                else if (fuelStr.includes('hybrid')) updates.fuel = 'Hybride';
+            }
+
+            this.vehicleForm.patchValue(updates);
+            this.toastService.show('Informations du véhicule récupérées !', 'success');
+         } else {
+            this.toastService.show(data.message || (data.error && data.error.error) || 'Aucun résultat trouvé pour ce VIN', 'error');
+         }
+      } catch (err) {
+         this.toastService.show('API de décodage hors ligne ou inaccessible', 'error');
+         console.error('VIN Decode Error', err);
+      } finally {
+         this.isDecodingVin.set(false);
+      }
+   }
 
    async openLiveChat() {
       await Browser.open({ 
