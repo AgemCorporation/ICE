@@ -113,14 +113,6 @@ interface WizardNode {
                                       </div>
                                       <select formControlName="countryCode" class="w-full h-full bg-transparent pl-9 pr-2 py-3.5 text-white focus:outline-none transition-all text-xs appearance-none cursor-pointer">
                                          <option value="+225" class="bg-indigo-800 text-white">🇨🇮 +225</option>
-                                         <option value="+33" class="bg-indigo-800 text-white">🇫🇷 +33</option>
-                                         <option value="+221" class="bg-indigo-800 text-white">🇸🇳 +221</option>
-                                         <option value="+223" class="bg-indigo-800 text-white">🇲🇱 +223</option>
-                                         <option value="+226" class="bg-indigo-800 text-white">🇧🇫 +226</option>
-                                         <option value="+228" class="bg-indigo-800 text-white">🇹🇬 +228</option>
-                                         <option value="+229" class="bg-indigo-800 text-white">🇧🇯 +229</option>
-                                         <option value="+212" class="bg-indigo-800 text-white">🇲🇦 +212</option>
-                                         <option value="+216" class="bg-indigo-800 text-white">🇹🇳 +216</option>
                                       </select>
                                    </div>
                                    <!-- Phone Input -->
@@ -135,7 +127,7 @@ interface WizardNode {
                             <!-- Adresse -->
                             <div class="relative group animate-slide-in">
                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg></div>
-                               <input formControlName="address" placeholder="Adresse complète" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
+                               <input formControlName="address" placeholder="Commune / Quartier" class="w-full bg-white/10 border border-indigo-400/30 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-indigo-300 focus:bg-white/20 focus:border-white/50 focus:ring-0 outline-none transition-all text-sm">
                             </div>
                          }
                          <!-- Email (login/signup) -->
@@ -387,7 +379,7 @@ interface WizardNode {
                              <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Étape 2</h3>
                              <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Que se passe-t-il avec votre véhicule ?</p>
                              <div class="grid grid-cols-2 gap-3">
-                                @for (need of ['Ne démarre pas', 'Bruit / anomalie', 'Voyant allumé', 'Entretien', 'Accident', 'Autre']; track need) {
+                                @for (need of ['Ne démarre pas', 'Bruit / anomalie', 'Voyant allumé', 'Entretien/Vidange', 'Accident', 'Autre']; track need) {
                                    <button type="button" (click)="toggleNeedType(need)" class="p-3 rounded-xl border-2 text-left transition-all active:scale-95 flex items-center gap-2" [class.border-indigo-500]="requestNeedType().includes(need)" [class.bg-indigo-50]="requestNeedType().includes(need)" [class.text-indigo-700]="requestNeedType().includes(need)" [class.border-slate-200]="!requestNeedType().includes(need)" [class.bg-white]="!requestNeedType().includes(need)" [class.text-slate-700]="!requestNeedType().includes(need)" [class.dark:bg-slate-800]="!requestNeedType().includes(need)" [class.dark:text-slate-300]="!requestNeedType().includes(need)" [class.dark:border-slate-700]="!requestNeedType().includes(need)">
                                       <div class="w-3 h-3 rounded-[3px] shrink-0" [class.bg-indigo-500]="requestNeedType().includes(need)" [class.bg-slate-200]="!requestNeedType().includes(need)" [class.dark:bg-slate-700]="!requestNeedType().includes(need)"></div>
                                       <span class="font-bold text-[13px] leading-tight">{{ need }}</span>
@@ -425,7 +417,12 @@ interface WizardNode {
                                    <span class="font-bold text-slate-900 dark:text-white">Oui</span>
                                    <span class="text-[10px] text-slate-400 mt-1">Il roule normalement</span>
                                 </button>
-                                <button type="button" (click)="setVehicleDrivable(false)" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" [class.border-red-500]="isVehicleDrivable() === false" [class.bg-red-50]="isVehicleDrivable() === false" [class.border-slate-200]="isVehicleDrivable() !== false" [class.bg-white]="isVehicleDrivable() !== false" [class.dark:bg-slate-800]="isVehicleDrivable() !== false" [class.dark:border-slate-700]="isVehicleDrivable() !== false">
+                                 <button type="button" (click)="!(requestNeedType().includes('Entretien/Vidange') && !requestNeedType().includes('Ne démarre pas') && !requestNeedType().includes('Accident')) && setVehicleDrivable(false)" 
+                                         class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all active:scale-95" 
+                                         [class.border-red-500]="isVehicleDrivable() === false" [class.bg-red-50]="isVehicleDrivable() === false" 
+                                         [class.border-slate-200]="isVehicleDrivable() !== false" [class.bg-white]="isVehicleDrivable() !== false" 
+                                         [class.dark:bg-slate-800]="isVehicleDrivable() !== false" [class.dark:border-slate-700]="isVehicleDrivable() !== false"
+                                         [class.opacity-40]="requestNeedType().includes('Entretien/Vidange') && !requestNeedType().includes('Ne démarre pas') && !requestNeedType().includes('Accident')" [class.cursor-not-allowed]="requestNeedType().includes('Entretien/Vidange') && !requestNeedType().includes('Ne démarre pas') && !requestNeedType().includes('Accident')">
                                    <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3" [class.bg-red-100]="isVehicleDrivable() === false" [class.bg-slate-100]="isVehicleDrivable() !== false"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" [class.text-red-600]="isVehicleDrivable() === false" [class.text-slate-400]="isVehicleDrivable() !== false" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
                                    <span class="font-bold text-slate-900 dark:text-white">Non</span>
                                    <span class="text-[10px] text-slate-400 mt-1">Il est en panne</span>
@@ -1058,7 +1055,7 @@ interface WizardNode {
                       <div class="relative mb-4 group">
                          <div class="w-24 h-24 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-3xl font-bold border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
                             @if (currentClientData()?.avatarUrl) {
-                               <img [src]="avatarImageSrc()" class="w-full h-full object-cover">
+                               <img [src]="avatarImageSrc()" class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity" (click)="viewingAvatar.set(true)">
                             } @else {
                                <span>{{ currentUser()?.charAt(0) }}</span>
                             }
@@ -1473,14 +1470,9 @@ interface WizardNode {
                    <form [formGroup]="vehicleForm" class="space-y-4">
                       <div class="grid grid-cols-2 gap-4">
                          <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">N° Immatriculation</label>
-                            <input formControlName="plate" placeholder="AB-123-CD" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-mono uppercase">
-                            @if(vehicleForm.get('plate')?.invalid && vehicleForm.get('plate')?.touched) { <span class="text-red-500 text-xs mt-1 block">Requis</span> }
-                         </div>
-                         <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">N° de Châssis (VIN)</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">N° de Châssis (VIN)<span class="text-red-500 ml-1">*</span></label>
                             <div class="relative">
-                               <input formControlName="vin" placeholder="17 caractères" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-mono uppercase">
+                               <input formControlName="vin" placeholder="17 caractères" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-4 pr-12 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-mono uppercase">
                                <button type="button" (click)="decodeVin()" [disabled]="isDecodingVin() || !vehicleForm.get('vin')?.value" class="absolute right-2 top-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 p-1.5 rounded-lg hover:bg-indigo-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Décoder le VIN">
                                   @if(isDecodingVin()) {
                                      <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -1491,16 +1483,20 @@ interface WizardNode {
                             </div>
                             @if(vehicleForm.get('vin')?.invalid && vehicleForm.get('vin')?.touched) { <span class="text-red-500 text-xs mt-1 block">Requis</span> }
                          </div>
+                         <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">N° Immatriculation</label>
+                            <input formControlName="plate" placeholder="AB-123-CD" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-mono uppercase">
+                         </div>
                       </div>
                       
                       <div class="grid grid-cols-2 gap-4">
                          <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Marque</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Marque<span class="text-red-500 ml-1">*</span></label>
                             <input formControlName="brand" placeholder="Ex: Toyota" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                             @if(vehicleForm.get('brand')?.invalid && vehicleForm.get('brand')?.touched) { <span class="text-red-500 text-xs mt-1 block">Requis</span> }
                          </div>
                          <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Modèle</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Modèle<span class="text-red-500 ml-1">*</span></label>
                             <input formControlName="model" placeholder="Ex: Yaris" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                             @if(vehicleForm.get('model')?.invalid && vehicleForm.get('model')?.touched) { <span class="text-red-500 text-xs mt-1 block">Requis</span> }
                          </div>
@@ -1508,11 +1504,11 @@ interface WizardNode {
 
                       <div class="grid grid-cols-2 gap-4">
                          <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Année</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Année<span class="text-red-500 ml-1">*</span></label>
                             <input type="number" formControlName="year" placeholder="2020" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                          </div>
                          <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Kilométrage</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Kilométrage<span class="text-red-500 ml-1">*</span></label>
                             <input type="number" formControlName="mileage" placeholder="45000" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                          </div>
                       </div>
@@ -1538,7 +1534,7 @@ interface WizardNode {
 
                       <!-- VEHICLE PHOTOS SECTION -->
                       <div>
-                         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Photos du véhicule</label>
+                         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Photos du véhicule/pièces du véhicule</label>
                          <div class="flex flex-wrap gap-3 mb-3">
                             @for (photo of tempPhotos(); track $index) {
                                <div class="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm group cursor-pointer" (click)="openPhotoViewer($index)">
@@ -1611,6 +1607,18 @@ interface WizardNode {
                       </div>
                    </form>
                 </div>
+             </div>
+          }
+
+          <!-- AVATAR VIEWER MODAL -->
+          @if (viewingAvatar() && currentClientData()?.avatarUrl) {
+             <div class="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center animate-fade-in"
+                  (click)="viewingAvatar.set(false)">
+                <div class="absolute top-0 left-0 right-0 p-4 pt-[calc(1rem+env(safe-area-inset-top))] flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+                   <h3 class="text-white font-bold ml-2">{{ currentUser() }}</h3>
+                   <button (click)="viewingAvatar.set(false)" class="w-10 h-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors text-lg font-bold">✕</button>
+                </div>
+                <img [src]="avatarImageSrc()" class="w-[85vw] h-[85vw] max-w-[350px] max-h-[350px] rounded-full object-cover border-4 border-white/20 shadow-2xl" (click)="$event.stopPropagation()">
              </div>
           }
 
@@ -2116,6 +2124,7 @@ export class MobileAppComponent {
    tempPhotos = signal<string[]>([]);
    photoViewerOpen = signal(false);
    photoViewerIndex = signal(0);
+   viewingAvatar = signal(false);
    showAddVehicleForm = signal(false);
    editingVehicleId = signal<string | null>(null);
 
@@ -2296,10 +2305,19 @@ export class MobileAppComponent {
    requestWizardShowDescription = computed(() => true);
 
    // NEW: Step logic computed signals (Wizard v2)
-   isTowingForced = computed(() => this.isVehicleDrivable() === false && this.requestUrgency() === 'urgency_immediate');
-   isGarageDropDisabled = computed(() => this.isVehicleDrivable() === false);
+   isTowingForced = computed(() => {
+      if (this.requestNeedType().includes('Ne démarre pas')) return false;
+      return this.isVehicleDrivable() === false && this.requestUrgency() === 'urgency_immediate';
+   });
+   isGarageDropDisabled = computed(() => {
+      if (this.requestNeedType().includes('Ne démarre pas')) return false;
+      return this.isVehicleDrivable() === false;
+   });
    recommendedServices = computed(() => {
       const rec = new Set<string>();
+      if (this.requestNeedType().includes('Ne démarre pas')) {
+         rec.add('tech_home'); rec.add('towing');
+      }
       if (this.requestNeedType().includes('Accident')) {
          rec.add('towing'); rec.add('tech_home');
       }
@@ -2317,7 +2335,7 @@ export class MobileAppComponent {
        const hasAccident = needs.includes('Accident');
        const hasVoyant = needs.includes('Voyant allumé');
        const hasBruit = needs.includes('Bruit / anomalie');
-       const hasEntretien = needs.includes('Entretien');
+       const hasEntretien = needs.includes('Entretien/Vidange');
        
        const selectedVehicleId = this.requestForm.get('selectedVehicleId')?.value;
        const vehicle = this.myVehicles().find(v => v.id === selectedVehicleId);
@@ -2708,7 +2726,7 @@ export class MobileAppComponent {
       });
       // Enhanced Vehicle Form - VIN Required
       this.vehicleForm = this.fb.group({
-         plate: ['', Validators.required],
+         plate: [''],
          brand: ['', Validators.required],
          model: ['', Validators.required],
          year: [2020, Validators.required],
@@ -3395,10 +3413,14 @@ export class MobileAppComponent {
       this.currentPhone.set(null);
       this.currentClientData.set(null);
       this.authMode.set('login');
-      this.loginForm.reset(); // Clear old input
+      this.loginForm.reset({ type: 'Particulier', countryCode: '+225' }); // Clear old input but keep defaults
       localStorage.removeItem('mobileUserName');
       localStorage.removeItem('mobileUserPhone');
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('mobile_push_notifications');
+      localStorage.removeItem('mobile_read_notification_ids');
+      this._receivedPushNotifications.set([]);
+      this._readNotificationIds.set(new Set());
       // Destroy the Leaflet map so it re-creates cleanly on next login
       // (avoids the grey map bug where invalidateSize is never called after reconnection)
       if (this.leafletMap) {
@@ -3686,11 +3708,15 @@ export class MobileAppComponent {
          // Auto-selection Step 3 check
          if (this.requestNeedType().includes('Ne démarre pas')) {
              this.isVehicleDrivable.set(false);
+         } else if (this.requestNeedType().includes('Accident')) {
+             // Accident bypasses auto-selection to let user decide manually
+         } else if (this.requestNeedType().includes('Entretien/Vidange')) {
+             this.isVehicleDrivable.set(true);
          }
          
          // Auto-selection Step 4 check
          const needs = this.requestNeedType();
-         if (needs.length === 1 && needs.includes('Entretien')) {
+         if (needs.length === 1 && needs.includes('Entretien/Vidange')) {
              this.requestUrgency.set('urgency_flexible');
          }
          
