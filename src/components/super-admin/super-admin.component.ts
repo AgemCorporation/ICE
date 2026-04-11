@@ -886,12 +886,20 @@ import * as XLSX from 'xlsx';
                                <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ lead.vehiclesPerDay || '—' }}</td>
                                <td class="px-6 py-4 text-slate-500">{{ lead.date | date:'dd/MM/yyyy' }}</td>
                                <td class="px-6 py-4 text-center">
-                                  <span class="px-2 py-1 rounded-full text-xs font-bold" 
+                                  <select class="text-xs font-bold rounded-full px-3 py-1.5 border-none outline-none cursor-pointer appearance-none text-center"
                                      [class.bg-blue-100]="lead.status === 'New'" [class.text-blue-700]="lead.status === 'New'"
                                      [class.bg-amber-100]="lead.status === 'Contacted'" [class.text-amber-700]="lead.status === 'Contacted'"
-                                     [class.bg-emerald-100]="lead.status === 'Converted'" [class.text-emerald-700]="lead.status === 'Converted'">
-                                     {{ lead.status }}
-                                  </span>
+                                     [class.bg-purple-100]="lead.status === 'Qualified'" [class.text-purple-700]="lead.status === 'Qualified'"
+                                     [class.bg-emerald-100]="lead.status === 'Converted'" [class.text-emerald-700]="lead.status === 'Converted'"
+                                     [class.bg-red-100]="lead.status === 'Lost'" [class.text-red-700]="lead.status === 'Lost'"
+                                     [value]="lead.status"
+                                     (change)="dataService.updateLeadStatus(lead.id, $any($event.target).value)">
+                                     <option value="New">New</option>
+                                     <option value="Contacted">Contacted</option>
+                                     <option value="Qualified">Qualified</option>
+                                     <option value="Converted">Converted</option>
+                                     <option value="Lost">Lost</option>
+                                  </select>
                                </td>
                             </tr>
                          } @empty {
