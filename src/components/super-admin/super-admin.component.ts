@@ -864,7 +864,7 @@ import * as XLSX from 'xlsx';
                          <tr>
                             <th class="px-6 py-3">Garage Prospect</th>
                             <th class="px-6 py-3">Contact</th>
-                            <th class="px-6 py-3">Ville</th>
+                            <th class="px-6 py-3">Adresse</th>
                             <th class="px-6 py-3">Plan Intérêt</th>
                             <th class="px-6 py-3">Véh/Jour</th>
                             <th class="px-6 py-3">Date</th>
@@ -894,11 +894,11 @@ import * as XLSX from 'xlsx';
                                      [class.bg-red-100]="lead.status === 'Lost'" [class.text-red-700]="lead.status === 'Lost'"
                                      [value]="lead.status"
                                      (change)="dataService.updateLeadStatus(lead.id, $any($event.target).value)">
-                                     <option value="New">New</option>
-                                     <option value="Contacted">Contacted</option>
-                                     <option value="Qualified">Qualified</option>
-                                     <option value="Converted">Converted</option>
-                                     <option value="Lost">Lost</option>
+                                     <option value="New">Nouveau</option>
+                                     <option value="Contacted">Contacté</option>
+                                     <option value="Qualified">Qualifié</option>
+                                     <option value="Converted">Converti</option>
+                                     <option value="Lost">Perdu</option>
                                   </select>
                                </td>
                             </tr>
