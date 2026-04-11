@@ -425,8 +425,11 @@ export interface PlatformLead {
    id: string;
    garageName: string;
    contactName: string;
-   email: string;
+   email?: string;
    phone: string;
+   city?: string;
+   vehiclesPerDay?: string;
+   equipment?: string;
    planInterest: 'ICE Light' | 'ICE Full';
    status: 'New' | 'Contacted' | 'Qualified' | 'Converted' | 'Lost';
    date: string;

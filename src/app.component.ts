@@ -157,6 +157,7 @@ export class AppComponent {
          this.router.navigate(['/mobile']);
       }
       this.isFullScreenLayout.set(
+        event.urlAfterRedirects === '/' ||
         event.urlAfterRedirects.includes('/login') || 
         event.urlAfterRedirects.includes('/mobile') || 
         event.urlAfterRedirects.includes('/workshop')

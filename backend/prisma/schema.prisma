@@ -376,15 +376,18 @@ model StockMovement {
 }
 
 model PlatformLead {
-  id           String  @id @default(uuid())
-  garageName   String
-  contactName  String
-  email        String
-  phone        String
-  planInterest String  @default("ICE Light") // 'ICE Light' | 'ICE Full'
-  status       String  @default("New") // 'New' | 'Contacted' | 'Qualified' | 'Converted' | 'Lost'
-  date         String
-  notes        String?
+  id             String  @id @default(uuid())
+  garageName     String
+  contactName    String
+  email          String?
+  phone          String
+  city           String?
+  vehiclesPerDay String?
+  equipment      String?
+  planInterest   String  @default("ICE Light") // 'ICE Light' | 'ICE Full'
+  status         String  @default("New") // 'New' | 'Contacted' | 'Qualified' | 'Converted' | 'Lost'
+  date           String
+  notes          String?
 }
 
 model GarageRole {

@@ -24,6 +24,8 @@ import { OpportunitiesComponent } from './src/components/opportunities/opportuni
 import { HrComponent } from './src/components/hr/hr.component';
 import { MobileAppComponent } from './src/components/mobile-app/mobile-app.component';
 import { WorkshopComponent } from './src/components/workshop/workshop.component';
+import { LandingComponent } from './src/components/landing/landing.component';
+
 
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
@@ -41,7 +43,9 @@ const authGuard: CanActivateFn = () => {
 
 const routes: Routes = [
   // Redirection par défaut vers le Tableau de Bord
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  // Landing Page at Root
+  { path: '', component: LandingComponent },
+
 
   { path: 'login', component: LoginComponent },
 

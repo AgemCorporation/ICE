@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class LeadService {
   constructor(private prisma: PrismaService) {}
 
-  findAll() { return this.prisma.platformLead.findMany(); }
+  findAll() { return this.prisma.platformLead.findMany({ orderBy: { date: 'desc' } }); }
   findOne(id: string) { return this.prisma.platformLead.findUnique({ where: { id } }); }
 
   create(data: any) {
@@ -13,10 +13,17 @@ export class LeadService {
     return this.prisma.platformLead.create({
       data: {
         id: data.id || crypto.randomUUID(),
-        garageName: data.garageName, contactName: data.contactName,
-        email: data.email, phone: data.phone,
+        garageName: data.garageName,
+        contactName: data.contactName,
+        email: data.email || null,
+        phone: data.phone,
+        city: data.city || null,
+        vehiclesPerDay: data.vehiclesPerDay || null,
+        equipment: data.equipment || null,
         planInterest: data.planInterest || 'ICE Light',
-        status: data.status || 'New', date: data.date, notes: data.notes,
+        status: data.status || 'New',
+        date: data.date || new Date().toISOString(),
+        notes: data.notes || null,
       },
     });
   }

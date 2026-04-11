@@ -864,7 +864,9 @@ import * as XLSX from 'xlsx';
                          <tr>
                             <th class="px-6 py-3">Garage Prospect</th>
                             <th class="px-6 py-3">Contact</th>
+                            <th class="px-6 py-3">Ville</th>
                             <th class="px-6 py-3">Plan Intérêt</th>
+                            <th class="px-6 py-3">Véh/Jour</th>
                             <th class="px-6 py-3">Date</th>
                             <th class="px-6 py-3 text-center">Statut</th>
                          </tr>
@@ -875,11 +877,13 @@ import * as XLSX from 'xlsx';
                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">{{ lead.garageName }}</td>
                                <td class="px-6 py-4">
                                   <div class="text-sm text-slate-700 dark:text-slate-300">{{ lead.contactName }}</div>
-                                  <div class="text-xs text-slate-500">{{ lead.email }} • {{ lead.phone }}</div>
+                                  <div class="text-xs text-slate-500">{{ lead.phone }}</div>
                                </td>
+                               <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ lead.city || '—' }}</td>
                                <td class="px-6 py-4">
                                   <span class="px-2 py-1 rounded text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">{{ lead.planInterest }}</span>
                                </td>
+                               <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ lead.vehiclesPerDay || '—' }}</td>
                                <td class="px-6 py-4 text-slate-500">{{ lead.date | date:'dd/MM/yyyy' }}</td>
                                <td class="px-6 py-4 text-center">
                                   <span class="px-2 py-1 rounded-full text-xs font-bold" 
@@ -888,6 +892,13 @@ import * as XLSX from 'xlsx';
                                      [class.bg-emerald-100]="lead.status === 'Converted'" [class.text-emerald-700]="lead.status === 'Converted'">
                                      {{ lead.status }}
                                   </span>
+                               </td>
+                            </tr>
+                         } @empty {
+                            <tr>
+                               <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                  Aucun prospect pour le moment. Les inscriptions depuis la landing page apparaîtront ici.
                                </td>
                             </tr>
                          }
